@@ -27,7 +27,7 @@ void MainWin::LoadSongs() {
 
     QFile infile ("songs.txt");
     if (!infile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qDebug() << infile.errorString();
+        qDebug() << "Error opening songs: " << infile.errorString();
         return;
     }
 
@@ -53,7 +53,7 @@ void MainWin::LoadAlbums() {
 
     QFile infile("albums.txt");
     if (!infile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qDebug() << infile.errorString();
+        qDebug() << "Error opening albums: " <<  infile.errorString();
         return;
     }
 

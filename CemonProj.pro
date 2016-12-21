@@ -15,7 +15,7 @@ TEMPLATE = app
 CONFIG += c++11
 
 SOURCES += main.cpp\
-        mainwin.cpp \
+    mainwin.cpp \
     album.cpp \
     song.cpp \
     dialogaddalbum.cpp \

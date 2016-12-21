@@ -6,6 +6,7 @@
 #include "album.h"
 #include "song.h"
 
+#include <QDir>
 #include <QFile>
 #include <QTextStream>
 #include <QMainWindow>
