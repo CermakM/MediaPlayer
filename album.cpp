@@ -21,7 +21,6 @@ Album::Album(const QString _path, QString _title, QString _interpret = " ", QStr
     for ( QFileInfo& song: song_paths) {
         QString song_path = song.absoluteFilePath();
         QString song_fname = song.fileName();
-        qDebug() << song_path << " | " << song_fname << endl;
         songs.push_back(Song(song_path, song_fname, song_title, interpret, title));
         numberOfSongs++;
     }

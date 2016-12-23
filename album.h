@@ -17,6 +17,11 @@ public:
 
     std::vector<Song> GetSongs() const { return songs; }
 
+    QString GetTitle() const { return title; }
+
+    QString GetInterpret() const { return interpret; }
+
+    QString GetYear() const { return year; }
 private:
     QString path;
     QString title;

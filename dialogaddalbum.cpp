@@ -6,6 +6,8 @@ DialogAddAlbum::DialogAddAlbum(QWidget *parent) :
     ui(new Ui::DialogAddAlbum)
 {
     ui->setupUi(this);
+
+    addToPlaylist = false;
 }
 
 DialogAddAlbum::~DialogAddAlbum()
@@ -34,7 +36,7 @@ void DialogAddAlbum::on_buttonBox_accepted()
     }
 
     inStream << pathToAdd << "|" << title << "|" << interpret << "|" << year;
-    addToPlaylist ? inStream << "|" << "#" << endl : inStream << endl;
+    if ( addToPlaylist ) inStream << "|" << "#";
 
     qInfo("The new album has been added");
 
@@ -50,5 +52,5 @@ void DialogAddAlbum::on_BrowseButton_clicked()
 
 void DialogAddAlbum::on_checkBoxAddToPlaylist_toggled(bool checked)
 {
-   checked ? addToPlaylist = true : addToPlaylist = false;
+   ui->checkBoxAddToPlaylist->isChecked() ? addToPlaylist = true : addToPlaylist = false;
 }

@@ -15,6 +15,7 @@ MainWin::MainWin(QWidget *parent) :
 
     LoadSongs();
 
+    CreateMediaPlaylist();
 }
 
 MainWin::~MainWin()
@@ -23,7 +24,7 @@ MainWin::~MainWin()
 }
 
 
-void MainWin::ProcessAlbumLine(QStringList& line) {
+void MainWin::AddAlbumToPlaylist(QStringList& line) {
 
     QString album_path, album_title = " ", album_interpret = " ", album_year = " ";
 
@@ -37,11 +38,11 @@ void MainWin::ProcessAlbumLine(QStringList& line) {
     // Check the last char for playlist-sign
     if (line.last() == "#") {
         for ( Song& song : current_album.GetSongs())
-            playlist.push_back(song.GetPath());
+            playlist.push_back(song);
     }
 }
 
-void MainWin::ProcessSongLine(QStringList& line) {
+void MainWin::AddSongToPlaylist(QStringList& line) {
 
     QString song_path, song_title = " ", song_fname, song_interpret = " ", song_album = " ";
 
@@ -53,7 +54,7 @@ void MainWin::ProcessSongLine(QStringList& line) {
     song_album = line[4];
     Song current_song(song_path, song_title, song_fname, song_interpret, song_album);
     SongList.push_back(current_song);
-    if (line.last() == "#") playlist.push_back(current_song.GetPath());
+    if (line.last() == "#") playlist.push_back(current_song);
 }
 
 
@@ -70,7 +71,7 @@ void MainWin::LoadSongs() {
 
     while (!instream.atEnd()) {
         line = instream.readLine().split("|");
-        ProcessSongLine(line);
+        AddSongToPlaylist(line);
     }
 
     infile.close();
@@ -88,9 +89,40 @@ void MainWin::LoadAlbums() {
     QStringList line;
     while (!instream.atEnd()) {
         line = instream.readLine().split("|");
-        ProcessAlbumLine(line);
+        AddAlbumToPlaylist(line);
     }
     infile.close();
+}
+
+void MainWin::AddLastAlbumToPlaylist() {
+
+    qInfo("Refreshing playlist..");
+    QFile infile("albums.txt");
+    infile.open(QIODevice::ReadOnly);
+    infile.seek(infile.size() -1 );
+    QString last_line, ch;
+    while (1) {
+        ch = infile.read(1);
+        if (ch == "\n" || ch == "\r") break;
+
+        last_line.push_front(ch);
+        infile.seek(infile.pos() -2);
+    };
+
+    QStringList last_line_split = last_line.split('|');
+    AddAlbumToPlaylist(last_line_split);
+
+    infile.close();
+}
+
+
+void MainWin::CreateMediaPlaylist() {
+
+    for ( Song& _song : playlist) {
+        media_playlist.addMedia(QUrl::fromLocalFile(_song.GetPath()));
+    }
+    media_playlist.setCurrentIndex(1);
+    media_player->setPlaylist(&media_playlist);
 }
 
 void MainWin::LoadSongFromPlaylist() {
@@ -107,7 +139,7 @@ void MainWin::LoadSongFromPlaylist() {
     playlist.push_back(playlist.front());
     playlist.erase(playlist.begin(), playlist.begin()+1);
 
-    qDebug() << media_player->errorString();
+    // qDebug() << media_player->errorString();
 }
 
 
@@ -145,9 +177,8 @@ void MainWin::on_DurationChange(qint64 position)
 
 void MainWin::on_PlayMusicButton_clicked()
 {
-    LoadSongFromPlaylist();
-    media_player->play();
-
+    song_is_playing ? media_player->pause() : media_player->play();
+    song_is_playing = !song_is_playing;
 }
 
 void MainWin::on_StopMusicButton_clicked()
@@ -159,20 +190,10 @@ void MainWin::on_StopMusicButton_clicked()
 void MainWin::on_AddNewAlbum_triggered()
 {
     DialogAddAlbum AlbumBrowser;
+    connect(&AlbumBrowser, SIGNAL(destroyed()), this, SLOT(AddLastAlbumToPlaylist()));
     AlbumBrowser.setWindowTitle("Add your Album");
     AlbumBrowser.setModal(true);
     AlbumBrowser.exec();
-
-    qDebug() << "Is this part of code even executed?" << endl;
-    QFile infile("albums.txt");
-    infile.open(QIODevice::ReadOnly);
-    infile.seek(infile.size() -1);
-    QTextStream instream (&infile);
-    QStringList last_line = instream.readLine().split('|');
-
-    ProcessAlbumLine(last_line);
-
-    infile.close();
 }
 
 void MainWin::on_actionEditPlaylist_triggered()
@@ -180,5 +201,9 @@ void MainWin::on_actionEditPlaylist_triggered()
     DialogEditPlaylist EditPlaylist;
     EditPlaylist.setWindowTitle("Edit playlist");
     EditPlaylist.setModal(true);
+    EditPlaylist.SetAlbumVector(AlbumList);
+    EditPlaylist.SetPlaylistVector(playlist);
+    EditPlaylist.LoadAlbums();
+    EditPlaylist.LoadPlaylist();
     EditPlaylist.exec();
 }

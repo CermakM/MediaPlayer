@@ -6,7 +6,7 @@
 class Song
 {
 public:
-    Song(const QString _path);
+    explicit Song(const QString _path);
 
     Song(const QString _path, const QString _fname, const QString _title = " ", QString _interpret = " ", QString _album = " ");
 
@@ -16,6 +16,14 @@ public:
 
     QString GetPath() const { return path; }
 
+    QString GetTitle() const { return title; }
+
+    QString GetInterpret() const { return interpret; }
+
+    QString GetAlbum() const { return album; }
+
+    bool HasAlbum() const { return has_album; }
+
 private:
 
     QString path;
@@ -24,6 +32,7 @@ private:
     QString interpret;
     QString album;
 
+    bool has_album = false;
 
 };
 

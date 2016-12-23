@@ -11,6 +11,7 @@
 #include <QTextStream>
 #include <QMainWindow>
 #include <QMediaPlayer>
+#include <QMediaPlaylist>
 #include <QDebug>
 #include <QMessageBox>
 
@@ -36,11 +37,13 @@ public:
 
     void LoadSongs();
 
+    void CreateMediaPlaylist();
+
     void LoadSongFromPlaylist();
 
-    void ProcessAlbumLine(QStringList&);
+    void AddAlbumToPlaylist(QStringList&);
 
-    void ProcessSongLine(QStringList&);
+    void AddSongToPlaylist(QStringList&);
 
 private slots:
     void on_VolumeSlider_valueChanged(int value);
@@ -55,18 +58,22 @@ private slots:
 
     void on_StopMusicButton_clicked();
 
-    // Creates a new window
     void on_AddNewAlbum_triggered();
 
     void on_actionEditPlaylist_triggered();
 
+    void AddLastAlbumToPlaylist();
+
 private:
     Ui::MainWin *ui;
     QMediaPlayer* media_player;
+    QMediaPlaylist media_playlist;
 
     std::vector<Album> AlbumList;
     std::vector<Song> SongList;
     std::vector<Song> playlist;
+
+    bool song_is_playing = false;
 };
 
 #endif // MAINWIN_H
