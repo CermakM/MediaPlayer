@@ -33,7 +33,9 @@ void DialogAddAlbum::on_buttonBox_accepted()
             return;
     }
 
-    inStream << pathToAdd << "|" << title << "|" << interpret << "|" << year <<  endl;
+    inStream << pathToAdd << "|" << title << "|" << interpret << "|" << year;
+    addToPlaylist ? inStream << "|" << "#" << endl : inStream << endl;
+
     qInfo("The new album has been added");
 
     albums.close();
@@ -44,4 +46,9 @@ void DialogAddAlbum::on_BrowseButton_clicked()
     QString dir_name = QFileDialog::getExistingDirectory(this, tr("Open Directory"));
     ui->PathSelect->clear();
     ui->PathSelect->insert(dir_name);
+}
+
+void DialogAddAlbum::on_checkBoxAddToPlaylist_toggled(bool checked)
+{
+   checked ? addToPlaylist = true : addToPlaylist = false;
 }

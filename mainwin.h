@@ -12,6 +12,7 @@
 #include <QMainWindow>
 #include <QMediaPlayer>
 #include <QDebug>
+#include <QMessageBox>
 
 #include <vector>
 #include <unordered_map>
@@ -36,6 +37,10 @@ public:
     void LoadSongs();
 
     void LoadSongFromPlaylist();
+
+    void ProcessAlbumLine(QStringList&);
+
+    void ProcessSongLine(QStringList&);
 
 private slots:
     void on_VolumeSlider_valueChanged(int value);

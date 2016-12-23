@@ -24,8 +24,12 @@ private slots:
 
     void on_BrowseButton_clicked();
 
+    void on_checkBoxAddToPlaylist_toggled(bool checked);
+
 private:
     Ui::DialogAddAlbum *ui;
+
+    bool addToPlaylist;
 };
 
 #endif // DIALOGADDALBUM_H

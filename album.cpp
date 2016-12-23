@@ -15,11 +15,13 @@ Album::Album(const QString _path, QString _title, QString _interpret = " ", QStr
     QStringList filters;
     filters << "*.mp3";
     dir.setNameFilters(filters);
-    QStringList song_paths = dir.entryList();
+    QFileInfoList song_paths = dir.entryInfoList();
     QString song_title = " "; // need to get the title from the file
 
-    for ( QString& song_fname : song_paths) {
-        QString song_path = path + song_fname;
+    for ( QFileInfo& song: song_paths) {
+        QString song_path = song.absoluteFilePath();
+        QString song_fname = song.fileName();
+        qDebug() << song_path << " | " << song_fname << endl;
         songs.push_back(Song(song_path, song_fname, song_title, interpret, title));
         numberOfSongs++;
     }

@@ -4,6 +4,7 @@
 #include "song.h"
 
 #include <QDir>
+#include <QDebug>
 #include <QString>
 
 #include <vector>
