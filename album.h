@@ -12,6 +12,9 @@
 class Album
 {
 public:
+    Album();
+
+    Album(const QString _path);
 
     Album(const QString _path, QString _title, QString _interpret, QString _year);
 
@@ -22,12 +25,16 @@ public:
     QString GetInterpret() const { return interpret; }
 
     QString GetYear() const { return year; }
+
+    int numberOfSongs;
+
+    bool is_in_playlist = false;
+
 private:
     QString path;
     QString title;
     QString interpret;
     QString year;
-    int numberOfSongs;
 
     std::vector<Song> songs;
 

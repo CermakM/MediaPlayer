@@ -121,6 +121,9 @@
        </item>
        <item row="1" column="2">
         <widget class="QLineEdit" name="CurrentSongLine">
+         <property name="styleSheet">
+          <string notr="true">background-color: rgba(255, 255, 255, 0);</string>
+         </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
          </property>
@@ -147,9 +150,12 @@
         </widget>
        </item>
        <item row="1" column="0" colspan="2">
-        <widget class="QLineEdit" name="CurrentPlaylistLine">
+        <widget class="QLineEdit" name="CurrentAlbumLine">
          <property name="autoFillBackground">
-          <bool>true</bool>
+          <bool>false</bool>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: rgba(255, 255, 255, 0);</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -185,7 +191,7 @@
      <x>0</x>
      <y>0</y>
      <width>640</width>
-     <height>21</height>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuEdit">
@@ -236,14 +242,6 @@
    <addaction name="menuMusic"/>
    <addaction name="menuYouTube"/>
    <addaction name="menuHelp_2"/>
-  </widget>
-  <widget class="QToolBar" name="mainToolBar">
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="AddNewAlbum">

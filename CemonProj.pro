@@ -12,7 +12,9 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = CemiSec
 TEMPLATE = app
 
-CONFIG += c++11
+CONFIG += c++14
+
+LIBS += -ltag
 
 SOURCES += main.cpp\
     mainwin.cpp \

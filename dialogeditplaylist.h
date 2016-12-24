@@ -7,6 +7,7 @@
 #include <QDialog>
 #include <QTreeWidget>
 #include <QMediaPlaylist>
+#include <QList>
 
 #include <vector>
 
@@ -33,12 +34,14 @@ public:
 
     void LoadAlbums();
 
-    void LoadPlaylist();
+    Album GetAlbumByTitle(const QString&);
 
 private slots:
     void on_AddToPlaylistButton_clicked();
 
     void on_RemoveFromPlaylistButton_clicked();
+
+    void on_buttonBox_accepted();
 
 private:
     Ui::DialogEditPlaylist *ui;
@@ -46,6 +49,8 @@ private:
     std::vector<Album> album_vector;
     std::vector<Song> song_vector;
     std::vector<Song> playlist;
+
+    QList<QTreeWidgetItem*> new_items;
 
 };
 

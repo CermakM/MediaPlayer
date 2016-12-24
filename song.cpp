@@ -4,7 +4,17 @@ Song::Song(const QString _path)
 {
     path = _path;
 
-    // read the title etc.. from the mp3 file
+    // read the tags from the mp3 file
+    TagLib::FileRef file(path.toUtf8());
+    TagLib::String title_string = file.tag()->title();
+    TagLib::String artist_string = file.tag()->artist();
+    TagLib::String album_string = file.tag()->album();
+    TagLib::uint year_uint = file.tag()->year();
+
+    title = QString::fromStdWString(title_string.toWString());
+    interpret = QString::fromStdWString(artist_string.toWString());
+    album = QString::fromStdWString(album_string.toWString());
+    year = QString::number(year_uint);
 
 }
 
@@ -16,6 +26,6 @@ Song::Song(const QString _path, const QString _fname, const QString _title, QStr
     interpret = _interpret;
     album = _album;
 
-    if (!album.isEmpty()) has_album = true;
+    if (album.isEmpty()) has_album = false;
 
 }

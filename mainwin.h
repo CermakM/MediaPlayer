@@ -41,9 +41,9 @@ public:
 
     void LoadSongFromPlaylist();
 
-    void AddAlbumToPlaylist(QStringList&);
+    void AddAlbumToAlbums(QStringList&);
 
-    void AddSongToPlaylist(QStringList&);
+    void AddSongToSongs(QStringList&);
 
 private slots:
     void on_VolumeSlider_valueChanged(int value);
@@ -64,6 +64,8 @@ private slots:
 
     void AddLastAlbumToPlaylist();
 
+    void on_EndOfSong();
+
 private:
     Ui::MainWin *ui;
     QMediaPlayer* media_player;
@@ -72,8 +74,6 @@ private:
     std::vector<Album> AlbumList;
     std::vector<Song> SongList;
     std::vector<Song> playlist;
-
-    bool song_is_playing = false;
 };
 
 #endif // MAINWIN_H

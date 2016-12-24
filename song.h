@@ -3,6 +3,9 @@
 
 #include <QString>
 
+#include <taglib/tag.h>
+#include <taglib/fileref.h>
+
 class Song
 {
 public:
@@ -22,6 +25,8 @@ public:
 
     QString GetAlbum() const { return album; }
 
+    QString GetYear() const {return year; }
+
     bool HasAlbum() const { return has_album; }
 
 private:
@@ -31,8 +36,8 @@ private:
     QString title;
     QString interpret;
     QString album;
-
-    bool has_album = false;
+    QString year;
+    bool has_album = true;
 
 };
 

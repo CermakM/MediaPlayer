@@ -13,22 +13,12 @@ DialogEditPlaylist::~DialogEditPlaylist()
     delete ui;
 }
 
-void DialogEditPlaylist::LoadPlaylist() {
-
-    for (Song& song : playlist) {
-        QTreeWidgetItem* topItm = new QTreeWidgetItem(ui->treePlaylist);
-        topItm->setText(0, song.GetTitle());
-        topItm->setText(1, song.GetInterpret());
-        if (song.HasAlbum())
-            topItm->setText(2, song.GetAlbum());
-        ui->treePlaylist->addTopLevelItem(topItm);
-    }
-}
 
 void DialogEditPlaylist::LoadAlbums() {
 
     // Create top level item - album
     for (Album& temp_album : album_vector) {
+        bool album_goes_to_playlist = temp_album.is_in_playlist;
         QTreeWidgetItem* topItm = new QTreeWidgetItem(ui->treeAlbum);
         topItm->setText(0, temp_album.GetTitle());
         topItm->setText(1, temp_album.GetInterpret());
@@ -38,20 +28,48 @@ void DialogEditPlaylist::LoadAlbums() {
         for (Song& temp_song : temp_album.GetSongs()) {
             // Create child item
             QTreeWidgetItem* childItm = new QTreeWidgetItem(topItm);
-            childItm->setText(0, temp_song.GetFileName()); // later on - use GetTitle() when there is a title of the song
+            childItm->setText(0, temp_song.GetTitle());
             // Add the child item
             topItm->addChild(childItm);
         }
-    }
 
+        if (album_goes_to_playlist) ui->treePlaylist->addTopLevelItem(topItm->clone());
+    }
 }
 
 void DialogEditPlaylist::on_AddToPlaylistButton_clicked()
 {
+    QTreeWidgetItem* current_item = ui->treeAlbum->currentItem();
+    // Check by title if the album / song is in playlist already
+    QList<QTreeWidgetItem*> qlist = ui->treePlaylist->findItems(current_item->text(0), Qt::MatchExactly);
+    if (!qlist.empty()) return;
 
+    ui->treePlaylist->addTopLevelItem(current_item->clone());
+    new_items.push_back(current_item);
 }
 
 void DialogEditPlaylist::on_RemoveFromPlaylistButton_clicked()
 {
 
+}
+
+Album DialogEditPlaylist::GetAlbumByTitle(const QString& _title) {
+
+    for (Album& _album : album_vector) {
+        if ( _album.GetTitle() == _title)
+            return _album;
+    }
+
+    qDebug() << "Album " << _title << " not found ";
+    return Album();
+}
+
+void DialogEditPlaylist::on_buttonBox_accepted()
+{
+    for (QTreeWidgetItem* itm : new_items) {
+        Album _album = GetAlbumByTitle(itm->text(0));
+        _album.is_in_playlist = true;
+        for (Song& _song : _album.GetSongs())
+            playlist.push_back(_song);
+    }
 }

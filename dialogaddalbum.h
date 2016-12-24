@@ -1,6 +1,8 @@
 #ifndef DIALOGADDALBUM_H
 #define DIALOGADDALBUM_H
 
+#include "album.h"
+
 #include <QDebug>
 #include <QDialog>
 #include <QFileDialog>

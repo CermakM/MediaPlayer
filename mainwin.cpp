@@ -10,12 +10,15 @@ MainWin::MainWin(QWidget *parent) :
 
     connect(media_player, &QMediaPlayer::positionChanged, this, &MainWin::on_PositionChange);
     connect(media_player, &QMediaPlayer::durationChanged, this, &MainWin::on_DurationChange);
+    connect(&media_playlist, SIGNAL(currentIndexChanged(int)), this, SLOT(on_EndOfSong()));
 
     LoadAlbums();
 
     LoadSongs();
 
     CreateMediaPlaylist();
+
+    on_EndOfSong();
 }
 
 MainWin::~MainWin()
@@ -24,7 +27,7 @@ MainWin::~MainWin()
 }
 
 
-void MainWin::AddAlbumToPlaylist(QStringList& line) {
+void MainWin::AddAlbumToAlbums(QStringList& line) {
 
     QString album_path, album_title = " ", album_interpret = " ", album_year = " ";
 
@@ -34,15 +37,18 @@ void MainWin::AddAlbumToPlaylist(QStringList& line) {
     album_interpret = line[2];
     album_year = line[3];
     Album current_album(album_path, album_title, album_interpret, album_year);
-    AlbumList.push_back(current_album);
+
     // Check the last char for playlist-sign
     if (line.last() == "#") {
+        current_album.is_in_playlist = true;
+        AlbumList.push_back(current_album);
         for ( Song& song : current_album.GetSongs())
             playlist.push_back(song);
     }
+    else AlbumList.push_back(current_album);
 }
 
-void MainWin::AddSongToPlaylist(QStringList& line) {
+void MainWin::AddSongToSongs(QStringList& line) {
 
     QString song_path, song_title = " ", song_fname, song_interpret = " ", song_album = " ";
 
@@ -55,6 +61,13 @@ void MainWin::AddSongToPlaylist(QStringList& line) {
     Song current_song(song_path, song_title, song_fname, song_interpret, song_album);
     SongList.push_back(current_song);
     if (line.last() == "#") playlist.push_back(current_song);
+}
+
+
+void MainWin::on_EndOfSong() {
+    Song current_song(playlist[media_playlist.currentIndex()]);
+    ui->CurrentAlbumLine->setText(current_song.GetAlbum());
+    ui->CurrentSongLine->setText(current_song.GetTitle());
 }
 
 
@@ -71,7 +84,7 @@ void MainWin::LoadSongs() {
 
     while (!instream.atEnd()) {
         line = instream.readLine().split("|");
-        AddSongToPlaylist(line);
+        AddSongToSongs(line);
     }
 
     infile.close();
@@ -89,7 +102,7 @@ void MainWin::LoadAlbums() {
     QStringList line;
     while (!instream.atEnd()) {
         line = instream.readLine().split("|");
-        AddAlbumToPlaylist(line);
+        AddAlbumToAlbums(line);
     }
     infile.close();
 }
@@ -99,19 +112,19 @@ void MainWin::AddLastAlbumToPlaylist() {
     qInfo("Refreshing playlist..");
     QFile infile("albums.txt");
     infile.open(QIODevice::ReadOnly);
-    infile.seek(infile.size() -1 );
-    QString last_line, ch;
-    while (1) {
-        ch = infile.read(1);
-        if (ch == "\n" || ch == "\r") break;
-
-        last_line.push_front(ch);
-        infile.seek(infile.pos() -2);
-    };
+    if (!infile.size()) {
+        qDebug() << "Album list is empty";
+        return;
+    }
+    QString last_line, line;
+    while (!(line = infile.readLine()).isEmpty()) {
+        last_line = line;
+    }
 
     QStringList last_line_split = last_line.split('|');
-    AddAlbumToPlaylist(last_line_split);
+    AddAlbumToAlbums(last_line_split);
 
+    qDebug() << "Playlist has been refreshed";
     infile.close();
 }
 
@@ -165,7 +178,10 @@ void MainWin::on_ProgressSlider_sliderMoved(int position)
 
 void MainWin::on_PositionChange(qint64 position)
 {
+    try {
     ui->ProgressSlider->setValue(position);
+    }
+    catch (...) {}
 }
 
 
@@ -177,8 +193,8 @@ void MainWin::on_DurationChange(qint64 position)
 
 void MainWin::on_PlayMusicButton_clicked()
 {
-    song_is_playing ? media_player->pause() : media_player->play();
-    song_is_playing = !song_is_playing;
+    media_player->state() == QMediaPlayer::PlayingState ?
+    media_player->pause() : media_player->play();
 }
 
 void MainWin::on_StopMusicButton_clicked()
@@ -204,6 +220,6 @@ void MainWin::on_actionEditPlaylist_triggered()
     EditPlaylist.SetAlbumVector(AlbumList);
     EditPlaylist.SetPlaylistVector(playlist);
     EditPlaylist.LoadAlbums();
-    EditPlaylist.LoadPlaylist();
+   // EditPlaylist.LoadPlaylist();
     EditPlaylist.exec();
 }

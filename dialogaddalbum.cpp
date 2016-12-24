@@ -25,8 +25,13 @@ void DialogAddAlbum::on_buttonBox_accepted()
     }
 
     QString pathToAdd = ui->PathSelect->text();
-    QString title = ui->TitleSelect->text();
-    QString interpret = " ", year = " ";
+    Album myAlbum (pathToAdd);
+    QString title = myAlbum.GetTitle();
+    QString interpret = myAlbum.GetInterpret();
+    QString year = myAlbum.GetYear();
+
+    if (ui->TitleSelect->isModified()) title = ui->TitleSelect->text();
+
     QString saved_path;
     QTextStream inStream(&albums);
     while(!inStream.atEnd()) {
@@ -36,7 +41,11 @@ void DialogAddAlbum::on_buttonBox_accepted()
     }
 
     inStream << pathToAdd << "|" << title << "|" << interpret << "|" << year;
-    if ( addToPlaylist ) inStream << "|" << "#";
+    if ( addToPlaylist ) {
+        inStream << "|" << "#";
+    }
+
+    inStream << endl;
 
     qInfo("The new album has been added");
 
