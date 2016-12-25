@@ -50,7 +50,8 @@ void DialogEditPlaylist::on_AddToPlaylistButton_clicked()
 
 void DialogEditPlaylist::on_RemoveFromPlaylistButton_clicked()
 {
-
+    QTreeWidgetItem* itm = ui->treePlaylist->currentItem();
+    Album _album = GetAlbumByTitle(itm->text(0));
 }
 
 Album DialogEditPlaylist::GetAlbumByTitle(const QString& _title) {
@@ -66,10 +67,38 @@ Album DialogEditPlaylist::GetAlbumByTitle(const QString& _title) {
 
 void DialogEditPlaylist::on_buttonBox_accepted()
 {
+    if ( new_items.empty()) return;
+
+    QFile infile("albums.txt");
+    infile.open(QFile::ReadOnly);
+    QString line;
+    QStringList list;
+    while(!(line = infile.readLine()).isEmpty())
+        list.append(line);
+
+    infile.close();
+
     for (QTreeWidgetItem* itm : new_items) {
         Album _album = GetAlbumByTitle(itm->text(0));
         _album.is_in_playlist = true;
+
+    // Search the title in list file and replace the last symbol
+
+        for(QString& line : list) {
+            if(line.contains(_album.GetTitle(), Qt::CaseInsensitive)) {
+                line.replace("-", "#");
+            }
+        }
+
         for (Song& _song : _album.GetSongs())
             playlist.push_back(_song);
     }
+
+    infile.open(QFile::WriteOnly | QFile::Truncate);
+
+    QTextStream outStream(&infile);
+    for( const QString& line : list)
+        outStream << line;
+
+    infile.close();
 }

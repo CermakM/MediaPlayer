@@ -44,6 +44,7 @@ void DialogAddAlbum::on_buttonBox_accepted()
     if ( addToPlaylist ) {
         inStream << "|" << "#";
     }
+    else inStream << "|" << "-";
 
     inStream << endl;
 

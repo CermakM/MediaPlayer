@@ -8,6 +8,7 @@
 #include <QTreeWidget>
 #include <QMediaPlaylist>
 #include <QList>
+#include <QFile>
 
 #include <vector>
 
