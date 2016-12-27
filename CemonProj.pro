@@ -12,7 +12,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = CemiSec
 TEMPLATE = app
 
-CONFIG += c++14
+CONFIG += c++17
 
 LIBS += -ltag
 
@@ -27,7 +27,8 @@ HEADERS  += mainwin.h \
     album.h \
     song.h \
     dialogaddalbum.h \
-    dialogeditplaylist.h
+    dialogeditplaylist.h \
+    common.h
 
 FORMS    += mainwin.ui \
     dialogaddalbum.ui \

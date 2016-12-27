@@ -5,6 +5,7 @@
 #include "dialogeditplaylist.h"
 #include "album.h"
 #include "song.h"
+#include "common.h"
 
 #include <QDir>
 #include <QFile>
@@ -16,9 +17,7 @@
 #include <QMessageBox>
 
 #include <vector>
-#include <unordered_map>
 #include <fstream>
-
 
 
 namespace Ui {
@@ -38,8 +37,6 @@ public:
     void LoadSongs();
 
     void CreateMediaPlaylist();
-
-    void LoadSongFromPlaylist();
 
     void AddAlbumToAlbums(QStringList&);
 
@@ -62,18 +59,21 @@ private slots:
 
     void on_actionEditPlaylist_triggered();
 
-    void AddLastAlbumToPlaylist();
+    void AddLastAlbum();
 
     void on_EndOfSong();
 
+    void on_EditPlaylistOver(bool b);
+
 private:
     Ui::MainWin *ui;
+
     QMediaPlayer* media_player;
     QMediaPlaylist media_playlist;
 
     std::vector<Album> AlbumList;
     std::vector<Song> SongList;
-    std::vector<Song> playlist;
+    std::vector<MusicType> playlist;
 };
 
 #endif // MAINWIN_H

@@ -17,8 +17,6 @@ MainWin::MainWin(QWidget *parent) :
     LoadSongs();
 
     CreateMediaPlaylist();
-
-    on_EndOfSong();
 }
 
 MainWin::~MainWin()
@@ -42,8 +40,7 @@ void MainWin::AddAlbumToAlbums(QStringList& line) {
     if (line.last() == "#") {
         current_album.is_in_playlist = true;
         AlbumList.push_back(current_album);
-        for ( Song& song : current_album.GetSongs())
-            playlist.push_back(song);
+        playlist.push_back(current_album);
     }
     else AlbumList.push_back(current_album);
 }
@@ -65,9 +62,15 @@ void MainWin::AddSongToSongs(QStringList& line) {
 
 
 void MainWin::on_EndOfSong() {
-    Song current_song(playlist[media_playlist.currentIndex()]);
-    ui->CurrentAlbumLine->setText(current_song.GetAlbum());
-    ui->CurrentSongLine->setText(current_song.GetTitle());
+
+    if (media_playlist.isEmpty()) {
+        return;
+    }
+    QMediaContent current_media = media_playlist.currentMedia();
+    QString song_title = current_media.canonicalUrl().path();
+    Song _song(song_title);
+    ui->CurrentAlbumLine->setText(_song.GetAlbum());
+    ui->CurrentSongLine->setText(_song.GetTitle());
 }
 
 
@@ -107,7 +110,7 @@ void MainWin::LoadAlbums() {
     infile.close();
 }
 
-void MainWin::AddLastAlbumToPlaylist() {
+void MainWin::AddLastAlbum() {
 
     qInfo("Refreshing playlist..");
     QFile infile("albums.txt");
@@ -116,9 +119,10 @@ void MainWin::AddLastAlbumToPlaylist() {
         qDebug() << "Album list is empty";
         return;
     }
-    QString last_line, line;
-    while (!(line = infile.readLine()).isEmpty()) {
-        last_line = line;
+    QString last_line;
+    QTextStream instream(&infile);
+    while (!(instream.atEnd())) {
+        last_line = instream.readLine();
     }
 
     QStringList last_line_split = last_line.split('|');
@@ -129,32 +133,39 @@ void MainWin::AddLastAlbumToPlaylist() {
 }
 
 
-void MainWin::CreateMediaPlaylist() {
+    void MainWin::CreateMediaPlaylist() {
 
-    for ( Song& _song : playlist) {
-        media_playlist.addMedia(QUrl::fromLocalFile(_song.GetPath()));
-    }
-    media_playlist.setCurrentIndex(1);
-    media_player->setPlaylist(&media_playlist);
-}
+    media_player->stop();
+    media_player->setMedia(QMediaContent());
+    media_playlist.clear();
 
-void MainWin::LoadSongFromPlaylist() {
-
-    // Check if the playlist is empty, if so, ask to add a song
     if(playlist.empty()) {
-        QMessageBox::warning(this, tr("Empty Playlist"), tr("Add a song to your playlist first"), QMessageBox::Ok);
+        media_player->setPlaylist(&media_playlist);
+        ui->CurrentAlbumLine->clear();
+        ui->CurrentSongLine->clear();
         return;
     }
 
-    // Load a song from playlist
-    Song current_song(playlist.front());
-    media_player->setMedia(QUrl::fromLocalFile(current_song.GetPath()));
-    playlist.push_back(playlist.front());
-    playlist.erase(playlist.begin(), playlist.begin()+1);
+    for ( MusicType itm : playlist) {
+        if (itm.type() == typeid(Song)) {
+            Song _song = boost::get<Song>(itm);
+            media_playlist.addMedia(QUrl::fromLocalFile(_song.GetPath()));
+        }
+        else if(itm.type() == typeid(Album)) {
+            Album _album = boost::get<Album>(itm);
+            std::vector<Song> _songs = _album.GetSongs();
+            for (Song& _song : _songs) {
+                media_playlist.addMedia(QUrl::fromLocalFile(_song.GetPath()));
+            }
+        }
+        else {
+            qDebug() << "Boost::variant type does not match";
+        }
+    }
 
-    // qDebug() << media_player->errorString();
+    media_playlist.setCurrentIndex(0);
+    media_player->setPlaylist(&media_playlist);
 }
-
 
 void MainWin::on_VolumeSlider_valueChanged(int value)
 {
@@ -178,10 +189,7 @@ void MainWin::on_ProgressSlider_sliderMoved(int position)
 
 void MainWin::on_PositionChange(qint64 position)
 {
-    try {
     ui->ProgressSlider->setValue(position);
-    }
-    catch (...) {}
 }
 
 
@@ -206,7 +214,7 @@ void MainWin::on_StopMusicButton_clicked()
 void MainWin::on_AddNewAlbum_triggered()
 {
     DialogAddAlbum AlbumBrowser;
-    connect(&AlbumBrowser, SIGNAL(destroyed()), this, SLOT(AddLastAlbumToPlaylist()));
+    connect(&AlbumBrowser, SIGNAL(destroyed()), this, SLOT(AddLastAlbum()));
     AlbumBrowser.setWindowTitle("Add your Album");
     AlbumBrowser.setModal(true);
     AlbumBrowser.exec();
@@ -215,11 +223,30 @@ void MainWin::on_AddNewAlbum_triggered()
 void MainWin::on_actionEditPlaylist_triggered()
 {
     DialogEditPlaylist EditPlaylist;
+
+    connect(&EditPlaylist, &DialogEditPlaylist::PlaylistChanged, this, &MainWin::on_EditPlaylistOver);
+
     EditPlaylist.setWindowTitle("Edit playlist");
     EditPlaylist.setModal(true);
     EditPlaylist.SetAlbumVector(AlbumList);
     EditPlaylist.SetPlaylistVector(playlist);
     EditPlaylist.LoadAlbums();
-   // EditPlaylist.LoadPlaylist();
+
     EditPlaylist.exec();
 }
+
+void MainWin::on_EditPlaylistOver(bool b) {
+
+    if (b)
+        CreateMediaPlaylist();
+
+}
+
+
+class GetTitleVisitor : public boost::static_visitor<> {
+
+public:
+    QString operator() (Song& _song) const { return _song.GetTitle(); }
+
+    QString operator() (Album& _album) const { return _album.GetTitle(); }
+};

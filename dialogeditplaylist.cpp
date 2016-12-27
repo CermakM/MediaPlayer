@@ -11,13 +11,17 @@ DialogEditPlaylist::DialogEditPlaylist(QWidget *parent) :
 DialogEditPlaylist::~DialogEditPlaylist()
 {
     delete ui;
+
+    album_vector = nullptr;
+    song_vector = nullptr;
+    playlist = nullptr;
 }
 
 
 void DialogEditPlaylist::LoadAlbums() {
 
     // Create top level item - album
-    for (Album& temp_album : album_vector) {
+    for (Album& temp_album : *album_vector) {
         bool album_goes_to_playlist = temp_album.is_in_playlist;
         QTreeWidgetItem* topItm = new QTreeWidgetItem(ui->treeAlbum);
         topItm->setText(0, temp_album.GetTitle());
@@ -50,24 +54,37 @@ void DialogEditPlaylist::on_AddToPlaylistButton_clicked()
 
 void DialogEditPlaylist::on_RemoveFromPlaylistButton_clicked()
 {
-    QTreeWidgetItem* itm = ui->treePlaylist->currentItem();
-    Album _album = GetAlbumByTitle(itm->text(0));
+   QTreeWidgetItem* current_item = ui->treePlaylist->currentItem();
+   current_item->setHidden(true);
+   int index = 0;
+   for (QTreeWidgetItem* itm : new_items) {
+       if (itm->text(0) == current_item->text(0)) { // item is already in add-list
+           new_items.removeAt(index);
+           delete current_item;
+           return;
+       }
+       index++;
+   }
+
+   items_to_remove.push_back(current_item);
 }
 
-Album DialogEditPlaylist::GetAlbumByTitle(const QString& _title) {
+Album* DialogEditPlaylist::GetAlbumByTitle(const QString& _title) {
 
-    for (Album& _album : album_vector) {
+    Album* album_ptr = nullptr;
+    for (Album& _album : *album_vector) {
         if ( _album.GetTitle() == _title)
-            return _album;
+            album_ptr = &_album;
     }
 
-    qDebug() << "Album " << _title << " not found ";
-    return Album();
+    return album_ptr;
 }
+
 
 void DialogEditPlaylist::on_buttonBox_accepted()
 {
-    if ( new_items.empty()) return;
+    // If no change - return
+    if ( new_items.empty() && items_to_remove.empty()) return;
 
     QFile infile("albums.txt");
     infile.open(QFile::ReadOnly);
@@ -78,20 +95,45 @@ void DialogEditPlaylist::on_buttonBox_accepted()
 
     infile.close();
 
+    // Add new albums to playlist
     for (QTreeWidgetItem* itm : new_items) {
-        Album _album = GetAlbumByTitle(itm->text(0));
-        _album.is_in_playlist = true;
+        Album* _album = GetAlbumByTitle(itm->text(0));
+        _album->is_in_playlist = true;
+        playlist->push_back(*_album);
 
     // Search the title in list file and replace the last symbol
-
         for(QString& line : list) {
-            if(line.contains(_album.GetTitle(), Qt::CaseInsensitive)) {
+            if(line.contains(_album->GetTitle(), Qt::CaseInsensitive)) {
                 line.replace("-", "#");
             }
         }
+    }
 
-        for (Song& _song : _album.GetSongs())
-            playlist.push_back(_song);
+    // Remove selected items from playlist
+    for(QTreeWidgetItem* itm : items_to_remove) {
+        Album* _album = GetAlbumByTitle(itm->text(0));
+        _album->is_in_playlist = false;
+        // get the indexes of items to be removed
+        std::vector<int> indexes;
+        int index;
+        for (MusicType itm : *playlist) {
+            Album prev_album = boost::get<Album>(itm);
+            if (prev_album.GetTitle() == _album->GetTitle()) {
+                indexes.push_back(index);
+            }
+            index++;
+        }
+
+        for (int _index : indexes)
+            playlist->erase(playlist->begin() + _index);
+
+        for(QString& line : list) {
+            if(line.contains(_album->GetTitle(), Qt::CaseInsensitive)) {
+                line.replace("#", "-");
+            }
+        }
+
+        delete itm;
     }
 
     infile.open(QFile::WriteOnly | QFile::Truncate);
@@ -101,4 +143,6 @@ void DialogEditPlaylist::on_buttonBox_accepted()
         outStream << line;
 
     infile.close();
+
+    emit PlaylistChanged(true);
 }

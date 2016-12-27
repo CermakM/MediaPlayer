@@ -3,6 +3,7 @@
 
 #include "album.h"
 #include "song.h"
+#include "common.h"
 
 #include <QDialog>
 #include <QTreeWidget>
@@ -25,17 +26,18 @@ public:
     explicit DialogEditPlaylist(QWidget *parent = 0);
     ~DialogEditPlaylist();
 
-    void SetAlbumVector(const std::vector<Album>& _album) {
-        album_vector = _album;
+    Album* GetAlbumByTitle(const QString&);
+
+    void SetAlbumVector( std::vector<Album>& _album) {
+        album_vector = &_album;
     }
 
-    void SetPlaylistVector( const std::vector<Song>& _playlist) {
-        playlist = _playlist;
+    void SetPlaylistVector( std::vector<MusicType>& _playlist) {
+        playlist = &_playlist;
     }
 
     void LoadAlbums();
 
-    Album GetAlbumByTitle(const QString&);
 
 private slots:
     void on_AddToPlaylistButton_clicked();
@@ -44,14 +46,20 @@ private slots:
 
     void on_buttonBox_accepted();
 
+signals:
+
+    void PlaylistChanged(bool);
+
+
 private:
     Ui::DialogEditPlaylist *ui;
 
-    std::vector<Album> album_vector;
-    std::vector<Song> song_vector;
-    std::vector<Song> playlist;
+    std::vector<Album> * album_vector;
+    std::vector<Song> * song_vector;
+    std::vector<MusicType> * playlist;
 
     QList<QTreeWidgetItem*> new_items;
+    QList<QTreeWidgetItem*> items_to_remove;
 
 };
 

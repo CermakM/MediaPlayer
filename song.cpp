@@ -1,8 +1,17 @@
 #include "song.h"
 
+Song::Song() {
+    qDebug() << "Empty song has been creaded";
+}
+
 Song::Song(const QString _path)
 {
     path = _path;
+
+    if(path.isEmpty()) {
+        qDebug() << "Empty song has been created";
+        return;
+    }
 
     // read the tags from the mp3 file
     TagLib::FileRef file(path.toUtf8());

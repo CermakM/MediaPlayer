@@ -2,6 +2,7 @@
 #define SONG_H
 
 #include <QString>
+#include <QDebug>
 
 #include <taglib/tag.h>
 #include <taglib/fileref.h>
@@ -9,6 +10,8 @@
 class Song
 {
 public:
+    Song();
+
     explicit Song(const QString _path);
 
     Song(const QString _path, const QString _fname, const QString _title = " ", QString _interpret = " ", QString _album = " ");
