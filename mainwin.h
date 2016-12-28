@@ -9,12 +9,16 @@
 
 #include <QDir>
 #include <QFile>
+#include <QMenu>
+#include <QWidgetAction>
 #include <QTextStream>
 #include <QMainWindow>
 #include <QMediaPlayer>
 #include <QMediaPlaylist>
 #include <QDebug>
 #include <QMessageBox>
+#include <QShortcut>
+
 
 #include <vector>
 #include <fstream>
@@ -55,21 +59,22 @@ private slots:
 
     void on_StopMusicButton_clicked();
 
-    void on_AddNewAlbum_triggered();
+    void on_actionAddNewAlbum_triggered();
 
     void on_actionEditPlaylist_triggered();
 
-    void AddLastAlbum();
-
     void on_EndOfSong();
 
+    void AddLastAlbum(bool);
+
     void on_EditPlaylistOver(bool b);
+
 
 private:
     Ui::MainWin *ui;
 
     QMediaPlayer* media_player;
-    QMediaPlaylist media_playlist;
+    QMediaPlaylist* media_playlist;
 
     std::vector<Album> AlbumList;
     std::vector<Song> SongList;

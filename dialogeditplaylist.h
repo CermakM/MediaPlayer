@@ -48,7 +48,7 @@ private slots:
 
 signals:
 
-    void PlaylistChanged(bool);
+    void Change(bool);
 
 
 private:

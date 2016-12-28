@@ -98,6 +98,9 @@ void DialogEditPlaylist::on_buttonBox_accepted()
     // Add new albums to playlist
     for (QTreeWidgetItem* itm : new_items) {
         Album* _album = GetAlbumByTitle(itm->text(0));
+
+        qDebug() << "Itme to be added: " << _album->GetTitle();
+
         _album->is_in_playlist = true;
         playlist->push_back(*_album);
 
@@ -111,14 +114,17 @@ void DialogEditPlaylist::on_buttonBox_accepted()
 
     // Remove selected items from playlist
     for(QTreeWidgetItem* itm : items_to_remove) {
-        Album* _album = GetAlbumByTitle(itm->text(0));
-        _album->is_in_playlist = false;
+        Album* album_to_remove = GetAlbumByTitle(itm->text(0));
+
+        qDebug() << "Item to be removed: " << album_to_remove->GetTitle();
+
+        album_to_remove->is_in_playlist = false;
         // get the indexes of items to be removed
         std::vector<int> indexes;
-        int index;
-        for (MusicType itm : *playlist) {
-            Album prev_album = boost::get<Album>(itm);
-            if (prev_album.GetTitle() == _album->GetTitle()) {
+        int index = 0;
+        for (MusicType _itm : *playlist) {
+            Album _album = boost::get<Album>(_itm);
+            if (album_to_remove->GetTitle() == _album.GetTitle()) {
                 indexes.push_back(index);
             }
             index++;
@@ -128,7 +134,7 @@ void DialogEditPlaylist::on_buttonBox_accepted()
             playlist->erase(playlist->begin() + _index);
 
         for(QString& line : list) {
-            if(line.contains(_album->GetTitle(), Qt::CaseInsensitive)) {
+            if(line.contains(album_to_remove->GetTitle(), Qt::CaseInsensitive)) {
                 line.replace("#", "-");
             }
         }
@@ -144,5 +150,5 @@ void DialogEditPlaylist::on_buttonBox_accepted()
 
     infile.close();
 
-    emit PlaylistChanged(true);
+    emit Change(true);
 }

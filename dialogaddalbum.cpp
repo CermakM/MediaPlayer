@@ -17,14 +17,19 @@ DialogAddAlbum::~DialogAddAlbum()
 
 void DialogAddAlbum::on_buttonBox_accepted()
 {
+    QString pathToAdd = ui->PathSelect->text();
+
+    if(pathToAdd.isEmpty()) {
+        return; // no change has happened
+    }
+
     QFile albums("albums.txt");
-    if (!albums.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Append)){
+    if (!albums.open(QIODevice::ReadOnly | QIODevice::Text)){
         qInfo("Album has not been succesfully opened for writing");
         qDebug() << albums.errorString();
         return;
     }
 
-    QString pathToAdd = ui->PathSelect->text();
     Album myAlbum (pathToAdd);
     QString title = myAlbum.GetTitle();
     QString interpret = myAlbum.GetInterpret();
@@ -36,8 +41,17 @@ void DialogAddAlbum::on_buttonBox_accepted()
     QTextStream inStream(&albums);
     while(!inStream.atEnd()) {
         saved_path = inStream.readLine();
-        if (saved_path == pathToAdd)
+        if (saved_path.contains(pathToAdd))
+            QMessageBox::warning(this, tr("Duplicated path"), tr("The album you\'ve selected is already in your list"), QMessageBox::Ok);
             return;
+    }
+
+    albums.close();
+
+    if (!albums.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append)){
+        qInfo("Album has not been succesfully opened for writing");
+        qDebug() << albums.errorString();
+        return;
     }
 
     inStream << pathToAdd << "|" << title << "|" << interpret << "|" << year;
@@ -51,6 +65,8 @@ void DialogAddAlbum::on_buttonBox_accepted()
     qInfo("The new album has been added");
 
     albums.close();
+
+    emit Change(true);
 }
 
 void DialogAddAlbum::on_BrowseButton_clicked()

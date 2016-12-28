@@ -1,6 +1,6 @@
 # Developer notes
 
 ## Create playlist class and refactor the boost::variant handling
-## Segmentation fault on exit ???
-## Adding new album && to playlist
-## Remove the album from playlist while song is running
+## Remove a single song belonging to album from playlist
+
+

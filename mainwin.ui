@@ -24,6 +24,9 @@
           <property name="text">
            <string>Play</string>
           </property>
+          <property name="shortcut">
+           <string/>
+          </property>
          </widget>
         </item>
         <item row="1" column="2">
@@ -174,8 +177,6 @@
      </widget>
     </item>
    </layout>
-   <zorder>layoutWidget</zorder>
-   <zorder>groupBox</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -190,8 +191,8 @@
     <property name="title">
      <string>Edit</string>
     </property>
-    <addaction name="AddNewAlbum"/>
-    <addaction name="AddNewSong"/>
+    <addaction name="actionAddNewAlbum"/>
+    <addaction name="actionAddNewSong"/>
     <addaction name="actionEditPlaylist"/>
    </widget>
    <widget class="QMenu" name="menuFilter">
@@ -228,6 +229,7 @@
     <property name="title">
      <string>Help</string>
     </property>
+    <addaction name="actionShortcuts"/>
    </widget>
    <addaction name="menuEdit"/>
    <addaction name="menuFilter"/>
@@ -236,14 +238,20 @@
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="AddNewAlbum">
+  <action name="actionAddNewAlbum">
    <property name="text">
     <string>Add Album</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+A</string>
    </property>
   </action>
   <action name="actionEditPlaylist">
    <property name="text">
     <string>Edit Playlist</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+E</string>
    </property>
   </action>
   <action name="actionSearch_app">
@@ -271,7 +279,7 @@
     <string>Browse Album</string>
    </property>
   </action>
-  <action name="AddNewSong">
+  <action name="actionAddNewSong">
    <property name="text">
     <string>Add Song</string>
    </property>
@@ -279,6 +287,11 @@
   <action name="actionAdd_URL">
    <property name="text">
     <string>Add URL</string>
+   </property>
+  </action>
+  <action name="actionShortcuts">
+   <property name="text">
+    <string>Shortcuts</string>
    </property>
   </action>
  </widget>

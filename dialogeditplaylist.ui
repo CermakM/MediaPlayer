@@ -127,17 +127,17 @@
            </column>
            <column>
             <property name="text">
-             <string>Album</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
              <string>Interpret</string>
             </property>
            </column>
            <column>
             <property name="text">
              <string>Year</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Album</string>
             </property>
            </column>
           </widget>

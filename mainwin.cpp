@@ -7,10 +7,23 @@ MainWin::MainWin(QWidget *parent) :
 {
     ui->setupUi(this);
     media_player = new QMediaPlayer(this);
+    media_playlist = new QMediaPlaylist;
 
+    // Connect Signals and slots
     connect(media_player, &QMediaPlayer::positionChanged, this, &MainWin::on_PositionChange);
     connect(media_player, &QMediaPlayer::durationChanged, this, &MainWin::on_DurationChange);
-    connect(&media_playlist, SIGNAL(currentIndexChanged(int)), this, SLOT(on_EndOfSong()));
+    connect(media_playlist, SIGNAL(currentIndexChanged(int)), this, SLOT(on_EndOfSong()));
+
+    // Connect shortcuts
+    QShortcut* shortcutAddAlbum = new QShortcut(QKeySequence("Ctrl+Shift+A"), this);
+    QShortcut* shortcutEditPlaylist = new QShortcut(QKeySequence("Ctrl+Shift+E"), this);
+    QShortcut* shortcutPlayButton = new QShortcut(QKeySequence("P"), this);
+    QShortcut* shortcutForwardButton = new QShortcut(QKeySequence(Qt::Key_Right), this);
+    QShortcut* shortcutBackwardButotn = new QShortcut(QKeySequence(Qt::Key_Left), this);
+
+    connect(shortcutAddAlbum, SIGNAL(activated()), this, SLOT(on_actionAddNewAlbum_triggered()));
+    connect(shortcutEditPlaylist, SIGNAL(activated()), this, SLOT(on_actionEditPlaylist_triggered()));
+    connect(shortcutPlayButton, SIGNAL(activated()), this, SLOT(on_PlayMusicButton_clicked()));
 
     LoadAlbums();
 
@@ -63,10 +76,10 @@ void MainWin::AddSongToSongs(QStringList& line) {
 
 void MainWin::on_EndOfSong() {
 
-    if (media_playlist.isEmpty()) {
+    if (media_playlist->isEmpty()) {
         return;
     }
-    QMediaContent current_media = media_playlist.currentMedia();
+    QMediaContent current_media = media_playlist->currentMedia();
     QString song_title = current_media.canonicalUrl().path();
     Song _song(song_title);
     ui->CurrentAlbumLine->setText(_song.GetAlbum());
@@ -110,7 +123,9 @@ void MainWin::LoadAlbums() {
     infile.close();
 }
 
-void MainWin::AddLastAlbum() {
+void MainWin::AddLastAlbum(bool b) {
+
+    if (!b) return;
 
     qInfo("Refreshing playlist..");
     QFile infile("albums.txt");
@@ -133,29 +148,34 @@ void MainWin::AddLastAlbum() {
 }
 
 
-    void MainWin::CreateMediaPlaylist() {
+void MainWin::CreateMediaPlaylist() {
+
+    qDebug() << "Actual media player status before: " << media_playlist->mediaCount();
 
     media_player->stop();
     media_player->setMedia(QMediaContent());
-    media_playlist.clear();
+    media_player->setPlaylist(NULL);
+    media_playlist->clear();
+
+    ui->CurrentAlbumLine->clear();
+    ui->CurrentSongLine->clear();
 
     if(playlist.empty()) {
-        media_player->setPlaylist(&media_playlist);
-        ui->CurrentAlbumLine->clear();
-        ui->CurrentSongLine->clear();
+        media_player->setPlaylist(media_playlist);
+        qDebug() << "Actual media player status after: " << media_playlist->mediaCount();
         return;
     }
 
     for ( MusicType itm : playlist) {
         if (itm.type() == typeid(Song)) {
             Song _song = boost::get<Song>(itm);
-            media_playlist.addMedia(QUrl::fromLocalFile(_song.GetPath()));
+            media_playlist->addMedia(QUrl::fromLocalFile(_song.GetPath()));
         }
         else if(itm.type() == typeid(Album)) {
             Album _album = boost::get<Album>(itm);
             std::vector<Song> _songs = _album.GetSongs();
             for (Song& _song : _songs) {
-                media_playlist.addMedia(QUrl::fromLocalFile(_song.GetPath()));
+                media_playlist->addMedia(QUrl::fromLocalFile(_song.GetPath()));
             }
         }
         else {
@@ -163,8 +183,10 @@ void MainWin::AddLastAlbum() {
         }
     }
 
-    media_playlist.setCurrentIndex(0);
-    media_player->setPlaylist(&media_playlist);
+    qDebug() << "Actual media player status after: " << media_playlist->mediaCount();
+
+    media_playlist->setCurrentIndex(0);
+    media_player->setPlaylist(media_playlist);
 }
 
 void MainWin::on_VolumeSlider_valueChanged(int value)
@@ -211,10 +233,10 @@ void MainWin::on_StopMusicButton_clicked()
 }
 
 
-void MainWin::on_AddNewAlbum_triggered()
+void MainWin::on_actionAddNewAlbum_triggered()
 {
     DialogAddAlbum AlbumBrowser;
-    connect(&AlbumBrowser, SIGNAL(destroyed()), this, SLOT(AddLastAlbum()));
+    connect(&AlbumBrowser, SIGNAL(Change(bool)), this, SLOT(AddLastAlbum(bool)));
     AlbumBrowser.setWindowTitle("Add your Album");
     AlbumBrowser.setModal(true);
     AlbumBrowser.exec();
@@ -224,7 +246,7 @@ void MainWin::on_actionEditPlaylist_triggered()
 {
     DialogEditPlaylist EditPlaylist;
 
-    connect(&EditPlaylist, &DialogEditPlaylist::PlaylistChanged, this, &MainWin::on_EditPlaylistOver);
+    connect(&EditPlaylist, &DialogEditPlaylist::Change, this, &MainWin::on_EditPlaylistOver);
 
     EditPlaylist.setWindowTitle("Edit playlist");
     EditPlaylist.setModal(true);
