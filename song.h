@@ -32,6 +32,8 @@ public:
 
     bool HasAlbum() const { return has_album; }
 
+    friend bool operator== (const Song& s1, const Song& s2);
+
 private:
 
     QString path;
@@ -40,6 +42,8 @@ private:
     QString interpret;
     QString album;
     QString year;
+
+    bool skip = false;
     bool has_album = true;
 
 };

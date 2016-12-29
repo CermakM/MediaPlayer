@@ -78,6 +78,7 @@ private:
 
     std::vector<Album> AlbumList;
     std::vector<Song> SongList;
+
     std::vector<MusicType> playlist;
 };
 

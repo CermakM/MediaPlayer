@@ -4,6 +4,18 @@ Song::Song() {
     qDebug() << "Empty song has been creaded";
 }
 
+
+bool operator== (const Song& s1, const Song& s2) {
+
+    if (s1.GetAlbum() == s2.GetAlbum()\
+            && s1.GetTitle() == s2.GetTitle()\
+            && s1.GetInterpret() == s2.GetInterpret())
+        return true;
+
+    return false;
+}
+
+
 Song::Song(const QString _path)
 {
     path = _path;

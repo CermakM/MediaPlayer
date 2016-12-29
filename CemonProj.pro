@@ -21,14 +21,16 @@ SOURCES += main.cpp\
     album.cpp \
     song.cpp \
     dialogaddalbum.cpp \
-    dialogeditplaylist.cpp
+    dialogeditplaylist.cpp \
+    playlist.cpp
 
 HEADERS  += mainwin.h \
     album.h \
     song.h \
     dialogaddalbum.h \
     dialogeditplaylist.h \
-    common.h
+    common.h \
+    playlist.h
 
 FORMS    += mainwin.ui \
     dialogaddalbum.ui \
