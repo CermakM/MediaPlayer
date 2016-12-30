@@ -3,12 +3,12 @@
 
 #include "album.h"
 #include "song.h"
-#include "common.h"
+#include "playlist.h"
 
 #include <QDialog>
 #include <QTreeWidget>
 #include <QMediaPlaylist>
-#include <QList>
+#include <QVector>
 #include <QFile>
 
 #include <vector>
@@ -26,13 +26,21 @@ public:
     explicit DialogEditPlaylist(QWidget *parent = 0);
     ~DialogEditPlaylist();
 
+    DialogEditPlaylist(std::vector<Album>&, std::vector<Song>&, Playlist&, QWidget* parent = 0);
+
     Album* GetAlbumByTitle(const QString&);
 
-    void SetAlbumVector( std::vector<Album>& _album) {
+    Song* GetSongByTitle(const QString&);
+
+    void PassAlbum( std::vector<Album>& _album) {
         album_vector = &_album;
     }
 
-    void SetPlaylistVector( std::vector<MusicType>& _playlist) {
+    void PassSong( std::vector<Song>& _song) {
+        song_vector = &_song;
+    }
+
+    void PassPlaylist( Playlist& _playlist) {
         playlist = &_playlist;
     }
 
@@ -56,10 +64,10 @@ private:
 
     std::vector<Album> * album_vector;
     std::vector<Song> * song_vector;
-    std::vector<MusicType> * playlist;
+    Playlist * playlist;
 
-    QList<QTreeWidgetItem*> new_items;
-    QList<QTreeWidgetItem*> items_to_remove;
+    QVector<QTreeWidgetItem*> new_albums;
+    QVector<QTreeWidgetItem*> albums_to_remove;
 
 };
 

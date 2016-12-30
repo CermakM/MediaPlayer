@@ -7,12 +7,11 @@ MainWin::MainWin(QWidget *parent) :
 {
     ui->setupUi(this);
     media_player = new QMediaPlayer(this);
-    media_playlist = new QMediaPlaylist;
 
     // Connect Signals and slots
     connect(media_player, &QMediaPlayer::positionChanged, this, &MainWin::on_PositionChange);
     connect(media_player, &QMediaPlayer::durationChanged, this, &MainWin::on_DurationChange);
-    connect(media_playlist, SIGNAL(currentIndexChanged(int)), this, SLOT(on_EndOfSong()));
+    connect(playlist.MediaPlaylist(), SIGNAL(currentIndexChanged(int)), this, SLOT(on_EndOfSong()));
 
     // Connect shortcuts
     QShortcut* shortcutAddAlbum = new QShortcut(QKeySequence("Ctrl+Shift+A"), this);
@@ -29,7 +28,7 @@ MainWin::MainWin(QWidget *parent) :
 
     LoadSongs();
 
-    CreateMediaPlaylist();
+    UpdatePlaylist();
 }
 
 MainWin::~MainWin()
@@ -52,10 +51,10 @@ void MainWin::AddAlbumToAlbums(QStringList& line) {
     // Check the last char for playlist-sign
     if (line.last() == "#") {
         current_album.is_in_playlist = true;
-        AlbumList.push_back(current_album);
-        playlist.push_back(current_album);
+        albumList.push_back(current_album);
+        playlist.AddMedia(current_album);
     }
-    else AlbumList.push_back(current_album);
+    else albumList.push_back(current_album);
 }
 
 void MainWin::AddSongToSongs(QStringList& line) {
@@ -69,21 +68,20 @@ void MainWin::AddSongToSongs(QStringList& line) {
     song_interpret = line[3];
     song_album = line[4];
     Song current_song(song_path, song_title, song_fname, song_interpret, song_album);
-    SongList.push_back(current_song);
-    if (line.last() == "#") playlist.push_back(current_song);
+    songList.push_back(current_song);
+    if (line.last() == "#") playlist.AddMedia(current_song);
 }
 
 
 void MainWin::on_EndOfSong() {
 
-    if (media_playlist->isEmpty()) {
+    if (playlist.isEmpty()) {
         return;
     }
-    QMediaContent current_media = media_playlist->currentMedia();
-    QString song_title = current_media.canonicalUrl().path();
-    Song _song(song_title);
-    ui->CurrentAlbumLine->setText(_song.GetAlbum());
-    ui->CurrentSongLine->setText(_song.GetTitle());
+    Song* song = playlist.CurrentMedia();
+
+    ui->CurrentAlbumLine->setText(song->GetAlbum());
+    ui->CurrentSongLine->setText(song->GetTitle());
 }
 
 
@@ -148,45 +146,20 @@ void MainWin::AddLastAlbum(bool b) {
 }
 
 
-void MainWin::CreateMediaPlaylist() {
+void MainWin::UpdatePlaylist() {
 
-    qDebug() << "Actual media player status before: " << media_playlist->mediaCount();
+    ui->CurrentSongLine->clear();
+    ui->CurrentAlbumLine->clear();
 
     media_player->stop();
-    media_player->setMedia(QMediaContent());
-    media_player->setPlaylist(NULL);
-    media_playlist->clear();
 
-    ui->CurrentAlbumLine->clear();
-    ui->CurrentSongLine->clear();
+    playlist.Update();
 
-    if(playlist.empty()) {
-        media_player->setPlaylist(media_playlist);
-        qDebug() << "Actual media player status after: " << media_playlist->mediaCount();
-        return;
-    }
+    qDebug() << "Actual media player status: " << playlist.Size();
 
-    for ( MusicType itm : playlist) {
-        if (itm.type() == typeid(Song)) {
-            Song _song = boost::get<Song>(itm);
-            media_playlist->addMedia(QUrl::fromLocalFile(_song.GetPath()));
-        }
-        else if(itm.type() == typeid(Album)) {
-            Album _album = boost::get<Album>(itm);
-            std::vector<Song> _songs = _album.GetSongs();
-            for (Song& _song : _songs) {
-                media_playlist->addMedia(QUrl::fromLocalFile(_song.GetPath()));
-            }
-        }
-        else {
-            qDebug() << "Boost::variant type does not match";
-        }
-    }
+    playlist.setCurrentIndex(0);
 
-    qDebug() << "Actual media player status after: " << media_playlist->mediaCount();
-
-    media_playlist->setCurrentIndex(0);
-    media_player->setPlaylist(media_playlist);
+    media_player->setPlaylist(playlist.MediaPlaylist());
 }
 
 void MainWin::on_VolumeSlider_valueChanged(int value)
@@ -244,15 +217,12 @@ void MainWin::on_actionAddNewAlbum_triggered()
 
 void MainWin::on_actionEditPlaylist_triggered()
 {
-    DialogEditPlaylist EditPlaylist;
+    DialogEditPlaylist EditPlaylist(albumList, songList, playlist, this);
 
     connect(&EditPlaylist, &DialogEditPlaylist::Change, this, &MainWin::on_EditPlaylistOver);
 
     EditPlaylist.setWindowTitle("Edit playlist");
     EditPlaylist.setModal(true);
-    EditPlaylist.SetAlbumVector(AlbumList);
-    EditPlaylist.SetPlaylistVector(playlist);
-    EditPlaylist.LoadAlbums();
 
     EditPlaylist.exec();
 }
@@ -260,8 +230,7 @@ void MainWin::on_actionEditPlaylist_triggered()
 void MainWin::on_EditPlaylistOver(bool b) {
 
     if (b)
-        CreateMediaPlaylist();
-
+        UpdatePlaylist();
 }
 
 

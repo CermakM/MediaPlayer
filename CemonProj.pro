@@ -29,7 +29,6 @@ HEADERS  += mainwin.h \
     song.h \
     dialogaddalbum.h \
     dialogeditplaylist.h \
-    common.h \
     playlist.h
 
 FORMS    += mainwin.ui \

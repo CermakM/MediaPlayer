@@ -39,8 +39,6 @@ void Playlist::AddMedia(Media _media) {
     }
 
     else qDebug() << "Type mismatch";
-
-    Update();
 }
 
 
@@ -49,17 +47,17 @@ bool Playlist::RemoveMedia(Media _media) {
     bool was_removed = false;
 
     if(isAlbum(_media)) {
-        Album& album = boost::get<Album>(_media);
+        Album album = boost::get<Album>(_media);
         QString album_title = album.GetTitle();
-        QVector<int> indexes;
-        for (Song& song : playlist) {
-            if (song.GetAlbum() == album_title)
-               indexes.push_back(playlist.indexOf(song));
+        for (int i = 0; i < playlist.size(); true ) {
+            Song* song = &playlist[i];
+            if (song->GetAlbum() == album_title) {
+               playlist.removeAt(i);
+               qDebug() << "Song " << song->GetTitle() << " erased";
+            }
+            else i++;
         }
-
-        for (int i : indexes) {
-            playlist.removeAt(i);
-        }
+        was_removed = true;
     }
 
     else if (isSong(_media)) {
@@ -67,8 +65,6 @@ bool Playlist::RemoveMedia(Media _media) {
     }
 
     else qDebug() << "Type mismatch";
-
-    Update();
 
     return was_removed;
 }
@@ -86,11 +82,13 @@ void Playlist::Clear() {
 
     playlist.clear();
 
-    Update();
+    media_playlist->clear();
 }
 
 
 void Playlist::Update() {
+
+    media_playlist->clear();
 
     for(Song& song : playlist) {
         media_playlist->addMedia(QMediaContent(QUrl::fromLocalFile(song.GetPath())));

@@ -6,15 +6,27 @@ DialogEditPlaylist::DialogEditPlaylist(QWidget *parent) :
     ui(new Ui::DialogEditPlaylist)
 {
     ui->setupUi(this);
+
+    album_vector = nullptr;
+    song_vector = nullptr;
+    playlist = nullptr;
 }
 
 DialogEditPlaylist::~DialogEditPlaylist()
 {
     delete ui;
+}
 
-    album_vector = nullptr;
-    song_vector = nullptr;
-    playlist = nullptr;
+DialogEditPlaylist::DialogEditPlaylist(std::vector<Album> & _album, std::vector<Song> & _song, Playlist & _playlist, QWidget *parent) :
+    QDialog(parent), ui(new Ui::DialogEditPlaylist)
+{
+    ui->setupUi(this);
+
+    album_vector = &_album;
+    song_vector = &_song;
+    playlist = &_playlist;
+
+    LoadAlbums();
 }
 
 
@@ -49,7 +61,7 @@ void DialogEditPlaylist::on_AddToPlaylistButton_clicked()
     if (!qlist.empty()) return;
 
     ui->treePlaylist->addTopLevelItem(current_item->clone());
-    new_items.push_back(current_item);
+    new_albums.push_back(current_item);
 }
 
 void DialogEditPlaylist::on_RemoveFromPlaylistButton_clicked()
@@ -57,18 +69,19 @@ void DialogEditPlaylist::on_RemoveFromPlaylistButton_clicked()
    QTreeWidgetItem* current_item = ui->treePlaylist->currentItem();
    current_item->setHidden(true);
    int index = 0;
-   for (QTreeWidgetItem* itm : new_items) {
+   for (QTreeWidgetItem* itm : new_albums) {
        if (itm->text(0) == current_item->text(0)) { // item is already in add-list
-           new_items.removeAt(index);
+           new_albums.removeAt(index);
            delete current_item;
            return;
        }
        index++;
    }
 
-   items_to_remove.push_back(current_item);
+   albums_to_remove.push_back(current_item);
 }
 
+/// will be library method
 Album* DialogEditPlaylist::GetAlbumByTitle(const QString& _title) {
 
     Album* album_ptr = nullptr;
@@ -80,11 +93,22 @@ Album* DialogEditPlaylist::GetAlbumByTitle(const QString& _title) {
     return album_ptr;
 }
 
+/// will be library method
+Song* DialogEditPlaylist::GetSongByTitle(const QString& _title) {
+
+    Song* song_ptr = nullptr;
+    for( Song& _song : *song_vector) {
+        if ( _song.GetTitle() == _title)
+            song_ptr = &_song;
+    }
+
+    return song_ptr;
+}
 
 void DialogEditPlaylist::on_buttonBox_accepted()
 {
     // If no change - return
-    if ( new_items.empty() && items_to_remove.empty()) return;
+    if ( new_albums.empty() && albums_to_remove.empty()) return;
 
     QFile infile("albums.txt");
     infile.open(QFile::ReadOnly);
@@ -96,13 +120,13 @@ void DialogEditPlaylist::on_buttonBox_accepted()
     infile.close();
 
     // Add new albums to playlist
-    for (QTreeWidgetItem* itm : new_items) {
+    for (QTreeWidgetItem* itm : new_albums) {
         Album* _album = GetAlbumByTitle(itm->text(0));
 
         qDebug() << "Itme to be added: " << _album->GetTitle();
 
         _album->is_in_playlist = true;
-        playlist->push_back(*_album);
+        playlist->AddMedia(*_album);
 
     // Search the title in list file and replace the last symbol
         for(QString& line : list) {
@@ -113,28 +137,18 @@ void DialogEditPlaylist::on_buttonBox_accepted()
     }
 
     // Remove selected items from playlist
-    for(QTreeWidgetItem* itm : items_to_remove) {
+    for(QTreeWidgetItem* itm : albums_to_remove) {
         Album* album_to_remove = GetAlbumByTitle(itm->text(0));
 
         qDebug() << "Item to be removed: " << album_to_remove->GetTitle();
 
         album_to_remove->is_in_playlist = false;
-        // get the indexes of items to be removed
-        std::vector<int> indexes;
-        int index = 0;
-        for (MusicType _itm : *playlist) {
-            Album _album = boost::get<Album>(_itm);
-            if (album_to_remove->GetTitle() == _album.GetTitle()) {
-                indexes.push_back(index);
-            }
-            index++;
-        }
 
-        for (int _index : indexes)
-            playlist->erase(playlist->begin() + _index);
+        playlist->RemoveMedia(*album_to_remove);
 
         for(QString& line : list) {
-            if(line.contains(album_to_remove->GetTitle(), Qt::CaseInsensitive)) {
+            if(line.contains(album_to_remove->GetTitle(), Qt::CaseInsensitive) \
+                    && line.contains(album_to_remove->GetYear(), Qt::CaseSensitive)) {
                 line.replace("#", "-");
             }
         }

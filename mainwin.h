@@ -5,7 +5,7 @@
 #include "dialogeditplaylist.h"
 #include "album.h"
 #include "song.h"
-#include "common.h"
+#include "playlist.h"
 
 #include <QDir>
 #include <QFile>
@@ -14,7 +14,6 @@
 #include <QTextStream>
 #include <QMainWindow>
 #include <QMediaPlayer>
-#include <QMediaPlaylist>
 #include <QDebug>
 #include <QMessageBox>
 #include <QShortcut>
@@ -40,7 +39,7 @@ public:
 
     void LoadSongs();
 
-    void CreateMediaPlaylist();
+    void UpdatePlaylist();
 
     void AddAlbumToAlbums(QStringList&);
 
@@ -74,12 +73,13 @@ private:
     Ui::MainWin *ui;
 
     QMediaPlayer* media_player;
-    QMediaPlaylist* media_playlist;
 
-    std::vector<Album> AlbumList;
-    std::vector<Song> SongList;
+    Playlist playlist;
 
-    std::vector<MusicType> playlist;
+    std::vector<Album> albumList;
+    std::vector<Song> songList; // add to the library class
+
+
 };
 
 #endif // MAINWIN_H

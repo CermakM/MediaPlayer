@@ -1,3 +1,11 @@
+/**
+  * User friendly media player program
+  * main.cpp
+  *
+  * @author Marek Cermak
+  * @version 1.0 30.12.2016
+*/
+
 #include "mainwin.h"
 #include <QApplication>
 #include <QLabel>

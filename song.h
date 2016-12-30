@@ -43,7 +43,6 @@ private:
     QString album;
     QString year;
 
-    bool skip = false;
     bool has_album = true;
 
 };

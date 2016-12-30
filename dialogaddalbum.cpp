@@ -41,9 +41,11 @@ void DialogAddAlbum::on_buttonBox_accepted()
     QTextStream inStream(&albums);
     while(!inStream.atEnd()) {
         saved_path = inStream.readLine();
-        if (saved_path.contains(pathToAdd))
-            QMessageBox::warning(this, tr("Duplicated path"), tr("The album you\'ve selected is already in your list"), QMessageBox::Ok);
+        if (saved_path.contains(pathToAdd)) {
+            QMessageBox::information(this, tr("Duplicated path"), tr("The album you\'ve selected is already in your list"), QMessageBox::Ok);
+            albums.close();
             return;
+        }
     }
 
     albums.close();
@@ -78,5 +80,6 @@ void DialogAddAlbum::on_BrowseButton_clicked()
 
 void DialogAddAlbum::on_checkBoxAddToPlaylist_toggled(bool checked)
 {
-   ui->checkBoxAddToPlaylist->isChecked() ? addToPlaylist = true : addToPlaylist = false;
+    addToPlaylist = checked;
+    // ui->checkBoxAddToPlaylist->isChecked() ? addToPlaylist = true : addToPlaylist = false;
 }
