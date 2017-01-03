@@ -1,1 +1,5 @@
-<RCC/>
+<RCC>
+    <qresource prefix="/">
+        <file>Media/media.sqlite</file>
+    </qresource>
+</RCC>

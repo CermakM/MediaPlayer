@@ -6,6 +6,7 @@
 
 QT       += core gui \
             multimedia \
+            sql \
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -22,14 +23,16 @@ SOURCES += main.cpp\
     song.cpp \
     dialogaddalbum.cpp \
     dialogeditplaylist.cpp \
-    playlist.cpp
+    playlist.cpp \
+    library.cpp
 
 HEADERS  += mainwin.h \
     album.h \
     song.h \
     dialogaddalbum.h \
     dialogeditplaylist.h \
-    playlist.h
+    playlist.h \
+    library.h
 
 FORMS    += mainwin.ui \
     dialogaddalbum.ui \
@@ -38,6 +41,4 @@ FORMS    += mainwin.ui \
 RESOURCES += \
     resource.qrc
 
-DISTFILES += \
-    songs.txt \
-    albums.txt \
+DISTFILES +=

@@ -7,43 +7,45 @@
 #include <taglib/tag.h>
 #include <taglib/fileref.h>
 
+class Album;
+
 class Song
 {
 public:
     Song();
 
-    explicit Song(const QString _path);
+    explicit Song(const QString _path, Album *_parent = nullptr);
 
-    Song(const QString _path, const QString _fname, const QString _title = " ", QString _interpret = " ", QString _album = " ");
+    Song(const QString &_title, const QString &_path, const QString &_interpret = "-", const QString &_album = "-", const int& year = 0, bool inPlaylist = false);
 
-    void SetFileName(QString _fName ) { fName = _fName; }
+    QString getPath() const { return path; }
 
-    QString GetFileName() const { return fName; }
+    QString getTitle() const { return title; }
 
-    QString GetPath() const { return path; }
+    QString getInterpret() const { return interpret; }
 
-    QString GetTitle() const { return title; }
+    QString getAlbumTitle() const { return album; }
 
-    QString GetInterpret() const { return interpret; }
+    int getYear() const {return year; }
 
-    QString GetAlbum() const { return album; }
+    Album*  getAlbum() { return parent; }
 
-    QString GetYear() const {return year; }
+    void setParent(Album* const _parent) { parent = _parent; }
 
-    bool HasAlbum() const { return has_album; }
+    bool is_in_playlist = false;
 
     friend bool operator== (const Song& s1, const Song& s2);
 
 private:
 
     QString path;
-    QString fName;
+
     QString title;
     QString interpret;
     QString album;
-    QString year;
+    int year;
 
-    bool has_album = true;
+    Album* parent;
 
 };
 

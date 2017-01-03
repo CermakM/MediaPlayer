@@ -4,39 +4,42 @@
 #include "song.h"
 
 #include <QDir>
+#include <QFile>
+#include <QtSql>
 #include <QDebug>
 #include <QString>
-
-#include <vector>
+#include <QVector>
 
 class Album
 {
 public:
     Album();
 
-    Album(const QString _path);
+    Album(QVector<Song>& _songs);
 
-    Album(const QString _path, QString _title, QString _interpret, QString _year);
+    Album(const QString& _path);
 
-    std::vector<Song> GetSongs() const { return songs; }
+    QVector<Song>* getSongs() { return &songs; }
 
-    QString GetTitle() const { return title; }
+    QString getPath() const {return path; }
 
-    QString GetInterpret() const { return interpret; }
+    QString getTitle() const { return title; }
 
-    QString GetYear() const { return year; }
+    QString getInterpret() const { return interpret; }
 
-    int numberOfSongs;
+    void setTitle(const QString& _title) { title = _title; }
 
-    bool is_in_playlist = false;
+    void PushSong(const Song& _song) { songs.push_back(_song); }
+
+    int number_of_songs = 0;
 
 private:
+
     QString path;
     QString title;
     QString interpret;
-    QString year;
 
-    std::vector<Song> songs;
+    QVector<Song> songs;
 
 };
 

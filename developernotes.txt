@@ -1,6 +1,5 @@
 # Developer notes
 
-## Create playlist class and refactor the boost::variant handling
 ## Remove a single song belonging to album from playlist
 ## Allow dragging albums into main widget
 ## Create library class for albums and songs 

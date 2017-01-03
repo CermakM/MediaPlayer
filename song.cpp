@@ -1,24 +1,28 @@
 #include "song.h"
 
 Song::Song() {
-    qDebug() << "Empty song has been creaded";
-}
 
+    qDebug() << "Empty song has been creaded";
+
+}
 
 bool operator== (const Song& s1, const Song& s2) {
 
-    if (s1.GetAlbum() == s2.GetAlbum()\
-            && s1.GetTitle() == s2.GetTitle()\
-            && s1.GetInterpret() == s2.GetInterpret())
+    if (s1.getAlbumTitle() == s2.getAlbumTitle()\
+            && s1.getTitle() == s2.getTitle()\
+            && s1.getInterpret() == s2.getInterpret())
         return true;
 
     return false;
 }
 
 
-Song::Song(const QString _path)
+Song::Song(const QString _path, Album* _parent)
 {
+    parent = _parent;
     path = _path;
+
+    qDebug() << "Path of the song about to be add: " << path;
 
     if(path.isEmpty()) {
         qDebug() << "Empty song has been created";
@@ -35,18 +39,20 @@ Song::Song(const QString _path)
     title = QString::fromStdWString(title_string.toWString());
     interpret = QString::fromStdWString(artist_string.toWString());
     album = QString::fromStdWString(album_string.toWString());
-    year = QString::number(year_uint);
+    year = year_uint;
 
+    if (album.isEmpty()) album = "-";
+    if (interpret.isEmpty()) interpret = "-";
 }
 
-Song::Song(const QString _path, const QString _fname, const QString _title, QString _interpret, QString _album)
+Song::Song(const QString& _title, const QString& _path, const QString& _interpret, const QString& _album, const int& _year, bool _inPlaylist)
 {
-    path = _path;
-    fName = _fname;
     title = _title;
+    path = _path;
     interpret = _interpret;
     album = _album;
+    year = _year;
+    is_in_playlist = _inPlaylist;
 
-    if (album.isEmpty()) has_album = false;
-
+    parent = nullptr;
 }

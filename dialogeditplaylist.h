@@ -4,12 +4,14 @@
 #include "album.h"
 #include "song.h"
 #include "playlist.h"
+#include "library.h"
 
 #include <QDialog>
 #include <QTreeWidget>
 #include <QMediaPlaylist>
 #include <QVector>
 #include <QFile>
+#include <QTranslator>
 
 #include <vector>
 
@@ -26,25 +28,9 @@ public:
     explicit DialogEditPlaylist(QWidget *parent = 0);
     ~DialogEditPlaylist();
 
-    DialogEditPlaylist(std::vector<Album>&, std::vector<Song>&, Playlist&, QWidget* parent = 0);
+    DialogEditPlaylist(Library *_library, QWidget* parent = 0);
 
-    Album* GetAlbumByTitle(const QString&);
-
-    Song* GetSongByTitle(const QString&);
-
-    void PassAlbum( std::vector<Album>& _album) {
-        album_vector = &_album;
-    }
-
-    void PassSong( std::vector<Song>& _song) {
-        song_vector = &_song;
-    }
-
-    void PassPlaylist( Playlist& _playlist) {
-        playlist = &_playlist;
-    }
-
-    void LoadAlbums();
+    void LoadLibrary();
 
 
 private slots:
@@ -62,12 +48,10 @@ signals:
 private:
     Ui::DialogEditPlaylist *ui;
 
-    std::vector<Album> * album_vector;
-    std::vector<Song> * song_vector;
-    Playlist * playlist;
+    Library* library;
 
-    QVector<QTreeWidgetItem*> new_albums;
-    QVector<QTreeWidgetItem*> albums_to_remove;
+    QVector<QTreeWidgetItem*> new_media;
+    QVector<QTreeWidgetItem*> items_to_remove;
 
 };
 

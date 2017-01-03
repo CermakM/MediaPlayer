@@ -5,66 +5,51 @@ Playlist::Playlist(QObject *parent)
     media_playlist = new QMediaPlaylist(parent);
 }
 
-bool Playlist::isSong(Media _media) {
+void Playlist::AddMedia(Album* _album) {
 
-    return _media.type() == typeid(Song);
-}
-
-
-bool Playlist::isAlbum(Media _media) {
-
-    return _media.type() == typeid(Album);
-}
-
-
-void Playlist::AddMedia(Media _media) {
-
-    if (isAlbum(_media)) {
-        Album& album = boost::get<Album>(_media);
-        for (Song& song : album.GetSongs()) {
-            if (playlist.contains(song)) {
+        for (Song& song : *(_album->getSongs())) {
+            if (playlist.contains(&song)) {
                 qDebug() << "Song is already in playlist";
                 break;
             }
-            playlist.push_back(song);
+            song.is_in_playlist = true;
+            playlist.push_back(&song);
         }
-    }
-
-    else if(isSong(_media)) {
-        Song& song = boost::get<Song>(_media);
-        if (playlist.contains(song)) {
-            qDebug() << "Song is already in playlist";
-        }
-        playlist.push_back(song);
-    }
-
-    else qDebug() << "Type mismatch";
 }
 
+void Playlist::AddMedia(Song* _song) {
 
-bool Playlist::RemoveMedia(Media _media) {
+    if (playlist.contains(_song)) {
+        qDebug() << "Song is already in playlist";
+    }
+    _song->is_in_playlist = true;
+    playlist.push_back(_song);
+}
+
+bool Playlist::RemoveMedia(Album* _album) {
 
     bool was_removed = false;
 
-    if(isAlbum(_media)) {
-        Album album = boost::get<Album>(_media);
-        QString album_title = album.GetTitle();
-        for (int i = 0; i < playlist.size(); true ) {
-            Song* song = &playlist[i];
-            if (song->GetAlbum() == album_title) {
-               playlist.removeAt(i);
-               qDebug() << "Song " << song->GetTitle() << " erased";
-            }
-            else i++;
+    QString _album_title = _album->getTitle();
+    for (int i = 0; i < playlist.size(); ) {
+        Song* song = playlist[i];
+        if (song->getAlbumTitle() == _album_title) {
+            song->is_in_playlist = false;
+            playlist.removeAt(i);
+            qDebug() << "Song " << song->getTitle() << " erased";
         }
-        was_removed = true;
+        else i++;
     }
+    was_removed = true;
+}
 
-    else if (isSong(_media)) {
-        was_removed = playlist.removeOne(boost::get<Song>(_media));
-    }
 
-    else qDebug() << "Type mismatch";
+bool Playlist::RemoveMedia(Song* _song) {
+
+    _song->is_in_playlist = false;
+    bool was_removed = playlist.removeOne(_song);
+
+    if (was_removed) qDebug() << "Song " << _song->getTitle() << " erased";
 
     return was_removed;
 }
@@ -74,7 +59,7 @@ Song* Playlist::CurrentMedia() {
 
     int current_index = media_playlist->currentIndex();
 
-    return &playlist[current_index];
+    return playlist[current_index];
 }
 
 
@@ -90,7 +75,7 @@ void Playlist::Update() {
 
     media_playlist->clear();
 
-    for(Song& song : playlist) {
-        media_playlist->addMedia(QMediaContent(QUrl::fromLocalFile(song.GetPath())));
+    for(Song* song : playlist) {
+        media_playlist->addMedia(QMediaContent(QUrl::fromLocalFile(song->getPath())));
     }
 }

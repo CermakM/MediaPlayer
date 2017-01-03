@@ -8,11 +8,25 @@ DialogAddAlbum::DialogAddAlbum(QWidget *parent) :
     ui->setupUi(this);
 
     addToPlaylist = false;
+
 }
 
 DialogAddAlbum::~DialogAddAlbum()
 {
     delete ui;
+}
+
+
+DialogAddAlbum::DialogAddAlbum(Library *_library, QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::DialogAddAlbum)
+{
+    ui->setupUi(this);
+
+    addToPlaylist = false;
+
+    library = _library;
+
 }
 
 void DialogAddAlbum::on_buttonBox_accepted()
@@ -23,50 +37,21 @@ void DialogAddAlbum::on_buttonBox_accepted()
         return; // no change has happened
     }
 
-    QFile albums("albums.txt");
-    if (!albums.open(QIODevice::ReadOnly | QIODevice::Text)){
-        qInfo("Album has not been succesfully opened for writing");
-        qDebug() << albums.errorString();
-        return;
-    }
+    Album newAlbum (pathToAdd);
 
-    Album myAlbum (pathToAdd);
-    QString title = myAlbum.GetTitle();
-    QString interpret = myAlbum.GetInterpret();
-    QString year = myAlbum.GetYear();
-
-    if (ui->TitleSelect->isModified()) title = ui->TitleSelect->text();
-
-    QString saved_path;
-    QTextStream inStream(&albums);
-    while(!inStream.atEnd()) {
-        saved_path = inStream.readLine();
-        if (saved_path.contains(pathToAdd)) {
-            QMessageBox::information(this, tr("Duplicated path"), tr("The album you\'ve selected is already in your list"), QMessageBox::Ok);
-            albums.close();
-            return;
+    if(addToPlaylist) {
+        for (Song& song : *(newAlbum.getSongs())) {
+            song.is_in_playlist = true;
         }
     }
-
-    albums.close();
-
-    if (!albums.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append)){
-        qInfo("Album has not been succesfully opened for writing");
-        qDebug() << albums.errorString();
-        return;
+    if (ui->TitleSelect->isModified()) {
+        QString title = ui->TitleSelect->text();
+        newAlbum.setTitle(title);
     }
 
-    inStream << pathToAdd << "|" << title << "|" << interpret << "|" << year;
-    if ( addToPlaylist ) {
-        inStream << "|" << "#";
-    }
-    else inStream << "|" << "-";
-
-    inStream << endl;
+    library->AddMedia(&newAlbum);
 
     qInfo("The new album has been added");
-
-    albums.close();
 
     emit Change(true);
 }

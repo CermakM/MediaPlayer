@@ -3,9 +3,8 @@
 
 #include "dialogaddalbum.h"
 #include "dialogeditplaylist.h"
-#include "album.h"
-#include "song.h"
 #include "playlist.h"
+#include "library.h"
 
 #include <QDir>
 #include <QFile>
@@ -41,10 +40,6 @@ public:
 
     void UpdatePlaylist();
 
-    void AddAlbumToAlbums(QStringList&);
-
-    void AddSongToSongs(QStringList&);
-
 private slots:
     void on_VolumeSlider_valueChanged(int value);
 
@@ -64,8 +59,6 @@ private slots:
 
     void on_EndOfSong();
 
-    void AddLastAlbum(bool);
-
     void on_EditPlaylistOver(bool b);
 
 
@@ -74,12 +67,9 @@ private:
 
     QMediaPlayer* media_player;
 
-    Playlist playlist;
+    Playlist* playlist;
 
-    std::vector<Album> albumList;
-    std::vector<Song> songList; // add to the library class
-
-
+    Library library;
 };
 
 #endif // MAINWIN_H

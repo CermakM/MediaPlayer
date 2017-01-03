@@ -9,27 +9,20 @@
 #include <QVector>
 #include <QMediaPlaylist>
 
-#include <boost/variant.hpp>
-
-typedef boost::variant<Album, Song> Media;
-
 class Playlist
 {
 public:
     Playlist(QObject* parent = Q_NULLPTR);
 
-    void AddMedia(Media);
+    void AddMedia(Album* _album);
 
-    /**
-     * If the media is album, removes all songs of the album,
-     * else removes the song specified in param.
-     *
-     * @param media of Song or Album type to be removed
-     * @return true if removed succesfully
-    */
-    bool RemoveMedia(Media);
+    void AddMedia(Song*);
 
-    Song *CurrentMedia();
+    bool RemoveMedia(Album* _album);
+
+    bool RemoveMedia(Song* _song);
+
+    Song* CurrentMedia();
 
     QMediaPlaylist* MediaPlaylist() const { return media_playlist; }
 
@@ -45,16 +38,12 @@ public:
 
     int Size() const { return playlist.size(); }
 
-    Song* operator[] (int i) { return &playlist[i]; }
+    Song* operator[] (int i) { return playlist[i]; }
 
 
 private:
 
-    bool isSong(Media);
-
-    bool isAlbum(Media);
-
-    QVector<Song>   playlist;
+    QVector<Song*>  playlist;
 
     QMediaPlaylist* media_playlist;
 

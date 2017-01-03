@@ -2,6 +2,7 @@
 #define DIALOGADDALBUM_H
 
 #include "album.h"
+#include "library.h"
 
 #include <QDebug>
 #include <QMessageBox>
@@ -23,6 +24,8 @@ public:
     explicit DialogAddAlbum(QWidget *parent = 0);
     ~DialogAddAlbum();
 
+    DialogAddAlbum(Library* _library, QWidget *parent = 0);
+
 
 private slots:
     void on_buttonBox_accepted();
@@ -32,13 +35,15 @@ private slots:
     void on_checkBoxAddToPlaylist_toggled(bool checked);
 
 signals:
-    void Change(bool);
 
+    void Change(bool);
 
 private:
     Ui::DialogAddAlbum *ui;
 
     bool addToPlaylist;
+
+    Library* library;
 };
 
 #endif // DIALOGADDALBUM_H

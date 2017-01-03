@@ -194,19 +194,20 @@
     <addaction name="actionAddNewAlbum"/>
     <addaction name="actionAddNewSong"/>
     <addaction name="actionEditPlaylist"/>
+    <addaction name="actionEditLibrary"/>
    </widget>
    <widget class="QMenu" name="menuFilter">
     <property name="title">
      <string>Filter</string>
     </property>
-    <addaction name="actionSearch_app"/>
+    <addaction name="actionSearchApp"/>
     <addaction name="actionFilters"/>
    </widget>
    <widget class="QMenu" name="menuMusic">
     <property name="title">
      <string>Music</string>
     </property>
-    <widget class="QMenu" name="Favourite_List">
+    <widget class="QMenu" name="FavouriteList">
      <property name="enabled">
       <bool>true</bool>
      </property>
@@ -216,14 +217,14 @@
      <addaction name="actionSongs"/>
      <addaction name="actionAlbums"/>
     </widget>
-    <addaction name="Favourite_List"/>
-    <addaction name="actionBrowse_Album"/>
+    <addaction name="FavouriteList"/>
+    <addaction name="actionBrowseLibrary"/>
    </widget>
    <widget class="QMenu" name="menuYouTube">
     <property name="title">
      <string>YouTube</string>
     </property>
-    <addaction name="actionAdd_URL"/>
+    <addaction name="actionAddURL"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -254,7 +255,7 @@
     <string>Ctrl+Shift+E</string>
    </property>
   </action>
-  <action name="actionSearch_app">
+  <action name="actionSearchApp">
    <property name="text">
     <string>Search App</string>
    </property>
@@ -274,9 +275,9 @@
     <string>Albums</string>
    </property>
   </action>
-  <action name="actionBrowse_Album">
+  <action name="actionBrowseLibrary">
    <property name="text">
-    <string>Browse Album</string>
+    <string>Browse Library</string>
    </property>
   </action>
   <action name="actionAddNewSong">
@@ -284,7 +285,7 @@
     <string>Add Song</string>
    </property>
   </action>
-  <action name="actionAdd_URL">
+  <action name="actionAddURL">
    <property name="text">
     <string>Add URL</string>
    </property>
@@ -292,6 +293,11 @@
   <action name="actionShortcuts">
    <property name="text">
     <string>Shortcuts</string>
+   </property>
+  </action>
+  <action name="actionEditLibrary">
+   <property name="text">
+    <string>Edit Library</string>
    </property>
   </action>
  </widget>
