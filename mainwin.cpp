@@ -20,7 +20,7 @@ MainWin::MainWin(QWidget *parent) :
     QShortcut* shortcutEditPlaylist = new QShortcut(QKeySequence("Ctrl+Shift+E"), this);
     QShortcut* shortcutPlayButton = new QShortcut(QKeySequence("P"), this);
     QShortcut* shortcutForwardButton = new QShortcut(QKeySequence(Qt::Key_Right), this);
-    QShortcut* shortcutBackwardButotn = new QShortcut(QKeySequence(Qt::Key_Left), this);
+    QShortcut* shortcutBackwardButton = new QShortcut(QKeySequence(Qt::Key_Left), this);
 
     connect(shortcutAddAlbum, SIGNAL(activated()), this, SLOT(on_actionAddNewAlbum_triggered()));
     connect(shortcutEditPlaylist, SIGNAL(activated()), this, SLOT(on_actionEditPlaylist_triggered()));
@@ -41,6 +41,8 @@ void MainWin::on_EndOfSong() {
     }
 
     Song* song = playlist->CurrentMedia();
+
+    if (song == nullptr) return;
 
     ui->CurrentAlbumLine->setText(song->getAlbumTitle());
     ui->CurrentSongLine->setText(song->getTitle());

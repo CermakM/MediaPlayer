@@ -1,6 +1,6 @@
 #include "library.h"
 
-Library::Library(QWidget *_parent)
+Library::Library(QWidget *_parent) : playlist(&database)
 {
     parent = _parent;
 

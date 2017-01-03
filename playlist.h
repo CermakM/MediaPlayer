@@ -4,6 +4,7 @@
 #include "album.h"
 #include "song.h"
 
+#include <QtSql>
 #include <QDebug>
 #include <QString>
 #include <QVector>
@@ -12,11 +13,11 @@
 class Playlist
 {
 public:
-    Playlist(QObject* parent = Q_NULLPTR);
+    Playlist(QSqlDatabase* _database, QObject* parent = Q_NULLPTR);
 
-    void AddMedia(Album* _album);
+    bool AddMedia(Album* _album);
 
-    void AddMedia(Song*);
+    bool AddMedia(Song*);
 
     bool RemoveMedia(Album* _album);
 
@@ -38,7 +39,7 @@ public:
 
     int Size() const { return playlist.size(); }
 
-    Song* operator[] (int i) { return playlist[i]; }
+    Song* operator[] (int i);
 
 
 private:
@@ -46,6 +47,7 @@ private:
     QVector<Song*>  playlist;
 
     QMediaPlaylist* media_playlist;
+    QSqlDatabase* database;
 
 };
 

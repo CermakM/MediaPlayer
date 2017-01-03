@@ -60,7 +60,7 @@ void DialogEditPlaylist::on_AddToPlaylistButton_clicked()
     QTreeWidgetItem* current_media = ui->treeAlbum->currentItem();
 
     // Check by title if the album / song is in playlist already
-    QList<QTreeWidgetItem*> qlist = ui->treePlaylist->findItems(current_media->text(0), Qt::MatchExactly);
+    QList<QTreeWidgetItem*> qlist = ui->treePlaylist->findItems(current_media->text(0), Qt::MatchExactly | Qt::MatchRecursive);
     if (!qlist.empty()) return;
 
     ui->treePlaylist->addTopLevelItem(current_media->clone());
