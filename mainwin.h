@@ -3,6 +3,7 @@
 
 #include "dialogaddalbum.h"
 #include "dialogeditplaylist.h"
+#include "dialogaddsongs.h"
 #include "playlist.h"
 #include "library.h"
 
@@ -61,6 +62,8 @@ private slots:
 
     void on_EditPlaylistOver(bool b);
 
+
+    void on_actionAddNewSongs_triggered();
 
 private:
     Ui::MainWin *ui;

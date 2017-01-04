@@ -108,7 +108,7 @@
      </layout>
     </item>
     <item row="0" column="0">
-     <widget class="QGroupBox" name="groupBox">
+     <widget class="QGroupBox" name="dropBox">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
@@ -128,7 +128,7 @@
        <enum>Qt::LeftToRight</enum>
       </property>
       <property name="title">
-       <string>My Albums</string>
+       <string>My Library</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
@@ -163,7 +163,7 @@
           <string notr="true">background-color: rgba(255, 255, 255, 0);</string>
          </property>
          <property name="text">
-          <string>Drag here your favourite Albums</string>
+          <string>Drag here your favourite  Albums &amp; Songs</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -192,7 +192,7 @@
      <string>Edit</string>
     </property>
     <addaction name="actionAddNewAlbum"/>
-    <addaction name="actionAddNewSong"/>
+    <addaction name="actionAddNewSongs"/>
     <addaction name="actionEditPlaylist"/>
     <addaction name="actionEditLibrary"/>
    </widget>
@@ -200,24 +200,13 @@
     <property name="title">
      <string>Filter</string>
     </property>
-    <addaction name="actionSearchApp"/>
+    <addaction name="actionSearch"/>
     <addaction name="actionFilters"/>
    </widget>
    <widget class="QMenu" name="menuMusic">
     <property name="title">
      <string>Music</string>
     </property>
-    <widget class="QMenu" name="FavouriteList">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="title">
-      <string>Favourite List</string>
-     </property>
-     <addaction name="actionSongs"/>
-     <addaction name="actionAlbums"/>
-    </widget>
-    <addaction name="FavouriteList"/>
     <addaction name="actionBrowseLibrary"/>
    </widget>
    <widget class="QMenu" name="menuYouTube">
@@ -231,6 +220,7 @@
      <string>Help</string>
     </property>
     <addaction name="actionShortcuts"/>
+    <addaction name="actionAbout"/>
    </widget>
    <addaction name="menuEdit"/>
    <addaction name="menuFilter"/>
@@ -255,9 +245,9 @@
     <string>Ctrl+Shift+E</string>
    </property>
   </action>
-  <action name="actionSearchApp">
+  <action name="actionSearch">
    <property name="text">
-    <string>Search App</string>
+    <string>Search</string>
    </property>
   </action>
   <action name="actionFilters">
@@ -265,24 +255,20 @@
     <string>Filters</string>
    </property>
   </action>
-  <action name="actionSongs">
-   <property name="text">
-    <string>Songs</string>
-   </property>
-  </action>
-  <action name="actionAlbums">
-   <property name="text">
-    <string>Albums</string>
-   </property>
-  </action>
   <action name="actionBrowseLibrary">
    <property name="text">
-    <string>Browse Library</string>
+    <string>Library</string>
    </property>
   </action>
-  <action name="actionAddNewSong">
+  <action name="actionAddNewSongs">
    <property name="text">
-    <string>Add Song</string>
+    <string>Add Songs</string>
+   </property>
+   <property name="toolTip">
+    <string>Add Songs</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
    </property>
   </action>
   <action name="actionAddURL">
@@ -298,6 +284,11 @@
   <action name="actionEditLibrary">
    <property name="text">
     <string>Edit Library</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
    </property>
   </action>
  </widget>

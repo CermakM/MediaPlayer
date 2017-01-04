@@ -17,14 +17,18 @@ MainWin::MainWin(QWidget *parent) :
 
     // Connect shortcuts
     QShortcut* shortcutAddAlbum = new QShortcut(QKeySequence("Ctrl+Shift+A"), this);
+    QShortcut* shortcutAddSongs = new QShortcut(QKeySequence("Ctrl+Shift+S"), this);
     QShortcut* shortcutEditPlaylist = new QShortcut(QKeySequence("Ctrl+Shift+E"), this);
     QShortcut* shortcutPlayButton = new QShortcut(QKeySequence("P"), this);
+    QShortcut* shortcutStopButton = new QShortcut(QKeySequence("S"), this);
     QShortcut* shortcutForwardButton = new QShortcut(QKeySequence(Qt::Key_Right), this);
     QShortcut* shortcutBackwardButton = new QShortcut(QKeySequence(Qt::Key_Left), this);
 
     connect(shortcutAddAlbum, SIGNAL(activated()), this, SLOT(on_actionAddNewAlbum_triggered()));
+    connect(shortcutAddSongs, SIGNAL(activated()), this, SLOT(on_actionAddNewSongs_triggered()));
     connect(shortcutEditPlaylist, SIGNAL(activated()), this, SLOT(on_actionEditPlaylist_triggered()));
     connect(shortcutPlayButton, SIGNAL(activated()), this, SLOT(on_PlayMusicButton_clicked()));
+    connect(shortcutStopButton, SIGNAL(activated()), this, SLOT(on_StopMusicButton_clicked()));
 
     UpdatePlaylist();
 }
@@ -117,6 +121,14 @@ void MainWin::on_actionAddNewAlbum_triggered()
     AlbumBrowser.exec();
 }
 
+void MainWin::on_actionAddNewSongs_triggered()
+{
+    DialogAddSongs SongsBrowser(&library, this);
+    SongsBrowser.setWindowTitle("Add your Songs");
+    SongsBrowser.setModal(true);
+    SongsBrowser.exec();
+}
+
 void MainWin::on_actionEditPlaylist_triggered()
 {
     DialogEditPlaylist EditPlaylist(&library, this);
@@ -134,3 +146,4 @@ void MainWin::on_EditPlaylistOver(bool b) {
     if (b)
         UpdatePlaylist();
 }
+

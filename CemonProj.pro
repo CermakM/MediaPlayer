@@ -10,7 +10,7 @@ QT       += core gui \
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = CemiSec
+TARGET = Musician
 TEMPLATE = app
 
 CONFIG += c++17
@@ -24,7 +24,8 @@ SOURCES += main.cpp\
     dialogaddalbum.cpp \
     dialogeditplaylist.cpp \
     playlist.cpp \
-    library.cpp
+    library.cpp \
+    dialogaddsongs.cpp
 
 HEADERS  += mainwin.h \
     album.h \
@@ -32,11 +33,13 @@ HEADERS  += mainwin.h \
     dialogaddalbum.h \
     dialogeditplaylist.h \
     playlist.h \
-    library.h
+    library.h \
+    dialogaddsongs.h
 
 FORMS    += mainwin.ui \
     dialogaddalbum.ui \
-    dialogeditplaylist.ui
+    dialogeditplaylist.ui \
+    dialogaddsongs.ui
 
 RESOURCES += \
     resource.qrc

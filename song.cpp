@@ -6,17 +6,6 @@ Song::Song() {
 
 }
 
-bool operator== (const Song& s1, const Song& s2) {
-
-    if (s1.getAlbumTitle() == s2.getAlbumTitle()\
-            && s1.getTitle() == s2.getTitle()\
-            && s1.getInterpret() == s2.getInterpret())
-        return true;
-
-    return false;
-}
-
-
 Song::Song(const QString _path, Album* _parent)
 {
     parent = _parent;
@@ -36,6 +25,7 @@ Song::Song(const QString _path, Album* _parent)
     TagLib::String album_string = file.tag()->album();
     TagLib::uint year_uint = file.tag()->year();
 
+
     title = QString::fromStdWString(title_string.toWString());
     interpret = QString::fromStdWString(artist_string.toWString());
     album = QString::fromStdWString(album_string.toWString());
@@ -43,6 +33,11 @@ Song::Song(const QString _path, Album* _parent)
 
     if (album.isEmpty()) album = "-";
     if (interpret.isEmpty()) interpret = "-";
+    if (title_string.isEmpty()) {
+        // if no title extracted - use the filename
+        title = path.right(path.length() - 1 - path.lastIndexOf("/"));
+        title = title.left(title.lastIndexOf("\."));
+    }
 }
 
 Song::Song(const QString& _title, const QString& _path, const QString& _interpret, const QString& _album, const int& _year, bool _inPlaylist)
@@ -56,3 +51,14 @@ Song::Song(const QString& _title, const QString& _path, const QString& _interpre
 
     parent = nullptr;
 }
+
+bool operator== (const Song& s1, const Song& s2) {
+
+    if (s1.getAlbumTitle() == s2.getAlbumTitle()\
+            && s1.getTitle() == s2.getTitle()\
+            && s1.getInterpret() == s2.getInterpret())
+        return true;
+
+    return false;
+}
+

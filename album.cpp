@@ -3,7 +3,7 @@
 Album::Album() {
 
     path = "";
-    title = "Untitled";
+    title = "-";
     interpret = "";
 
     qDebug() << "An empty album has been created.";
@@ -25,7 +25,7 @@ Album::Album(QVector<Song>& _songs)
     interpret = _songs[0].getInterpret();
 
     songs = _songs;
-    number_of_songs = _songs.size();
+
 }
 
 Album::Album(const QString &_path) {
@@ -50,6 +50,19 @@ Album::Album(const QString &_path) {
         //QString song_fname = song.fileName();
         //songs.push_back(Song(song_path, song_fname, song_title, interpret, title));
         songs.push_back(Song(song_path));
-        number_of_songs++;
     }
+}
+
+void Album::setTitle(const QString &_title)
+{
+     title = _title;
+
+     for (Song& song : songs) {
+         song.setAlbumTitle(title);
+     }
+}
+
+bool operator ==(const Album &a1, const Album &a2)
+{
+    return a1.getTitle() == a2.getTitle() && a1.getInterpret() == a2.getInterpret();
 }

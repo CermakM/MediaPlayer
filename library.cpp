@@ -67,6 +67,15 @@ void Library::AddMedia(Album *_album) {
         return;
     }
 
+    // If new database was created, push Untitled album in the front
+    if(albums.empty()) albums.push_back(Album());
+
+    if (_album->getTitle() == "-") {
+        for (Song& song : *(_album->getSongs()))
+            // Untitled songs stored on 0. position of albums
+            albums[0].PushSong(song);
+    }
+
     QSqlQuery query;
     QString table_name = QString("CREATE TABLE IF NOT EXISTS \"%1\" ").arg(_album->getTitle());
     QString create_statement = table_name + "(title TEXT NOT NULL UNIQUE, "
@@ -86,6 +95,7 @@ void Library::AddMedia(Album *_album) {
         return;
     }
 
+    int songs_added = 0;
     for (Song& song : *(_album->getSongs())) {
 
         if (song.is_in_playlist) playlist.AddMedia(&song);
@@ -100,11 +110,20 @@ void Library::AddMedia(Album *_album) {
         query.bindValue(":path", song.getPath());
 
         if (!query.exec()) qDebug() << query.lastError();
+        else songs_added++;
     }
 
     database.close();
 
-    albums.push_back(*_album);
+    if(songs_added != _album->CountSongs()) {
+        Album* current_album = &(albums[albums.indexOf(*_album)]);
+        for (Song& song : *(_album->getSongs())) {
+            if ( !current_album->contains(song))
+                current_album->PushSong(song);
+        }
+    }
+
+    else albums.push_back(*_album);
 }
 
 

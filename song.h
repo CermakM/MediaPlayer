@@ -26,6 +26,8 @@ public:
 
     QString getAlbumTitle() const { return album; }
 
+    void setAlbumTitle(const QString& _album_title) { album = _album_title; }
+
     int getYear() const {return year; }
 
     Album*  getAlbum() { return parent; }

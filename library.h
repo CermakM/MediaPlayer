@@ -25,7 +25,7 @@ public:
 
     void AddMedia(Album* _album);
 
-    void AddMedia(Song* _song);
+    //void AddMedia(Song* _song);
 
     void Load();
 

@@ -27,11 +27,16 @@ public:
 
     QString getInterpret() const { return interpret; }
 
-    void setTitle(const QString& _title) { title = _title; }
+    void setTitle(const QString& _title);
 
+    void setInterpret( const QString& _interpret) { interpret = _interpret; }
     void PushSong(const Song& _song) { songs.push_back(_song); }
 
-    int number_of_songs = 0;
+    int CountSongs() const {return songs.size(); }
+
+    bool contains(Song& _song) { return songs.contains(_song); }
+
+    friend bool operator == (const Album& a1, const Album& a2);
 
 private:
 
