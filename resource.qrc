@@ -1,3 +1,10 @@
 <RCC>
-    <qresource prefix="/icons"/>
+    <qresource prefix="/icons">
+        <file alias="icon_album">Assets/icon_album.png</file>
+        <file alias="icon_backward">Assets/icon_backward.png</file>
+        <file alias="icon_forward">Assets/icon_forward.png</file>
+        <file alias="icon_play">Assets/icon_play_pause.png</file>
+        <file alias="icon_song">Assets/icon_song.png</file>
+        <file alias="icon_empty_folder">Assets/icon_empty_folder.png</file>
+    </qresource>
 </RCC>

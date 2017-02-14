@@ -1,0 +1,35 @@
+#include "dialoglibrary.h"
+#include "ui_dialoglibrary.h"
+
+const int ROWSPAN = 10;
+const int COLCOUNT = 6;
+
+DialogLibrary::DialogLibrary(Library* library, QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::DialogLibrary)
+{
+    ui->setupUi(this);
+
+    
+}
+
+DialogLibrary::~DialogLibrary()
+{
+    delete ui;
+
+}
+
+void DialogLibrary::setIcon(Icon* icon)
+{
+
+}
+
+void DialogLibrary::PositionIcons() {
+
+}
+
+void DialogLibrary::Update() {
+
+    _main_table->resizeColumnsToContents();
+    _main_table->resizeRowsToContents();
+}

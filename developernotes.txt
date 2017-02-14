@@ -1,7 +1,7 @@
 # Developer notes
 
-## Remove a single song belonging to album from playlist
-## Allow dragging albums into main widget
-## Create library class for albums and songs 
+## Allow dragging albums & songs into main widget
+## Create library edit widget
+## Create forw / backward buttons - edit icons of the buttons
 
 

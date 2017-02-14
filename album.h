@@ -9,43 +9,63 @@
 #include <QDebug>
 #include <QString>
 #include <QVector>
+#include <QIcon>
 
 class Album
 {
 public:
     Album();
+    ~Album();
 
-    Album(QVector<Song>& _songs);
+    Album(QVector<Song>& songs);
 
-    Album(const QString& _path);
+    Album(const QString& path);
 
-    QVector<Song>* getSongs() { return &songs; }
+    QVector<Song>* getSongs() { return &_songs; }
 
-    QString getPath() const {return path; }
+    QString getPath() const {return _path; }
 
-    QString getTitle() const { return title; }
+    QString getTitle() const { return _title; }
 
-    QString getInterpret() const { return interpret; }
+    QString getInterpret() const { return _interpret; }
 
-    void setTitle(const QString& _title);
+    QFileInfoList* getIcons() {return &_icons; }
 
-    void setInterpret( const QString& _interpret) { interpret = _interpret; }
-    void PushSong(const Song& _song) { songs.push_back(_song); }
+    void setIcon(QIcon &icon);
 
-    int CountSongs() const {return songs.size(); }
+    void setIcon(const QString& path);
 
-    bool contains(Song& _song) { return songs.contains(_song); }
+    void setIcon(const int& i);
+
+    void SearchForIcons(const QString& path);
+
+    void setTitle(const QString& title);
+
+    void setInterpret( const QString& interpret) { _interpret = interpret; }
+
+    void PushSong(const Song& song) { _songs.push_back(song); }
+
+    int CountSongs() const {return _songs.size(); }
+
+    bool contains(Song& song) { return _songs.contains(song); }
+
+    QIcon* CurrentIcon();
 
     friend bool operator == (const Album& a1, const Album& a2);
 
 private:
 
-    QString path;
-    QString title;
-    QString interpret;
+    QString _path;
+    QString _title;
+    QString _interpret;
 
-    QVector<Song> songs;
+    QVector<Song> _songs;
+    QFileInfoList _icons;
+
+    QIcon _current_icon;
 
 };
+
+Q_DECLARE_METATYPE(Album)
 
 #endif // ALBUM_H

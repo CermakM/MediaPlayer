@@ -15,7 +15,7 @@ class DialogAddSongs : public QDialog
     Q_OBJECT
 
 public:
-    explicit DialogAddSongs(Library* _library, QWidget *parent = 0);
+    explicit DialogAddSongs(Library* library, QWidget *parent = 0);
     ~DialogAddSongs();
 
 private slots:
@@ -28,10 +28,10 @@ private slots:
 private:
     Ui::DialogAddSongs *ui;
 
-    Library* library;
+    Library* _library;
 
 
-    QVector<Song> song_vector;
+    QVector<Song> _song_vector;
 };
 
 #endif // DIALOGADDSONGS_H

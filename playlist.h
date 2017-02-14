@@ -13,41 +13,41 @@
 class Playlist
 {
 public:
-    Playlist(QSqlDatabase* _database, QObject* parent = Q_NULLPTR);
+    Playlist(QSqlDatabase* database, QObject* parent = Q_NULLPTR);
 
-    bool AddMedia(Album* _album);
+    bool AddMedia(Album* album);
 
     bool AddMedia(Song*);
 
-    bool RemoveMedia(Album* _album);
+    bool RemoveMedia(Album* album);
 
-    bool RemoveMedia(Song* _song);
+    bool RemoveMedia(Song* song);
 
     Song* CurrentMedia();
 
-    QMediaPlaylist* MediaPlaylist() const { return media_playlist; }
+    QMediaPlaylist* MediaPlaylist() const { return _media_playlist; }
 
     void setCurrentIndex(int index) {
-        media_playlist->setCurrentIndex(index);
+        _media_playlist->setCurrentIndex(index);
     }
 
     void Clear();
 
-    bool isEmpty() const { return playlist.isEmpty(); }
+    bool isEmpty() const { return _playlist.isEmpty(); }
 
     void Update();
 
-    int Size() const { return playlist.size(); }
+    int Size() const { return _playlist.size(); }
 
     Song* operator[] (int i);
 
 
 private:
 
-    QVector<Song*>  playlist;
+    QVector<Song*>  _playlist;
 
-    QMediaPlaylist* media_playlist;
-    QSqlDatabase* database;
+    QMediaPlaylist* _media_playlist;
+    QSqlDatabase* _database;
 
 };
 

@@ -4,6 +4,7 @@
 #include "dialogaddalbum.h"
 #include "dialogeditplaylist.h"
 #include "dialogaddsongs.h"
+#include "dialogeditlibrary.h"
 #include "playlist.h"
 #include "library.h"
 
@@ -62,17 +63,22 @@ private slots:
 
     void on_EditPlaylistOver(bool b);
 
-
     void on_actionAddNewSongs_triggered();
+
+    void on_ButtonForward_clicked();
+
+    void on_ButtonBackward_clicked();
+
+    void on_actionEditLibrary_triggered();
 
 private:
     Ui::MainWin *ui;
 
-    QMediaPlayer* media_player;
+    QMediaPlayer* _media_player;
 
-    Playlist* playlist;
+    Playlist* _playlist;
 
-    Library library;
+    Library _library;
 };
 
 #endif // MAINWIN_H

@@ -14,25 +14,25 @@ class Song
 public:
     Song();
 
-    explicit Song(const QString _path, Album *_parent = nullptr);
+    explicit Song(const QString path, Album *parent = nullptr);
 
-    Song(const QString &_title, const QString &_path, const QString &_interpret = "-", const QString &_album = "-", const int& year = 0, bool inPlaylist = false);
+    Song(const QString &title, const QString &path, const QString &interpret = "-", const QString &album = "-", const int& year = 0, bool inPlaylist = false);
 
-    QString getPath() const { return path; }
+    QString getPath() const { return _path; }
 
-    QString getTitle() const { return title; }
+    QString getTitle() const { return _title; }
 
-    QString getInterpret() const { return interpret; }
+    QString getInterpret() const { return _interpret; }
 
-    QString getAlbumTitle() const { return album; }
+    QString getAlbumTitle() const { return _album; }
 
-    void setAlbumTitle(const QString& _album_title) { album = _album_title; }
+    void setAlbumTitle(const QString& album_title) { _album = album_title; }
 
-    int getYear() const {return year; }
+    int getYear() const {return _year; }
 
-    Album*  getAlbum() { return parent; }
+    Album*  getAlbum() { return _parent; }
 
-    void setParent(Album* const _parent) { parent = _parent; }
+    void setParent(Album* const parent) { _parent = parent; }
 
     bool is_in_playlist = false;
 
@@ -40,15 +40,17 @@ public:
 
 private:
 
-    QString path;
+    QString _path;
 
-    QString title;
-    QString interpret;
-    QString album;
-    int year;
+    QString _title;
+    QString _interpret;
+    QString _album;
+    int _year;
 
-    Album* parent;
+    Album* _parent;
 
 };
+
+Q_DECLARE_METATYPE(Song)
 
 #endif // SONG_H

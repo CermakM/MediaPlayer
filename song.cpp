@@ -6,50 +6,50 @@ Song::Song() {
 
 }
 
-Song::Song(const QString _path, Album* _parent)
+Song::Song(const QString path, Album* parent)
 {
-    parent = _parent;
-    path = _path;
+    _parent = parent;
+    _path = path;
 
     qDebug() << "Path of the song about to be add: " << path;
 
-    if(path.isEmpty()) {
+    if(_path.isEmpty()) {
         qDebug() << "Empty song has been created";
         return;
     }
 
     // read the tags from the mp3 file
-    TagLib::FileRef file(path.toUtf8());
+    TagLib::FileRef file(_path.toUtf8());
     TagLib::String title_string = file.tag()->title();
     TagLib::String artist_string = file.tag()->artist();
     TagLib::String album_string = file.tag()->album();
     TagLib::uint year_uint = file.tag()->year();
 
 
-    title = QString::fromStdWString(title_string.toWString());
-    interpret = QString::fromStdWString(artist_string.toWString());
-    album = QString::fromStdWString(album_string.toWString());
-    year = year_uint;
+    _title = QString::fromStdWString(title_string.toWString());
+    _interpret = QString::fromStdWString(artist_string.toWString());
+    _album = QString::fromStdWString(album_string.toWString());
+    _year = year_uint;
 
-    if (album.isEmpty()) album = "-";
-    if (interpret.isEmpty()) interpret = "-";
+    if (_album.isEmpty()) _album = "-";
+    if (_interpret.isEmpty()) _interpret = "-";
     if (title_string.isEmpty()) {
         // if no title extracted - use the filename
-        title = path.right(path.length() - 1 - path.lastIndexOf("/"));
-        title = title.left(title.lastIndexOf("\."));
+        _title = _path.right(_path.length() - 1 - _path.lastIndexOf("/"));
+        _title = _title.left(_title.lastIndexOf("\."));
     }
 }
 
-Song::Song(const QString& _title, const QString& _path, const QString& _interpret, const QString& _album, const int& _year, bool _inPlaylist)
+Song::Song(const QString& title, const QString& path, const QString& interpret, const QString& album, const int& year, bool inPlaylist)
 {
-    title = _title;
-    path = _path;
-    interpret = _interpret;
-    album = _album;
-    year = _year;
-    is_in_playlist = _inPlaylist;
+    _title = title;
+    _path = path;
+    _interpret = interpret;
+    _album = album;
+    _year = year;
+    is_in_playlist = inPlaylist;
 
-    parent = nullptr;
+    _parent = nullptr;
 }
 
 bool operator== (const Song& s1, const Song& s2) {

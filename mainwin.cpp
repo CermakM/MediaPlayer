@@ -4,21 +4,22 @@
 MainWin::MainWin(QWidget *parent) :  
     QMainWindow(parent),
     ui(new Ui::MainWin),
-    library(parent)
+    _library(parent)
 {
     ui->setupUi(this);
-    media_player = new QMediaPlayer(this);
-    playlist = library.getPlaylist();
+    _media_player = new QMediaPlayer(this);
+    _playlist = _library.getPlaylist();
 
     // Connect Signals and slots
-    connect(media_player, &QMediaPlayer::positionChanged, this, &MainWin::on_PositionChange);
-    connect(media_player, &QMediaPlayer::durationChanged, this, &MainWin::on_DurationChange);
-    connect(playlist->MediaPlaylist(), SIGNAL(currentIndexChanged(int)), this, SLOT(on_EndOfSong()));
+    connect(_media_player, &QMediaPlayer::positionChanged, this, &MainWin::on_PositionChange);
+    connect(_media_player, &QMediaPlayer::durationChanged, this, &MainWin::on_DurationChange);
+    connect(_playlist->MediaPlaylist(), SIGNAL(currentIndexChanged(int)), this, SLOT(on_EndOfSong()));
 
     // Connect shortcuts
-    QShortcut* shortcutAddAlbum = new QShortcut(QKeySequence("Ctrl+Shift+A"), this);
-    QShortcut* shortcutAddSongs = new QShortcut(QKeySequence("Ctrl+Shift+S"), this);
-    QShortcut* shortcutEditPlaylist = new QShortcut(QKeySequence("Ctrl+Shift+E"), this);
+    QShortcut* shortcutAddAlbum = new QShortcut(QKeySequence("Ctrl+A"), this);
+    QShortcut* shortcutAddSongs = new QShortcut(QKeySequence("Ctrl+S"), this);
+    QShortcut* shortcutEditPlaylist = new QShortcut(QKeySequence("Ctrl+P"), this);
+    QShortcut* shortcutEditLibrary = new QShortcut(QKeySequence("Ctrl+L"), this);
     QShortcut* shortcutPlayButton = new QShortcut(QKeySequence("P"), this);
     QShortcut* shortcutStopButton = new QShortcut(QKeySequence("S"), this);
     QShortcut* shortcutForwardButton = new QShortcut(QKeySequence(Qt::Key_Right), this);
@@ -27,6 +28,7 @@ MainWin::MainWin(QWidget *parent) :
     connect(shortcutAddAlbum, SIGNAL(activated()), this, SLOT(on_actionAddNewAlbum_triggered()));
     connect(shortcutAddSongs, SIGNAL(activated()), this, SLOT(on_actionAddNewSongs_triggered()));
     connect(shortcutEditPlaylist, SIGNAL(activated()), this, SLOT(on_actionEditPlaylist_triggered()));
+    connect(shortcutEditLibrary, SIGNAL(activated()), this, SLOT(on_actionEditLibrary_triggered()));
     connect(shortcutPlayButton, SIGNAL(activated()), this, SLOT(on_PlayMusicButton_clicked()));
     connect(shortcutStopButton, SIGNAL(activated()), this, SLOT(on_StopMusicButton_clicked()));
 
@@ -40,11 +42,11 @@ MainWin::~MainWin()
 
 void MainWin::on_EndOfSong() {
 
-    if (playlist->isEmpty()) {
+    if (_playlist->isEmpty()) {
         return;
     }
 
-    Song* song = playlist->CurrentMedia();
+    Song* song = _playlist->CurrentMedia();
 
     if (song == nullptr) return;
 
@@ -57,15 +59,15 @@ void MainWin::UpdatePlaylist() {
     ui->CurrentSongLine->clear();
     ui->CurrentAlbumLine->clear();
 
-    media_player->stop();
+    _media_player->stop();
 
-    playlist->Update();
+    _playlist->Update();
 
-    qDebug() << "Actual media player status: " << playlist->Size();
+    qDebug() << "Actual media player status: " << _playlist->Size();
 
-    playlist->setCurrentIndex(0);
+    _playlist->setCurrentIndex(0);
 
-    media_player->setPlaylist(playlist->MediaPlaylist());
+    _media_player->setPlaylist(_playlist->MediaPlaylist());
 }
 
 void MainWin::on_VolumeSlider_valueChanged(int value)
@@ -73,18 +75,18 @@ void MainWin::on_VolumeSlider_valueChanged(int value)
 
     if (!ui->VolumeSlider->value()) {
         qInfo("The volume is now off");
-        media_player->pause();
+        _media_player->pause();
         return;
     }
 
-    media_player->setVolume(value);
+    _media_player->setVolume(value);
 
 }
 
 
 void MainWin::on_ProgressSlider_sliderMoved(int position)
 {
-    media_player->setPosition(position);
+    _media_player->setPosition(position);
 }
 
 
@@ -102,19 +104,19 @@ void MainWin::on_DurationChange(qint64 position)
 
 void MainWin::on_PlayMusicButton_clicked()
 {
-    media_player->state() == QMediaPlayer::PlayingState ?
-    media_player->pause() : media_player->play();
+    _media_player->state() == QMediaPlayer::PlayingState ?
+    _media_player->pause() : _media_player->play();
 }
 
 void MainWin::on_StopMusicButton_clicked()
 {
-    media_player->stop();
+    _media_player->stop();
 }
 
 
 void MainWin::on_actionAddNewAlbum_triggered()
 {
-    DialogAddAlbum AlbumBrowser(&library, this);
+    DialogAddAlbum AlbumBrowser(&_library, this);
     connect(&AlbumBrowser, SIGNAL(Change(bool)), this, SLOT(on_EditPlaylistOver(bool)));
     AlbumBrowser.setWindowTitle("Add your Album");
     AlbumBrowser.setModal(true);
@@ -123,7 +125,7 @@ void MainWin::on_actionAddNewAlbum_triggered()
 
 void MainWin::on_actionAddNewSongs_triggered()
 {
-    DialogAddSongs SongsBrowser(&library, this);
+    DialogAddSongs SongsBrowser(&_library, this);
     SongsBrowser.setWindowTitle("Add your Songs");
     SongsBrowser.setModal(true);
     SongsBrowser.exec();
@@ -131,7 +133,7 @@ void MainWin::on_actionAddNewSongs_triggered()
 
 void MainWin::on_actionEditPlaylist_triggered()
 {
-    DialogEditPlaylist EditPlaylist(&library, this);
+    DialogEditPlaylist EditPlaylist(&_library, this);
 
     connect(&EditPlaylist, &DialogEditPlaylist::Change, this, &MainWin::on_EditPlaylistOver);
 
@@ -141,9 +143,29 @@ void MainWin::on_actionEditPlaylist_triggered()
     EditPlaylist.exec();
 }
 
+void MainWin::on_actionEditLibrary_triggered()
+{
+    DialogEditLibrary EditLibrary(&_library, this);
+
+    EditLibrary.setModal(true);
+    EditLibrary.exec();
+}
+
 void MainWin::on_EditPlaylistOver(bool b) {
 
     if (b)
         UpdatePlaylist();
 }
+
+
+void MainWin::on_ButtonForward_clicked()
+{
+    _media_player->playlist()->next();
+}
+
+void MainWin::on_ButtonBackward_clicked()
+{
+    _media_player->playlist()->previous();
+}
+
 

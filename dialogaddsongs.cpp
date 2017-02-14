@@ -1,13 +1,13 @@
 #include "dialogaddsongs.h"
 #include "ui_dialogaddsongs.h"
 
-DialogAddSongs::DialogAddSongs(Library* _library, QWidget *parent) :
+DialogAddSongs::DialogAddSongs(Library* library, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DialogAddSongs)
 {
     ui->setupUi(this);
 
-    library = _library;
+    _library = library;
 
     setWindowTitle("Add your Songs");
 }
@@ -25,7 +25,7 @@ void DialogAddSongs::on_BrowseButton_clicked()
 
     for (QString& file_path : files_to_add) {
         Song song(file_path);
-        song_vector.push_back(song);
+        _song_vector.push_back(song);
 
         QTreeWidgetItem* itm = new QTreeWidgetItem(ui->treeWidget);
         itm->setText(0, song.getTitle());
@@ -44,18 +44,18 @@ void DialogAddSongs::on_RemoveButton_clicked()
     int index = ui->treeWidget->indexOfTopLevelItem(ui->treeWidget->currentItem());
     delete ui->treeWidget->currentItem();
 
-    song_vector.removeAt(index);
+    _song_vector.removeAt(index);
 }
 
 
 void DialogAddSongs::on_buttonBox_accepted()
 {
-    for(Song& song : song_vector) {
+    for(Song& song : _song_vector) {
         Album empty_album;
         empty_album.PushSong(song);
         empty_album.setInterpret(song.getInterpret());
         empty_album.setTitle(song.getAlbumTitle());
 
-        library->AddMedia(&empty_album);
+        _library->AddMedia(&empty_album);
     }
 }

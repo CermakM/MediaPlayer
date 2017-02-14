@@ -6,6 +6,7 @@ DialogEditPlaylist::DialogEditPlaylist(QWidget *parent) :
     ui(new Ui::DialogEditPlaylist)
 {
     ui->setupUi(this);
+    _library = nullptr;
 }
 
 DialogEditPlaylist::~DialogEditPlaylist()
@@ -13,12 +14,12 @@ DialogEditPlaylist::~DialogEditPlaylist()
     delete ui;
 }
 
-DialogEditPlaylist::DialogEditPlaylist(Library* _library, QWidget *parent) :
+DialogEditPlaylist::DialogEditPlaylist(Library* library, QWidget *parent) :
     QDialog(parent), ui(new Ui::DialogEditPlaylist)
 {
     ui->setupUi(this);
 
-    library = _library;
+    _library = library;
 
     LoadLibrary();
 }
@@ -26,7 +27,7 @@ DialogEditPlaylist::DialogEditPlaylist(Library* _library, QWidget *parent) :
 
 void DialogEditPlaylist::LoadLibrary() {
 
-    for (Album& temp_album : *(library->Albums())) {
+    for (Album& temp_album : *(_library->Albums())) {
         QTreeWidgetItem* topItm = new QTreeWidgetItem(ui->treeAlbum);
         topItm->setText(0, temp_album.getTitle());
         topItm->setText(1, temp_album.getInterpret());
@@ -55,7 +56,7 @@ void DialogEditPlaylist::LoadLibrary() {
     }
 }
 
-void DialogEditPlaylist::on_AddToPlaylistButton_clicked()
+void DialogEditPlaylist::on_AddButton_clicked()
 {
     QTreeWidgetItem* current_media = ui->treeAlbum->currentItem();
 
@@ -65,84 +66,70 @@ void DialogEditPlaylist::on_AddToPlaylistButton_clicked()
 
     ui->treePlaylist->addTopLevelItem(current_media->clone());
 
-    new_media.push_back(current_media);
+    _new_media.push_back(current_media);
 }
 
-void DialogEditPlaylist::on_RemoveFromPlaylistButton_clicked()
+void DialogEditPlaylist::on_RemoveButton_clicked()
 {
    QTreeWidgetItem* current_item = ui->treePlaylist->currentItem();
    current_item->setHidden(true);
 
-   if (new_media.contains(current_item)) {
-       new_media.removeOne(current_item);
+   if (_new_media.contains(current_item)) {
+       _new_media.removeOne(current_item);
        delete current_item;
        return;
    }
 
-   items_to_remove.push_back(current_item);
+   _items_to_remove.push_back(current_item);
 }
 
 
 void DialogEditPlaylist::on_buttonBox_accepted()
 {
     // If no change - return
-    if ( new_media.empty() && items_to_remove.empty()) return;
-
-//    /
-//    /
-//    /     SQL handling
-//    /
-//    /
-//    /
+    if ( _new_media.empty() && _items_to_remove.empty()) return;
 
     // Add new media to playlist
-    for (QTreeWidgetItem* itm : new_media) {
+    for (QTreeWidgetItem* itm : _new_media) {
         if(itm->childCount()) {
             QString album_title = itm->text(0);
-            Album* album = library->getAlbumByTitle(album_title);
+            Album* album = _library->getAlbumByTitle(album_title);
 
             qDebug() << "Add to playlist... \nAlbum to be added: " << album->getTitle();
 
-            library->getPlaylist()->AddMedia(album);
+            _library->getPlaylist()->AddMedia(album);
         }
         else {
             QString song_title = itm->text(0);
-            Song* song = library->getSongByTitle(song_title);
+            Song* song = _library->getSongByTitle(song_title);
 
             qDebug() << "Add to playlist... \nSong to be added:" << song->getTitle();
 
-            library->getPlaylist()->AddMedia(song);
+            _library->getPlaylist()->AddMedia(song);
         }
     }
 
     // Remove selected items from playlist
 
-    for(QTreeWidgetItem* itm : items_to_remove) {
+    for(QTreeWidgetItem* itm : _items_to_remove) {
 
         // Check if song has been selected or whole album
         if (!itm->childCount()) {
-            Song* song_to_remove = library->getSongByTitle(itm->text(0));
+            Song* song_to_remove = _library->getSongByTitle(itm->text(0));
             //if (song_to_remove->is_in_playlist)
-                library->getPlaylist()->RemoveMedia(song_to_remove);
+                _library->getPlaylist()->RemoveMedia(song_to_remove);
         }
         else {
-            Album* album_to_remove = library->getAlbumByTitle(itm->text(0));
+            Album* album_to_remove = _library->getAlbumByTitle(itm->text(0));
 
             qDebug() << "Item to be removed: " << album_to_remove->getTitle();
 
-            library->getPlaylist()->RemoveMedia(album_to_remove);
+            _library->getPlaylist()->RemoveMedia(album_to_remove);
 
 
         }
         delete itm;
     }
-
-//    /
-//    /
-//    /     SQL handling
-//    /
-//    /
-//    /
 
     emit Change(true);
 }

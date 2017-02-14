@@ -25,7 +25,9 @@ SOURCES += main.cpp\
     dialogeditplaylist.cpp \
     playlist.cpp \
     library.cpp \
-    dialogaddsongs.cpp
+    dialogaddsongs.cpp \
+    icon.cpp \
+    dialogeditlibrary.cpp
 
 HEADERS  += mainwin.h \
     album.h \
@@ -34,12 +36,15 @@ HEADERS  += mainwin.h \
     dialogeditplaylist.h \
     playlist.h \
     library.h \
-    dialogaddsongs.h
+    dialogaddsongs.h \
+    icon.h \
+    dialogeditlibrary.h
 
 FORMS    += mainwin.ui \
     dialogaddalbum.ui \
     dialogeditplaylist.ui \
-    dialogaddsongs.ui
+    dialogaddsongs.ui \
+    dialogeditlibrary.ui
 
 RESOURCES += \
     resource.qrc

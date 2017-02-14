@@ -1,8 +1,8 @@
 #include "library.h"
 
-Library::Library(QWidget *_parent) : playlist(&database)
+Library::Library(QWidget *parent) : _playlist(&_database)
 {
-    parent = _parent;
+    _parent = parent;
 
     Load();
 
@@ -17,18 +17,20 @@ Library::~Library()
 
 void Library::Load()
 {
-    database = QSqlDatabase::addDatabase("QSQLITE");
-    database.setDatabaseName("Media/media.sqlite");
-    if (!database.open()) {
-        qDebug() << database.lastError();
+    _database = QSqlDatabase::addDatabase("QSQLITE");
+    _database.setDatabaseName("Media/media.sqlite");
+    if (!_database.open()) {
+        qDebug() << _database.lastError();
         return;
     }
 
-    QStringList tableList = database.tables();
+    QStringList tableList = _database.tables();
 
     for (QString& table : tableList) {
 
-        QSqlQuery query("select * from '"+table+"'");
+        QSqlQuery query("SELECT * FROM '"+table+"'");
+
+        query.exec();
 
         QString path, title, interpret, album;
         int year;
@@ -53,31 +55,31 @@ void Library::Load()
         Album new_album(songs);
         new_album.setTitle(table);
 
-        albums.push_back(new_album);
+        _albums.push_back(new_album);
     }
 
-    database.close();
+    _database.close();
 }
 
 
-void Library::AddMedia(Album *_album) {
+void Library::AddMedia(Album *album) {
 
-    if(!database.open()) {
-        qDebug() << "Database has not been opened: " << database.lastError();
+    if(!_database.open()) {
+        qDebug() << "Database has not been opened: " << _database.lastError();
         return;
     }
 
     // If new database was created, push Untitled album in the front
-    if(albums.empty()) albums.push_back(Album());
+    if(_albums.empty()) _albums.push_back(Album());
 
-    if (_album->getTitle() == "-") {
-        for (Song& song : *(_album->getSongs()))
+    if (album->getTitle() == "-") {
+        for (Song& song : *(album->getSongs()))
             // Untitled songs stored on 0. position of albums
-            albums[0].PushSong(song);
+            _albums[0].PushSong(song);
     }
 
     QSqlQuery query;
-    QString table_name = QString("CREATE TABLE IF NOT EXISTS \"%1\" ").arg(_album->getTitle());
+    QString table_name = QString("CREATE TABLE IF NOT EXISTS \"%1\" ").arg(album->getTitle());
     QString create_statement = table_name + "(title TEXT NOT NULL UNIQUE, "
                                             "interpret TEXT, "
                                             "album TEXT, "
@@ -96,11 +98,11 @@ void Library::AddMedia(Album *_album) {
     }
 
     int songs_added = 0;
-    for (Song& song : *(_album->getSongs())) {
+    for (Song& song : *(album->getSongs())) {
 
-        if (song.is_in_playlist) playlist.AddMedia(&song);
+        if (song.is_in_playlist) _playlist.AddMedia(&song);
 
-        query.prepare("INSERT INTO '"+_album->getTitle()+"' (title, interpret, album, year, inPlaylist, path) "
+        query.prepare("INSERT INTO '"+album->getTitle()+"' (title, interpret, album, year, inPlaylist, path) "
                                                          "VALUES (:title, :interpret, :album, :year, :inPlaylist, :path)");
         query.bindValue(":title", song.getTitle());
         query.bindValue(":interpret", song.getInterpret());
@@ -113,36 +115,36 @@ void Library::AddMedia(Album *_album) {
         else songs_added++;
     }
 
-    database.close();
+    _database.close();
 
-    if(songs_added != _album->CountSongs()) {
-        Album* current_album = &(albums[albums.indexOf(*_album)]);
-        for (Song& song : *(_album->getSongs())) {
+    if(songs_added != album->CountSongs()) {
+        Album* current_album = &(_albums[_albums.indexOf(*album)]);
+        for (Song& song : *(album->getSongs())) {
             if ( !current_album->contains(song))
                 current_album->PushSong(song);
         }
     }
 
-    else albums.push_back(*_album);
+    else _albums.push_back(*album);
 }
 
 
 void Library::SetupPlaylist()
 {
-    for (Album& album : albums) {
+    for (Album& album : _albums) {
         for(Song& song : *(album.getSongs()))
-            if (song.is_in_playlist) playlist.AddMedia(&song);
+            if (song.is_in_playlist) _playlist.AddMedia(&song);
     }
 
 }
 
 
-Song* Library::getSongByTitle(const QString & _title)
+Song* Library::getSongByTitle(const QString & title)
 {
     Song* song_ptr = nullptr;
-    for(Album& album : albums) {
+    for(Album& album : _albums) {
         for( Song& song : *(album.getSongs())) {
-            if ( song.getTitle() == _title) {
+            if ( song.getTitle() == title) {
                 song_ptr = &song;
                 qDebug() << "Song found: " << song.getTitle() << " | Album: " << song.getAlbumTitle();
                 return song_ptr;
@@ -153,11 +155,11 @@ Song* Library::getSongByTitle(const QString & _title)
     return song_ptr;
 }
 
-Album* Library::getAlbumByTitle(const QString & _title)
+Album* Library::getAlbumByTitle(const QString & title)
 {
     Album* album_ptr = nullptr;
-    for (Album& album : albums) {
-        if ( album.getTitle() == _title)
+    for (Album& album : _albums) {
+        if ( album.getTitle() == title)
             album_ptr = &album;
     }
 
@@ -165,9 +167,9 @@ Album* Library::getAlbumByTitle(const QString & _title)
 }
 
 
-bool Library::isSong(const QString & _path)
+bool Library::isSong(const QString & path)
 {
-    QFileInfo fi(_path);
+    QFileInfo fi(path);
 
     if (fi.isFile()) {
         QString suffix = fi.suffix();
@@ -180,10 +182,10 @@ bool Library::isSong(const QString & _path)
 }
 
 
-bool Library::isAlbum(const QString & _path)
+bool Library::isAlbum(const QString & path)
 {
 
-    QDir dir(_path);
+    QDir dir(path);
 
     QStringList filters;
     filters << "*.mp3";

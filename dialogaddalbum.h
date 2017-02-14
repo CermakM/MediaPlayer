@@ -41,9 +41,9 @@ signals:
 private:
     Ui::DialogAddAlbum *ui;
 
-    bool addToPlaylist;
+    bool _addToPlaylist;
 
-    Library* library;
+    Library* _library;
 };
 
 #endif // DIALOGADDALBUM_H

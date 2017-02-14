@@ -18,12 +18,12 @@ class Library
 {
 public:
 
-    Library(QWidget* _parent);
+    Library(QWidget* parent);
     ~Library();
 
     void Clear();
 
-    void AddMedia(Album* _album);
+    void AddMedia(Album* album);
 
     //void AddMedia(Song* _song);
 
@@ -31,30 +31,30 @@ public:
 
     void SetupPlaylist();
 
-    QVector<Album>* Albums() {return &albums; }
+    QVector<Album>* Albums() {return &_albums; }
 
-    Song* getSongByTitle(const QString & _title);
+    Song* getSongByTitle(const QString & title);
 
-    Album* getAlbumByTitle(const QString & _title);
+    Album* getAlbumByTitle(const QString & title);
 
-    Playlist* getPlaylist() { return &playlist; }
+    Playlist* getPlaylist() { return &_playlist; }
 
-    int CountAlbums() const { return albums.size(); }
+    int CountAlbums() const { return _albums.size(); }
 
-    bool isSong(const QString& _path);
+    bool isSong(const QString& path);
 
-    bool isAlbum(const QString& _path);
+    bool isAlbum(const QString& path);
 
 
 private:
 
-    QSqlDatabase database;
+    QSqlDatabase _database;
 
-    QWidget* parent;
+    QWidget* _parent;
 
-    Playlist playlist;
+    Playlist _playlist;
 
-    QVector<Album> albums;
+    QVector<Album> _albums;
 
 };
 

@@ -1,0 +1,37 @@
+#ifndef DIALOGLIBRARY_H
+#define DIALOGLIBRARY_H
+
+#include "library.h"
+#include "icon.h"
+
+#include <QDialog>
+#include <QAction>
+#include <QGridLayout>
+#include <QTableWidget>
+#include <QStandardItemModel>
+
+namespace Ui {
+class DialogLibrary;
+}
+
+class DialogLibrary : public QDialog
+{
+    Q_OBJECT
+
+public:
+    explicit DialogLibrary(Library* _library, QWidget *parent = 0);
+    ~DialogLibrary();
+
+
+public slots:
+    void Update();
+
+private:
+
+    Ui::DialogLibrary *ui;
+
+    Library* _library;
+    
+};
+
+#endif // DIALOGLIBRARY_H

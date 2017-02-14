@@ -7,7 +7,8 @@ DialogAddAlbum::DialogAddAlbum(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    addToPlaylist = false;
+    _library = nullptr;
+    _addToPlaylist = false;
 
 }
 
@@ -17,15 +18,15 @@ DialogAddAlbum::~DialogAddAlbum()
 }
 
 
-DialogAddAlbum::DialogAddAlbum(Library *_library, QWidget *parent) :
+DialogAddAlbum::DialogAddAlbum(Library *library, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DialogAddAlbum)
 {
     ui->setupUi(this);
 
-    addToPlaylist = false;
+    _addToPlaylist = false;
 
-    library = _library;
+    _library = library;
 
 }
 
@@ -39,7 +40,7 @@ void DialogAddAlbum::on_buttonBox_accepted()
 
     Album newAlbum (pathToAdd);
 
-    if(addToPlaylist) {
+    if(_addToPlaylist) {
         for (Song& song : *(newAlbum.getSongs())) {
             song.is_in_playlist = true;
         }
@@ -49,7 +50,7 @@ void DialogAddAlbum::on_buttonBox_accepted()
         newAlbum.setTitle(title);
     }
 
-    library->AddMedia(&newAlbum);
+    _library->AddMedia(&newAlbum);
 
     qInfo("The new album has been added");
 
@@ -65,6 +66,6 @@ void DialogAddAlbum::on_BrowseButton_clicked()
 
 void DialogAddAlbum::on_checkBoxAddToPlaylist_toggled(bool checked)
 {
-    addToPlaylist = checked;
+    _addToPlaylist = checked;
     // ui->checkBoxAddToPlaylist->isChecked() ? addToPlaylist = true : addToPlaylist = false;
 }
