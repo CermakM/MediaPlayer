@@ -1,0 +1,35 @@
+#include "iwidget.h"
+
+IconLayout::IconLayout(QWidget *parent)
+{
+    _main_layout = new QHBoxLayout(parent);
+
+    _icon = icon;
+    _icon->setParent(_main_layout);
+
+    QString icon_title = '&' + icon->getTitle();
+    _icon_title_label = new QLabel(icon_title, _main_layout);
+    _icon_title_label->setStyleSheet("border-radius: 3px;");
+
+    QObject::connect(_icon, SIGNAL(clicked()), this, SLOT(on_clicked()));
+    QObject::connect(_icon, SIGNAL(double_clicked()), this, SLOT(on_doubleClicked()));
+    QObject::connect(_icon, SIGNAL(pressed(bool)), this, SLOT(on_pressed(bool)));
+
+    _icon->setBuddy(_icon_title_label);
+}
+
+void IconLayout::on_clicked() {
+
+    _icon_title_label->setFocus();
+    _icon_title_label->raise();
+}
+
+void IconLayout::on_doubleClicked()
+{
+
+}
+
+void IconLayout::on_pressed(bool icon_pressed)
+{
+
+}

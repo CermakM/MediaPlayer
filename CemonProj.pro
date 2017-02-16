@@ -27,7 +27,9 @@ SOURCES += main.cpp\
     library.cpp \
     dialogaddsongs.cpp \
     icon.cpp \
-    dialogeditlibrary.cpp
+    dialogeditlibrary.cpp \
+    iwidget.cpp \
+    idelegate.cpp
 
 HEADERS  += mainwin.h \
     album.h \
@@ -38,7 +40,9 @@ HEADERS  += mainwin.h \
     library.h \
     dialogaddsongs.h \
     icon.h \
-    dialogeditlibrary.h
+    dialogeditlibrary.h \
+    iwidget.h \
+    idelegate.h
 
 FORMS    += mainwin.ui \
     dialogaddalbum.ui \

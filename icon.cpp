@@ -1,150 +1,91 @@
 #include "icon.h"
 
-const QSize MAXSIZE = QSize(100, 100);
-const QSize MINSIZE = QSize(35, 35);
-const QSize DEFSIZE = QSize(50, 50);
-
-Icon::Icon(QWidget *parent) : QWidget(parent) {
+template <class T> Icon<T>::Icon(QWidget* parent) : QLabel(parent) {
 
     _pixmap = new QPixmap(":/icons/icon_empty_folder");
-    _icon = new QIcon();
-    _action = new QAction();
 
     qDebug() << "Invalid or unspecified media passed to Icon constructor";
     qDebug() << "Empty folder will be created";
 
-    _icon_title = "Untitled";
-    _path_to_media = "";
+    _path_to_media = "Unspecified";
+    _media_ptr = nullptr;
 
-    _icon->addPixmap(*_pixmap);
-
-    CreateIconLabel();
-    CreateTitleLabel();
-    CreateLayout();
-    CreateWidget();
-
+    CreateLabel(_pixmap);
 }
 
-Icon::Icon(Album *media, QWidget *parent) : QWidget(parent)
-{
-    _icon = new QIcon();
-    _action = new QAction();
-
+template<> Icon<Album>::Icon (Album *media, QWidget *parent) : QLabel(parent) {
     _media_ptr = media;
-
     Album* album_ptr = media;
 
-    if(album_ptr->CurrentIcon() != nullptr) {
+    if(album_ptr->CurrentIcon()) {
         QString file_path = album_ptr->getIcons()->front().absoluteFilePath();
         _pixmap = new QPixmap(file_path);
-        _icon->addPixmap(*_pixmap);
     }
     else {
         _pixmap = new QPixmap(":/icons/icon_album");
-        _icon->addPixmap(*_pixmap);
     }
 
-    _icon_title = media->getTitle();
-    _path_to_media = media->getPath();
+    _path_to_media = album_ptr->getPath();
 
-    CreateIconLabel();
-    CreateTitleLabel();
-    CreateLayout();
-    CreateWidget();
-
+    CreateLabel(_pixmap);
 }
 
-Icon::Icon(Song *media, QWidget *parent) : QWidget(parent){
-
-    _pixmap = new QPixmap(":/icons/icon_song");
-    _icon = new QIcon();
-    _action = new QAction();
+template<> Icon<Song>::Icon(Song *media, QWidget *parent) : QLabel(parent) {
 
     _media_ptr = media;
-
     Song* song_ptr = media;
 
-    _icon->addPixmap(*_pixmap);
+    _pixmap = new QPixmap(":/icons/icon_song");
 
-    _icon_title = song_ptr->getTitle();
+    _in_playlist = song_ptr->is_in_playlist;
+
     _path_to_media = song_ptr->getPath();
 
-    CreateIconLabel();
-    CreateTitleLabel();
-    CreateLayout();
-    CreateWidget();
-
+    CreateLabel(_pixmap);
 }
 
 
-Icon::~Icon() {
+template<class T> Icon<T>::~Icon() {
 
-    delete _icon;
+    delete _label;
     delete _pixmap;
-    delete _action;
-    delete _spacer;
-    delete _hlayout;
-    delete _main_widget;
-    delete _main_layout;
 }
 
 
-void Icon::CreateIconLabel()
-{
-    _icon_label = new QLabel();
-    _icon_label->setPixmap(*_pixmap);
-    _icon_label->setScaledContents(true);
-}
-
-void Icon::CreateTitleLabel()
-{
-    _title_label = new QLabel();
-    _title_label->setWordWrap(true);
-    _title_label->setText("&" + _icon_title.toUpper());
-    _title_label->setAlignment(Qt::AlignHCenter);
-    _title_label->setMaximumWidth(MAXSIZE.width());
-    _title_label->setMaximumHeight(25);
-    _title_label->setBuddy(_icon_label);
-}
-
-void Icon::CreateLayout(QWidget* parent)
-{
-    _main_layout = new QVBoxLayout(parent);
-
-    int space_width = (MAXSIZE.width() - DEFSIZE.width()) / 2;
-    _spacer = new QSpacerItem (space_width, 0);
-
-    _hlayout = new QHBoxLayout();
-    _hlayout->insertSpacerItem(0, _spacer);
-    _hlayout->addWidget(_icon_label);
-    _hlayout->insertSpacerItem(-1, _spacer);
-
-    _main_layout->addLayout(_hlayout);
-    _main_layout->addWidget(_title_label);
-    _main_layout->setMargin(0);
-}
-
-void Icon::CreateWidget()
-{
-    _main_widget = new QWidget(this);
-
-    _main_widget->setLayout(_main_layout);
-    _main_widget->setMaximumSize(MAXSIZE);
-}
-
-const QSize Icon::Size()
-{
-    if (_main_layout == nullptr) {
-        qDebug()<< "Layout has not been created yet... returning size of icon";
-        return _icon_label->size();
+template<class T> bool Icon<T>::CreateLabel(QPixmap* pixmap) {
+    if (!pixmap) {
+        qDebug() << "Error creating QLabel: QPixmap = nullptr\n";
+        return false;
     }
-    return _main_layout->sizeHint();
 
+    _label = new QLabel();
+
+    _label->setPixmap(*pixmap);
+
+    return true;
 }
 
-void Icon::setIcon(QPixmap &pixmap)
+template<class T> void Icon<T>::mousePressEvent(QMouseEvent *ev)
 {
-    _icon->addPixmap(pixmap);
-    _action->setIcon(*_icon);
+    (void) ev;
+    _clicked = !_clicked;
+    emit clicked();
+    emit pressed(true);
 }
 
+template<class T> void Icon<T>::mouseReleaseEvent(QMouseEvent *ev)
+{
+    (void) ev;
+    emit pressed(false);
+}
+
+template<class T> void Icon<T>::mouseDoubleClickEvent(QMouseEvent *ev)
+{
+    (void) ev;
+    emit double_clicked();
+}
+
+template<class T> void Icon<T>::Update() {
+
+    _label->setMaximumSize(_size);
+}

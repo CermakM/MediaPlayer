@@ -3,97 +3,72 @@
 
 #include "library.h"
 
-#include <QObject>
-#include <QAction>
-#include <QIcon>
-#include <QToolButton>
 #include <QLabel>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
+#include <QWidget>
+#include <QMouseEvent>
+#include <QEvent>
+#include <QDebug>
 
-class Icon : public QWidget
-{
+enum Type {T_NOTYPE, T_ALBUM, T_SONG};
+
+class iSignalSlots : public QObject {
+    Q_OBJECT
+
 public:
-    int row = 0, column = 0;
-
-    Icon(QWidget *parent = 0);
-    ~Icon();
-
-    explicit Icon(Album* media, QWidget* parent = 0);
-
-    explicit Icon(Song* media, QWidget *parent = 0);
-
-    void setCheckable() { _action->isCheckable(); }
-
-    void setIcon(QPixmap& pixmap);
-
-    void setTitle(const QString& title) { _icon_title = title; }
-
-    void setPath(const QString& path) {_path_to_media = path; }
-
-    void isInPlaylist(const bool b) { _inPlaylist = b; }
-
-    template<class T>
-    void setMedia(T* media) { _media_ptr = media; }
-
-    template<class T>
-    T* getMedia() { return _media_ptr; }
-
-    QIcon& getIcon() { return *_icon; }
-
-    QPixmap& getPixmap() {return *_pixmap; }
-
-    QString getTitle() const { return _icon_title; }
-
-    QVBoxLayout* getLayout() { return _main_layout; }
-
-    QLabel* getButton() { return _icon_label; }
-
-    QWidget* getWidget() { return _main_widget; }
-
-    QIcon& operator()() { return *_icon; }
-
-    const QSize Size();
+    explicit iSignalSlots(QObject* parent = 0) : QObject(parent) {}
 
 signals:
+    void clicked();
+    void double_clicked();
+    void pressed(bool icon_pressed);
 
 public slots:
+    virtual void on_click() = 0;
+    virtual void on_doubleClick() = 0;
+    virtual void on_press(bool icon_pressed) = 0;
+
+};
+
+template <class T>
+class Icon : public QLabel, iSignalSlots
+{
+public:
+   explicit Icon(QWidget* parent = 0);
+   ~Icon();
+    Icon(Album* media, QWidget* parent = 0);
+    Icon(Song* media, QWidget* parent = 0);
+
+   bool CreateLabel(QPixmap* pixmap);
+
+   inline void setSize(const QSize& size) {
+       _size = size; this->Update();
+   }
+
+   inline QString getTitle() const {
+       return _media_ptr ? _media_ptr->getTitle() : nullptr;
+   }
+
+   void mousePressEvent(QMouseEvent* ev);
+
+   void mouseReleaseEvent(QMouseEvent* ev);
+
+   void mouseDoubleClickEvent(QMouseEvent* ev);
+
+   void Update();
 
 private:
+    QString _path_to_media;
+    QPixmap* _pixmap;
+    QLabel* _label;
+    Type _type;
+    T* _media_ptr;
 
-    void* _media_ptr = nullptr;
+    bool _in_playlist = false;
+    bool _clicked = false;
 
-    bool _inPlaylist = false;
+    QSize _size = QSize(32, 32);
 
-    QString _icon_title, _path_to_media;
 
-    QWidget* _main_widget = nullptr;
-
-    QPixmap* _pixmap = nullptr;
-
-    QIcon* _icon = nullptr;
-
-    QLabel* _icon_label = nullptr;
-
-    QLabel* _title_label = nullptr;
-
-    QVBoxLayout* _main_layout = nullptr;
-
-    QHBoxLayout* _hlayout = nullptr;
-
-    QSpacerItem* _spacer = nullptr;
-
-    QAction* _action = nullptr;
-
-protected:
-
-    void CreateIconLabel();
-
-    void CreateTitleLabel();
-
-    void CreateLayout(QWidget* parent = 0);
-
-    void CreateWidget();
 };
 
 #endif // ICON_H
