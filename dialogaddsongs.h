@@ -18,6 +18,9 @@ public:
     explicit DialogAddSongs(Library* library, QWidget *parent = 0);
     ~DialogAddSongs();
 
+signals:
+    void Change(bool);
+
 private slots:
     void on_BrowseButton_clicked();
 
@@ -29,7 +32,6 @@ private:
     Ui::DialogAddSongs *ui;
 
     Library* _library;
-
 
     QVector<Song> _song_vector;
 };

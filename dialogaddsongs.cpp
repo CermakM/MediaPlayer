@@ -58,4 +58,6 @@ void DialogAddSongs::on_buttonBox_accepted()
 
         _library->AddMedia(&empty_album);
     }
+
+    emit Change(true);
 }

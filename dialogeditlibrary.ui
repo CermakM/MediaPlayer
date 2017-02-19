@@ -63,7 +63,7 @@
          <item alignment="Qt::AlignHCenter">
           <widget class="QLabel" name="SongsLabel">
            <property name="text">
-            <string>Songs</string>
+            <string>Untitled Songs</string>
            </property>
           </widget>
          </item>
@@ -116,20 +116,45 @@
         </spacer>
        </item>
        <item>
-        <widget class="QToolButton" name="AddButton">
+        <widget class="QPushButton" name="AddAlbumsButton">
+         <property name="minimumSize">
+          <size>
+           <width>80</width>
+           <height>30</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Add Albums</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="AddSongsButton">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="minimumSize">
+          <size>
+           <width>80</width>
+           <height>30</height>
+          </size>
+         </property>
          <property name="text">
-          <string>Browse</string>
+          <string>Add Songs</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="RemoveButton">
+         <property name="minimumSize">
+          <size>
+           <width>80</width>
+           <height>30</height>
+          </size>
+         </property>
          <property name="text">
           <string>Remove</string>
          </property>

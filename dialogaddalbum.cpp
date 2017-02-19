@@ -9,7 +9,6 @@ DialogAddAlbum::DialogAddAlbum(QWidget *parent) :
 
     _library = nullptr;
     _addToPlaylist = false;
-
 }
 
 DialogAddAlbum::~DialogAddAlbum()
@@ -27,7 +26,6 @@ DialogAddAlbum::DialogAddAlbum(Library *library, QWidget *parent) :
     _addToPlaylist = false;
 
     _library = library;
-
 }
 
 void DialogAddAlbum::on_buttonBox_accepted()
@@ -35,6 +33,7 @@ void DialogAddAlbum::on_buttonBox_accepted()
     QString pathToAdd = ui->PathSelect->text();
 
     if(pathToAdd.isEmpty()) {
+        emit Change(false);
         return; // no change has happened
     }
 

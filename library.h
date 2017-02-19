@@ -1,6 +1,7 @@
 #ifndef LIBRARY_H
 #define LIBRARY_H
 
+#include "probe.h"
 #include "album.h"
 #include "song.h"
 #include "playlist.h"
@@ -13,25 +14,32 @@
 #include <QDir>
 #include <QMessageBox>
 
+#include <cstdio>
+#include <fstream>
+
+enum Preview {OFF, ON};
+
+class DialogEditLibrary;
 
 class Library
 {
 public:
 
-    Library(QWidget* parent);
+    Library(QWidget* parent = 0);
+    Library(const Library& other);
     ~Library();
-
-    void Clear();
 
     void AddMedia(Album* album);
 
-    //void AddMedia(Song* _song);
+    void RemoveMedia(Album* album);
 
-    void Load();
+    void RemoveMedia(Song* song);
 
-    void SetupPlaylist();
+    void setDatabase(QSqlDatabase new_database);
 
-    QVector<Album>* Albums() {return &_albums; }
+    QSqlDatabase getDatabase() const { return _database; }
+
+    QVector<Album>* getAlbums() {return &_albums; }
 
     Song* getSongByTitle(const QString & title);
 
@@ -45,6 +53,7 @@ public:
 
     bool isAlbum(const QString& path);
 
+    friend class DialogEditLibrary;
 
 private:
 
@@ -55,6 +64,18 @@ private:
     Playlist _playlist;
 
     QVector<Album> _albums;
+
+    Preview _preview_state;
+
+    QString _database_path;
+
+    void LoadDatabase();
+
+    void SetupPlaylist();
+
+    bool create_temp_database_win();
+
+    bool create_temp_database_linux();
 
 };
 

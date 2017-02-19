@@ -11,7 +11,6 @@
 #include <QFile>
 #include <QTextStream>
 
-
 namespace Ui {
 class DialogAddAlbum;
 }
@@ -25,7 +24,6 @@ public:
     ~DialogAddAlbum();
 
     DialogAddAlbum(Library* _library, QWidget *parent = 0);
-
 
 private slots:
     void on_buttonBox_accepted();

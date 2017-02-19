@@ -41,7 +41,7 @@ bool Playlist::AddMedia(Album* album) {
 bool Playlist::AddMedia(Song* _song) {
 
     if( !_database->open()) {
-        qDebug() << "Playlist::RemoveMedia(Song*) : While opening database :" << _database->lastError();
+        qDebug() << "Playlist::AddMedia(Song*) : While opening database :" << _database->lastError();
         return false;
     }
 

@@ -47,7 +47,7 @@ private:
     QVector<Song*>  _playlist;
 
     QMediaPlaylist* _media_playlist;
-    QSqlDatabase* _database;
+    QSqlDatabase*  _database;
 
 };
 

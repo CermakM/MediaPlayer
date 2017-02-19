@@ -1,7 +1,7 @@
 #include "mainwin.h"
 #include "ui_mainwin.h"
 
-MainWin::MainWin(QWidget *parent) :  
+MainWin::MainWin(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWin),
     _library(parent)
@@ -53,6 +53,14 @@ void MainWin::on_EndOfSong() {
     ui->CurrentAlbumLine->setText(song->getAlbumTitle());
     ui->CurrentSongLine->setText(song->getTitle());
 }
+
+
+void MainWin::on_EditPlaylistOver(bool b) {
+
+    if (b)
+        UpdatePlaylist();
+}
+
 
 void MainWin::UpdatePlaylist() {
 
@@ -126,6 +134,7 @@ void MainWin::on_actionAddNewAlbum_triggered()
 void MainWin::on_actionAddNewSongs_triggered()
 {
     DialogAddSongs SongsBrowser(&_library, this);
+    connect(&SongsBrowser, SIGNAL(Change(bool)), this, SLOT(on_EditPlaylistOver(bool)));
     SongsBrowser.setWindowTitle("Add your Songs");
     SongsBrowser.setModal(true);
     SongsBrowser.exec();
@@ -150,13 +159,6 @@ void MainWin::on_actionEditLibrary_triggered()
     EditLibrary.setModal(true);
     EditLibrary.exec();
 }
-
-void MainWin::on_EditPlaylistOver(bool b) {
-
-    if (b)
-        UpdatePlaylist();
-}
-
 
 void MainWin::on_ButtonForward_clicked()
 {

@@ -42,7 +42,8 @@ HEADERS  += mainwin.h \
     icon.h \
     dialogeditlibrary.h \
     iwidget.h \
-    idelegate.h
+    idelegate.h \
+    probe.h
 
 FORMS    += mainwin.ui \
     dialogaddalbum.ui \

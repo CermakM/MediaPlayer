@@ -27,7 +27,7 @@ DialogEditPlaylist::DialogEditPlaylist(Library* library, QWidget *parent) :
 
 void DialogEditPlaylist::LoadLibrary() {
 
-    for (Album& temp_album : *(_library->Albums())) {
+    for (Album& temp_album : *(_library->getAlbums())) {
         QTreeWidgetItem* topItm = new QTreeWidgetItem(ui->treeAlbum);
         topItm->setText(0, temp_album.getTitle());
         topItm->setText(1, temp_album.getInterpret());
@@ -59,6 +59,8 @@ void DialogEditPlaylist::LoadLibrary() {
 void DialogEditPlaylist::on_AddButton_clicked()
 {
     QTreeWidgetItem* current_media = ui->treeAlbum->currentItem();
+
+    if (current_media == nullptr) return;
 
     // Check by title if the album / song is in playlist already
     QList<QTreeWidgetItem*> qlist = ui->treePlaylist->findItems(current_media->text(0), Qt::MatchExactly | Qt::MatchRecursive);
