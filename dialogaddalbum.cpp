@@ -66,5 +66,4 @@ void DialogAddAlbum::on_BrowseButton_clicked()
 void DialogAddAlbum::on_checkBoxAddToPlaylist_toggled(bool checked)
 {
     _addToPlaylist = checked;
-    // ui->checkBoxAddToPlaylist->isChecked() ? addToPlaylist = true : addToPlaylist = false;
 }

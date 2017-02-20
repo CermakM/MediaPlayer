@@ -9,7 +9,7 @@ Playlist::Playlist(QSqlDatabase *database, QObject *parent)
 bool Playlist::AddMedia(Album* album) {
 
     if( !_database->open()) {
-        qDebug() << "Playlist::RemoveMedia(Album*) : While opening database :" << _database->lastError();
+        qDebug() << "Playlist::AddMedia(Album*) : While opening database :" << _database->lastError();
         return false;
     }
 
@@ -20,7 +20,8 @@ bool Playlist::AddMedia(Album* album) {
     query.prepare(query_string);
 
     if( !query.exec()) {
-        qDebug() << "Playlist::RemoveMedia(Album*) : While executing query :" << query.lastError();
+        qDebug() << "Album title: " << album_title << endl;
+        qDebug() << "Playlist::AddMedia(Album*) : While executing query :" << query.lastError();
         return false;
     }
 
@@ -53,7 +54,7 @@ bool Playlist::AddMedia(Song* _song) {
     query.prepare(query_string);
 
     if( !query.exec()) {
-        qDebug() << "Playlist::RemoveMedia(Song*) : While executing query :" << query.lastError();
+        qDebug() << "Playlist::AddMedia(Song*) : While executing query :" << query.lastError();
         return false;
     }
 

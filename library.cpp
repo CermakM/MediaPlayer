@@ -4,9 +4,8 @@ Library::Library(QWidget *parent) :
     _playlist(&_database)
 {
     _parent = parent;
-    _preview_state = Preview::OFF;
-    _database_path = "Media/media.sqlite";
 
+    setDatabaseFileName(DB_FILENAME);
     LoadDatabase();
     SetupPlaylist();
 }
@@ -18,36 +17,35 @@ Library::Library(const Library& other)
     this->_albums = other._albums;
     this->_playlist = other._playlist;
 
-    this->_preview_state = Preview::ON;
-
-    // Probe to deduce the platform and create the temporary database file accordingly
-    #ifdef LINUX
-       create_temp_database_linux();
-    #elif defined WINDOWS
-       qDebug() << "Windows platform specified but no code provided yet";
-       return;
-//     create_temp_database_win();
-    #endif
     this->_database = other._database;
-    this->_database.setDatabaseName(_database_path);
 }
-
 
 Library::~Library()
 {
-    if (_preview_state == Preview::ON) {
-        std::string str = _database_path.toStdString();
-        remove(str.c_str());
-    }
+//    // Check for the existence of temp database file
+//    QFile db_temp_file;
+//    QString working_dir = QDir::currentPath();
+//    QDir::setCurrent("/Media");
+//    db_temp_file.setFileName(TEMP_DB_FILENAME);
+//    if (db_temp_file.exists()) {
+//        db_temp_file.remove();
+//    }
+//    QDir::setCurrent(working_dir);
 }
 
+void Library::setDatabaseFileName(const QString &fname)
+{
+   _database_path = "Media/" + fname;
+   _database_fname = fname;
+   _database.setDatabaseName(_database_path);
+}
 
 void Library::LoadDatabase()
 {
     std::fstream dbFile(_database_path.toStdString(), std::ios::in);
     if (!dbFile.good()) {
         qDebug() << "Database file does not exist... creating new one " ;
-        dbFile.open("Media/media.sqlite", std::ios::out);
+        dbFile.open("Media/" + DB_FILENAME.toStdString(), std::ios::out);
         dbFile.close();
     }
 
@@ -130,30 +128,36 @@ void Library::SetupPlaylist()
 
 }
 
-bool Library::create_temp_database_win()
+void Library::CopyDatabaseFile(const QString &original_fname, const QString &new_fname)
 {
-    std::setlocale(LC_ALL, "");
-    _database_path = "Media/temp_media.sqlite";
-    std::fstream file (_database_path.toStdString(), std::ios::out);
-    file.close();
-
-//    LPCWSTR wstr = L"Media/temp_media.sqlite";
-//    DWORD attr = GetFileAttributes(wstr);
-//    SetFileAttributes(wstr, attr + FILE_ATTRIBUTE_HIDDEN);
-
-    return true;
+    QFile dbFile;
+    QString working_dir = QDir::currentPath();
+    if(!QDir::setCurrent( working_dir + "/Media")) {
+        qDebug() << "Library::Library -> Directory has not been changed successfully";
+    }
+    dbFile.setFileName(original_fname);
+    if (!dbFile.copy(new_fname)) {
+        qDebug() << "Warning! Could not copy the database to the temporary file: " << dbFile.errorString() << endl;
+    }
+    // Probe to deduce the platform and hide the temporary database file
+    #ifdef WINDOWS
+       qDebug() << "Windows platform specified but no code provided yet";
+       return;
+//     hide_temp_database_win();
+    #endif
+    QDir::setCurrent(working_dir);
 }
 
-bool Library::create_temp_database_linux()
+bool Library::hide_temp_database_win()
 {
-    _database_path = "Media/.temp_media.sqlite";
-    std::fstream file (_database_path.toStdString(), std::ios::out);
-    if (!file.good()) {
-        qDebug() << "Temporary database file has not been created successfully. ";
-        return false;
-    }
+    std::setlocale(LC_ALL, "");
 
-    file.close();
+//      LPCWSTR wstr = L"Media/.temp_media.sqlite";
+//      wchar_t array[DB_FILENAME.size()];
+//      LPCWSTR wstr = L"Media/" + DB_FILENAME.toWCharArray(array);
+//      DWORD attr = GetFileAttributes(wstr);
+//      SetFileAttributes(wstr, attr + FILE_ATTRIBUTE_HIDDEN);
+
     return true;
 }
 
@@ -229,12 +233,44 @@ void Library::AddMedia(Album *album) {
 void Library::RemoveMedia(Album *album)
 {
 
+    if(!_database.open()) {
+        qDebug() << "in Library::RemoveMedia : " << _database.lastError();
+        return;
+    }
+
+    QSqlQuery query;
+    if (!query.exec("DROP TABLE IF EXISTS '"+album->getTitle()+"'")) {
+        qDebug() << "in Library::RemoveMedia : " << query.lastError();
+        return;
+    }
+
+    _database.close();
+
+    _albums.removeAt(_albums.indexOf(*album));
 }
 
 void Library::RemoveMedia(Song *song)
 {
+    if(!_database.open()) {
+        qDebug() << "in Library::RemoveMedia : " << _database.lastError();
+        return;
+    }
+    Album* const album_ptr= song->getAlbum();
 
+    QSqlQuery query;
+    if (!query.exec("DELETE FROM '"+album_ptr->getTitle()+"' where title='"+song->getTitle()+"'")) {
+        qDebug() << "in Library::RemoveMedia : " << query.lastError();
+        return;
+    }
+
+    _database.close();
+
+
+    QVector<Song>* song_vec = album_ptr->getSongs();
+    const int index_of_song = song_vec->indexOf(*song);
+    song_vec->removeAt(index_of_song);
 }
+
 
 Song* Library::getSongByTitle(const QString & title)
 {

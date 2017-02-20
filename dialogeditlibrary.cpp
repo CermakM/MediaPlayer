@@ -8,6 +8,8 @@ DialogEditLibrary::DialogEditLibrary(Library *library, QWidget *parent) :
     ui->setupUi(this);
     _library =  library;
     _pseudo_library = new Library(*_library);
+    Library::CopyDatabaseFile(DB_FILENAME, TEMP_DB_FILENAME);
+    _pseudo_library->setDatabaseFileName(TEMP_DB_FILENAME);
 
     LoadLibrary();
 }
@@ -62,7 +64,7 @@ void DialogEditLibrary::CreateTreeItem(Album& album, QTreeWidgetItem* const tree
 }
 
 
-void DialogEditLibrary::Update(bool changed)
+void DialogEditLibrary::UpdateTree(bool changed)
 {
     if (!changed) return;
 
@@ -70,6 +72,8 @@ void DialogEditLibrary::Update(bool changed)
     ui->SongsTree->clear();
 
     CreateTree(_pseudo_library->getAlbums());
+
+    _change = true;
 }
 
 void DialogEditLibrary::on_AddAlbumsButton_clicked()
@@ -77,7 +81,7 @@ void DialogEditLibrary::on_AddAlbumsButton_clicked()
     // Create empty library without loading the database to make user changes easier
     // In preview mode no changes will be written into database
     DialogAddAlbum AlbumBrowser(_pseudo_library, this);
-    connect(&AlbumBrowser, SIGNAL(Change(bool)), this, SLOT(Update(bool)));
+    connect(&AlbumBrowser, SIGNAL(Change(bool)), this, SLOT(UpdateTree(bool)));
     AlbumBrowser.setWindowTitle("Add your Album");
     AlbumBrowser.setModal(true);
     AlbumBrowser.exec();
@@ -88,7 +92,7 @@ void DialogEditLibrary::on_AddSongsButton_clicked()
     // Create empty library without loading the database to make user changes easier
     // In preview mode no changes will be written into database
     DialogAddSongs SongsBrowser(_pseudo_library, this);
-    connect(&SongsBrowser, SIGNAL(Change(bool)), this, SLOT(Update(bool)));
+    connect(&SongsBrowser, SIGNAL(Change(bool)), this, SLOT(UpdateTree(bool)));
     SongsBrowser.setWindowTitle("Add your Songs");
     SongsBrowser.setModal(true);
     SongsBrowser.exec();
@@ -98,7 +102,6 @@ void DialogEditLibrary::on_RemoveButton_clicked()
 {
     QList<QTreeWidgetItem*> selected_albums = ui->AlbumsTree->selectedItems();
     QList<QTreeWidgetItem*> selected_songs = ui->SongsTree->selectedItems();
-
 
     for (auto const& album_item : selected_albums) {
         Album* album = _pseudo_library->getAlbumByTitle(album_item->text(0));
@@ -111,39 +114,37 @@ void DialogEditLibrary::on_RemoveButton_clicked()
         delete song_item;
         _pseudo_library->RemoveMedia(song);
     }
+
+    _change = true;
 }
 
 void DialogEditLibrary::on_buttonBox_accepted()
 {
-    *_library = *_pseudo_library;
 
-    FILE *inFile, *outFile;
-
-    std::string instr = _pseudo_library->_database_path.toStdString();
-    inFile = fopen(instr.c_str(), "rb");
-    std::string outstr = _library->_database_path.toStdString();
-    outFile = fopen(outstr.c_str(), "wb");
-
-    if (inFile == NULL || outFile == NULL) {
-        qDebug() << "Error opening database files";
-        return;
+    QString working_dir = QDir::currentPath();
+    QDir::setCurrent(working_dir + "/Media");
+    QFile ftoRemove;
+    ftoRemove.setFileName(_library->getDatabaseFName());
+    if (!ftoRemove.remove()) {
+        qDebug() << "In on_buttonBox_accepted : " << ftoRemove.errorString();
     }
+    else qDebug() << "File " << ftoRemove.fileName() << " removed successfully" << endl;
+    if (!QFile::rename(_pseudo_library->getDatabaseFName(), _library->getDatabaseFName())) {
+        qDebug() << "In on_buttonBox_accepted : Could not rename database file";
+    }
+    QDir::setCurrent(working_dir);
 
-    auto getFileSize = [](FILE *file)->long {
-      fseek(file, 0, SEEK_END);
-      long lSize = ftell(file);
-      rewind(file);
-      return lSize;
-    };
+    *_library = *_pseudo_library;
+    _library->setDatabaseFileName(DB_FILENAME);
 
-    long lCount = getFileSize(inFile);
-    void *buffer = malloc(lCount*sizeof(char));
-
-    fread(buffer, 1, lCount, inFile);
-    fwrite(buffer, 1, lCount, outFile);
-
-    fclose(inFile);
-    fclose(outFile);
-
+    emit UpdatePlaylist(_change);
 }
 
+
+void DialogEditLibrary::on_buttonBox_rejected()
+{
+    QString working_dir = QDir::currentPath();
+    QDir::setCurrent(working_dir + "/Media");
+    QFile::remove(_pseudo_library->getDatabaseFName());
+    QDir::setCurrent(working_dir);
+}

@@ -156,6 +156,8 @@ void MainWin::on_actionEditLibrary_triggered()
 {
     DialogEditLibrary EditLibrary(&_library, this);
 
+    connect(&EditLibrary, SIGNAL(UpdatePlaylist(bool)), this, SLOT(on_EditPlaylistOver(bool)));
+
     EditLibrary.setModal(true);
     EditLibrary.exec();
 }

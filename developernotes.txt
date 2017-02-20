@@ -8,3 +8,6 @@
 ## make Mainwin user messages not clickable!
 
 
+## FIX segmentation fault when open and close add library and then try to add to playlist
+
+

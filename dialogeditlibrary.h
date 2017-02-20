@@ -14,6 +14,8 @@
 #include <QFileDialog>
 #include <QRegularExpression>
 
+//#include <filesystem>
+
 namespace Ui {
 class DialogEditLibrary;
 }
@@ -32,6 +34,9 @@ public:
 
     void CreateTreeItem(Album &album, QTreeWidgetItem * const tree_album_item = nullptr);
 
+signals:
+    void UpdatePlaylist(bool b);
+
 private slots:
     void on_AddSongsButton_clicked();
 
@@ -41,7 +46,9 @@ private slots:
 
     void on_AddAlbumsButton_clicked();
 
-    void Update(bool changed);
+    void UpdateTree(bool changed);
+
+    void on_buttonBox_rejected();
 
 private:
     Ui::DialogEditLibrary *ui;
@@ -49,8 +56,7 @@ private:
     Library* _library;
     Library* _pseudo_library;
 
-    QVector<QTreeWidgetItem*> _new_media;
-    QVector<QTreeWidgetItem*> _items_to_remove;
+    bool _change = false;
 };
 
 #endif // DIALOGEDITLIBRARY_H

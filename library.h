@@ -17,7 +17,8 @@
 #include <cstdio>
 #include <fstream>
 
-enum Preview {OFF, ON};
+const QString DB_FILENAME = "media.sqlite";
+const QString TEMP_DB_FILENAME = ".temp_media.sqlite";
 
 class DialogEditLibrary;
 
@@ -29,15 +30,19 @@ public:
     Library(const Library& other);
     ~Library();
 
+    void setDatabaseFileName(const QString& fname);
+
+    static void CopyDatabaseFile(const QString &original_fname, const QString &new_fname);
+
     void AddMedia(Album* album);
 
     void RemoveMedia(Album* album);
 
     void RemoveMedia(Song* song);
 
-    void setDatabase(QSqlDatabase new_database);
+    QString getDatabaseFName() const {return _database_fname; }
 
-    QSqlDatabase getDatabase() const { return _database; }
+    QString getDatabasePath() const { return _database_path; }
 
     QVector<Album>* getAlbums() {return &_albums; }
 
@@ -65,15 +70,15 @@ private:
 
     QVector<Album> _albums;
 
-    Preview _preview_state;
-
     QString _database_path;
+
+    QString _database_fname;
 
     void LoadDatabase();
 
     void SetupPlaylist();
 
-    bool create_temp_database_win();
+    bool hide_temp_database_win();
 
     bool create_temp_database_linux();
 
