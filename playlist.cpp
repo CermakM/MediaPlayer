@@ -6,6 +6,24 @@ Playlist::Playlist(QSqlDatabase *database, QObject *parent)
     _database = database;
 }
 
+Playlist::Playlist(const Playlist& other)
+{
+    /*
+    this->_media_playlist = new QMediaPlaylist();
+    this->_media_playlist->setParent(other._media_playlist->parent());
+    this->_media_playlist->addMedia( other._media_playlist->media());
+    */
+    this->_media_playlist = other._media_playlist;
+    this->_database = other._database;
+    this->_playlist = other._playlist;
+}
+
+Playlist::~Playlist() {
+
+    qInfo() << "Playlist::~Playlist destructor called";
+    //delete _media_playlist;
+}
+
 bool Playlist::AddMedia(Album* album) {
 
     if( !_database->open()) {
@@ -13,7 +31,7 @@ bool Playlist::AddMedia(Album* album) {
         return false;
     }
 
-    QSqlQuery query;
+    QSqlQuery query (*_database);
     QString album_title = album->getTitle();
     QString query_string = QString("UPDATE \"%1\" SET inPlaylist = 1").arg(album_title);
 
@@ -46,7 +64,7 @@ bool Playlist::AddMedia(Song* _song) {
         return false;
     }
 
-    QSqlQuery query;
+    QSqlQuery query(*_database);
     QString album_title = _song->getAlbumTitle();
     QString query_string = QString("UPDATE \"%1\" SET inPlaylist = 1 WHERE title = \"%2\"")
                            .arg(album_title).arg(_song->getTitle());
@@ -79,7 +97,7 @@ bool Playlist::RemoveMedia(Album* album) {
         return false;
     }
 
-    QSqlQuery query;
+    QSqlQuery query (*_database);
     QString album_title = album->getTitle();
     QString query_string = QString("UPDATE \"%1\" SET inPlaylist = 0").arg(album_title);
 
@@ -114,7 +132,7 @@ bool Playlist::RemoveMedia(Song* song) {
         return false;
     }
 
-    QSqlQuery query;
+    QSqlQuery query(*_database);
     QString album_title = song->getAlbumTitle();
     QString query_string = QString("UPDATE \"%1\" SET inPlaylist = 0 WHERE title = \"%2\"")
                            .arg(album_title).arg(song->getTitle());
@@ -157,7 +175,7 @@ void Playlist::Update() {
 
     _media_playlist->clear();
 
-    for(Song* song : _playlist) {
+    for(Song* const song : _playlist) {
         _media_playlist->addMedia(QMediaContent(QUrl::fromLocalFile(song->getPath())));
     }
 }

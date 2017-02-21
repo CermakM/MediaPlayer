@@ -40,6 +40,8 @@ public:
 
     void RemoveMedia(Song* song);
 
+    void infoDatabaseAddress() const;
+
     QString getDatabaseFName() const {return _database_fname; }
 
     QString getDatabasePath() const { return _database_path; }

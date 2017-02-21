@@ -14,6 +14,8 @@ class Playlist
 {
 public:
     Playlist(QSqlDatabase* database, QObject* parent = Q_NULLPTR);
+    Playlist(Playlist const& other);
+    ~Playlist();
 
     bool AddMedia(Album* album);
 
@@ -22,6 +24,10 @@ public:
     bool RemoveMedia(Album* album);
 
     bool RemoveMedia(Song* song);
+
+    void setDatabase(QSqlDatabase* const db);
+
+    QSqlDatabase* DatabaseAddress() const { return _database; }
 
     Song* CurrentMedia();
 
@@ -47,8 +53,7 @@ private:
     QVector<Song*>  _playlist;
 
     QMediaPlaylist* _media_playlist;
-    QSqlDatabase*  _database;
-
+    QSqlDatabase*   _database;
 };
 
 #endif // PLAYLIST_H

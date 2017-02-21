@@ -1,15 +1,21 @@
 #include "dialogeditlibrary.h"
 #include "ui_dialogeditlibrary.h"
 
-DialogEditLibrary::DialogEditLibrary(Library *library, QWidget *parent) :
+DialogEditLibrary::DialogEditLibrary(Library * const library, QWidget *parent) :
    QDialog(parent),
    ui(new Ui::DialogEditLibrary)
 {
     ui->setupUi(this);
     _library =  library;
+    _library->infoDatabaseAddress();
+
     _pseudo_library = new Library(*_library);
+
     Library::CopyDatabaseFile(DB_FILENAME, TEMP_DB_FILENAME);
-    _pseudo_library->setDatabaseFileName(TEMP_DB_FILENAME);
+     _pseudo_library->setDatabaseFileName(TEMP_DB_FILENAME);
+
+    qInfo() << "Library _pseudo_library database: "; _pseudo_library->infoDatabaseAddress();
+    qInfo() << "Library _library database:"; _library->infoDatabaseAddress();
 
     LoadLibrary();
 }
@@ -116,6 +122,8 @@ void DialogEditLibrary::on_RemoveButton_clicked()
     }
 
     _change = true;
+
+    _pseudo_library->infoDatabaseAddress();
 }
 
 void DialogEditLibrary::on_buttonBox_accepted()
@@ -137,6 +145,10 @@ void DialogEditLibrary::on_buttonBox_accepted()
     *_library = *_pseudo_library;
     _library->setDatabaseFileName(DB_FILENAME);
 
+
+    qInfo() << "Library _library database: "; _library->infoDatabaseAddress();
+    qInfo() << "Library _pseudo_library database: "; _pseudo_library->infoDatabaseAddress();
+
     emit UpdatePlaylist(_change);
 }
 
@@ -147,4 +159,8 @@ void DialogEditLibrary::on_buttonBox_rejected()
     QDir::setCurrent(working_dir + "/Media");
     QFile::remove(_pseudo_library->getDatabaseFName());
     QDir::setCurrent(working_dir);
+
+    qInfo() << "Library _pseudo_library database: "; _pseudo_library->infoDatabaseAddress();
+    qInfo() << "Library _library database:"; _library->infoDatabaseAddress();
+    emit UpdatePlaylist(true);
 }

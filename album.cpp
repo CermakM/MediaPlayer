@@ -45,19 +45,25 @@ Album::Album(const QString &path) {
     dir.setNameFilters(filters);
     QFileInfoList song_paths = dir.entryInfoList();
 
-    // Get the atributes for the album from the mp3 file
-    Song temp_song(song_paths[0].absoluteFilePath());
-    _title = temp_song.getAlbumTitle();
-    _interpret = temp_song.getInterpret();
+    if (!song_paths.empty()) {
 
-    for ( QFileInfo& song: song_paths) {
-        QString song_path = song.absoluteFilePath();
-        //QString song_fname = song.fileName();
-        //songs.push_back(Song(song_path, song_fname, song_title, interpret, title));
-        _songs.push_back(Song(song_path));
+        // Get the atributes for the album from the mp3 file
+        Song temp_song(song_paths[0].absoluteFilePath());
+        _title = temp_song.getAlbumTitle();
+        _interpret = temp_song.getInterpret();
+
+        for ( QFileInfo& song: song_paths) {
+            QString song_path = song.absoluteFilePath();
+            //QString song_fname = song.fileName();
+            //songs.push_back(Song(song_path, song_fname, song_title, interpret, title));
+            _songs.push_back(Song(song_path));
+        }
+
+        SearchForIcons(_path);
     }
 
-    SearchForIcons(_path);
+    else
+        qDebug() << " in Album::Album : Empty list of songs provided";
 }
 
 void Album::setIcon(QIcon &icon)

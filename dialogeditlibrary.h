@@ -25,7 +25,7 @@ class DialogEditLibrary : public QDialog
     Q_OBJECT
 
 public:
-    explicit DialogEditLibrary(Library* library, QWidget* parent = 0);
+    explicit DialogEditLibrary(Library* const library, QWidget* parent = 0);
     ~DialogEditLibrary();
 
     void LoadLibrary();

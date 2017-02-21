@@ -11,13 +11,11 @@ Library::Library(QWidget *parent) :
 }
 
 Library::Library(const Library& other)
-    :_playlist(&_database)
+    :_playlist(other._playlist)
 {
     this->_parent = other._parent;
     this->_albums = other._albums;
-    this->_playlist = other._playlist;
-
-    this->_database = other._database;
+    this->_database = QSqlDatabase::cloneDatabase(other._database, "QSQLITE");
 }
 
 Library::~Library()
@@ -31,6 +29,8 @@ Library::~Library()
 //        db_temp_file.remove();
 //    }
 //    QDir::setCurrent(working_dir);
+
+    qInfo() << "Library::~Library destructor called" ;
 }
 
 void Library::setDatabaseFileName(const QString &fname)
@@ -60,7 +60,7 @@ void Library::LoadDatabase()
 
     if (tableList.empty()) {
         // Push a default Untitled(-) album at the beginning of the database
-        QSqlQuery query;
+        QSqlQuery query(_database);
 
         QString table_name = QString("CREATE TABLE IF NOT EXISTS '-'");
         QString create_statement = table_name + "(title TEXT NOT NULL UNIQUE, "
@@ -85,9 +85,9 @@ void Library::LoadDatabase()
 
     for (QString& table : tableList) {
 
-        QSqlQuery query("SELECT * FROM '"+table+"'");
+        QSqlQuery query(_database);
 
-        query.exec();
+        query.exec("SELECT * FROM '"+table+"'");
 
         QString path, title, interpret, album;
         int year;
@@ -168,9 +168,7 @@ void Library::AddMedia(Album *album) {
         return;
     }
 
-
-
-    QSqlQuery query;
+    QSqlQuery query(_database);
 
     QString table_name = QString("CREATE TABLE IF NOT EXISTS \"%1\" ").arg(album->getTitle());
     QString create_statement = table_name + "(title TEXT NOT NULL UNIQUE, "
@@ -179,6 +177,9 @@ void Library::AddMedia(Album *album) {
                                             "year INTEGER, "
                                             "inPlaylist BOOL NOT NULL DEFAULT 0, "
                                             "path TEXT PRIMARY KEY NOT NULL )";
+
+
+    this->infoDatabaseAddress();
 
     if(!query.prepare(create_statement)) {
         qDebug() << "Query not prepared successfully" << query.lastError();
@@ -238,7 +239,7 @@ void Library::RemoveMedia(Album *album)
         return;
     }
 
-    QSqlQuery query;
+    QSqlQuery query(_database);
     if (!query.exec("DROP TABLE IF EXISTS '"+album->getTitle()+"'")) {
         qDebug() << "in Library::RemoveMedia : " << query.lastError();
         return;
@@ -257,7 +258,7 @@ void Library::RemoveMedia(Song *song)
     }
     Album* const album_ptr= song->getAlbum();
 
-    QSqlQuery query;
+    QSqlQuery query(_database);
     if (!query.exec("DELETE FROM '"+album_ptr->getTitle()+"' where title='"+song->getTitle()+"'")) {
         qDebug() << "in Library::RemoveMedia : " << query.lastError();
         return;
@@ -269,6 +270,12 @@ void Library::RemoveMedia(Song *song)
     QVector<Song>* song_vec = album_ptr->getSongs();
     const int index_of_song = song_vec->indexOf(*song);
     song_vec->removeAt(index_of_song);
+}
+
+void Library::infoDatabaseAddress() const
+{
+    qDebug() << "\tDatabase stored in library: " << _database << " on adress " << &_database;
+    qDebug() << "\tDatabase address stored in playlist: " << *_playlist.DatabaseAddress() << " on adress " << _playlist.DatabaseAddress();
 }
 
 
