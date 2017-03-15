@@ -20,16 +20,6 @@ Library::Library(const Library& other)
 
 Library::~Library()
 {
-//    // Check for the existence of temp database file
-//    QFile db_temp_file;
-//    QString working_dir = QDir::currentPath();
-//    QDir::setCurrent("/Media");
-//    db_temp_file.setFileName(TEMP_DB_FILENAME);
-//    if (db_temp_file.exists()) {
-//        db_temp_file.remove();
-//    }
-//    QDir::setCurrent(working_dir);
-
     qInfo() << "Library::~Library destructor called" ;
 }
 

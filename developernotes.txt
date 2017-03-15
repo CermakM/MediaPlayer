@@ -6,8 +6,4 @@
 ## Rate songs and albums (stars / hearts... ) 
 ## Favourite playlists
 ## make Mainwin user messages not clickable!
-
-
-## FIX segmentation fault when open and close add library and then try to add to playlist
-
-
+## Finish shortcuts and arrow-controled slider
