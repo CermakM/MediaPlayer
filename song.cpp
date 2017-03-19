@@ -28,10 +28,10 @@ Song::Song(const QString path, Album* parent)
 
     _title = QString::fromStdWString(title_string.toWString());
     _interpret = QString::fromStdWString(artist_string.toWString());
-    _album = QString::fromStdWString(album_string.toWString());
+    _album_title = QString::fromStdWString(album_string.toWString());
     _year = year_uint;
 
-    if (_album.isEmpty()) _album = "-";
+    if (_album_title.isEmpty()) _album_title = "-";
     if (_interpret.isEmpty()) _interpret = "-";
     if (title_string.isEmpty()) {
         // if no title extracted - use the filename
@@ -45,7 +45,7 @@ Song::Song(const QString& title, const QString& path, const QString& interpret, 
     _title = title;
     _path = path;
     _interpret = interpret;
-    _album = album;
+    _album_title = album;
     _year = year;
     is_in_playlist = inPlaylist;
 

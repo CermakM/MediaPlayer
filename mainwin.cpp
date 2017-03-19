@@ -33,11 +33,106 @@ MainWin::MainWin(QWidget *parent) :
     connect(shortcutStopButton, SIGNAL(activated()), this, SLOT(on_StopMusicButton_clicked()));
 
     UpdatePlaylist();
+
+    CreateDropArea();
 }
 
 MainWin::~MainWin()
 {
     delete ui;
+}
+
+void MainWin::UpdatePlaylist() {
+
+    ui->CurrentSongLine->clear();
+    ui->CurrentAlbumLine->clear();
+
+    _media_player->stop();
+
+    _playlist->Update();
+
+    qDebug() << "Actual media player status: " << _playlist->Size();
+
+    _playlist->setCurrentIndex(0);
+
+    _media_player->setPlaylist(_playlist->MediaPlaylist());
+}
+
+
+void MainWin::CreateDropArea()
+{
+    if (!_library.empty()) ui->default_placeholder->setVisible(false);
+
+    QVBoxLayout* drop_layout = new QVBoxLayout();
+    ui->dropArea->setLayout(drop_layout);
+
+    /* TEST CODE
+
+    iWidget* sample_widget = new iWidget(ui->dropArea);
+    sample_widget->setTitle("sample");
+    iWidget* sample_widget1 = new iWidget(ui->dropArea);
+    sample_widget1->setTitle("sample1");
+    iWidget* sample_widget2 = new iWidget(ui->dropArea);
+    sample_widget2->setTitle("sample2");
+    drop_layout->addWidget(sample_widget, 0, Qt::AlignTop | Qt::AlignLeft);
+    drop_layout->addWidget(sample_widget1, 0, Qt::AlignTop | Qt::AlignLeft);
+    drop_layout->addWidget(sample_widget2, 0, Qt::AlignTop | Qt::AlignLeft);
+
+    */
+
+    const int MAX_WIDGET_SIZE = 128;
+    int max_widget_count = this->width() / MAX_WIDGET_SIZE * 2;
+
+    QBoxLayout* drop_row = new QBoxLayout(QBoxLayout::LeftToRight);
+    drop_row->setSpacing(10);
+    drop_layout->addLayout(drop_row);
+
+    for (Album album : *(_library.getAlbums())) {
+        if ( album.getTitle() != "-") {
+            for (Song song : *(album.getSongs())) {
+                CreateWidget(&song, drop_row);
+                if (max_widget_count == drop_row->count()) {
+                    qDebug() << drop_row->count();
+                    CreateNewRow(drop_layout, &drop_row);
+                }
+            }
+        }
+        else {
+            CreateWidget(&album, drop_row);
+            if (max_widget_count == drop_row->count()) {
+                CreateNewRow(drop_layout, &drop_row);
+            }
+        }
+    }
+
+
+    QSpacerItem* right_spacer = new QSpacerItem(20, 0, QSizePolicy::Expanding);
+    drop_row->addSpacerItem(right_spacer);
+}
+
+
+void MainWin::CreateWidget(Album* const media, QBoxLayout* drop_row) {
+    iWidget* new_widget = new iWidget(new Icon(media), this);
+    new_widget->getIcon()->setParent(new_widget);
+    _icon_widgets.push_back(new_widget);
+    drop_row->addWidget(new_widget, 0, Qt::AlignTop | Qt::AlignLeft);
+    drop_row->insertSpacing(-1, 10);
+}
+
+void MainWin::CreateWidget(Song* const media, QBoxLayout* const drop_row) {
+    iWidget* new_widget = new iWidget(new Icon(media), this);
+    new_widget->getIcon()->setParent(new_widget);
+    _icon_widgets.push_back(new_widget);
+    drop_row->addWidget(new_widget, 0, Qt::AlignTop | Qt::AlignLeft);
+    drop_row->insertSpacing(-1, 10);
+}
+
+void MainWin::CreateNewRow(QVBoxLayout* drop_layout, QBoxLayout** drop_row) {
+    QSpacerItem* right_spacer = new QSpacerItem(20, 0, QSizePolicy::Expanding);
+    (*drop_row)->addSpacerItem(right_spacer);
+    *drop_row = new QBoxLayout(QBoxLayout::LeftToRight);
+    (*drop_row)->setSpacing(10);
+    drop_layout->addLayout(*drop_row);
 }
 
 void MainWin::on_EndOfSong() {
@@ -59,23 +154,8 @@ void MainWin::on_EditPlaylistOver(bool b) {
 
     if (b)
         UpdatePlaylist();
-}
 
-
-void MainWin::UpdatePlaylist() {
-
-    ui->CurrentSongLine->clear();
-    ui->CurrentAlbumLine->clear();
-
-    _media_player->stop();
-
-    _playlist->Update();
-
-    qDebug() << "Actual media player status: " << _playlist->Size();
-
-    _playlist->setCurrentIndex(0);
-
-    _media_player->setPlaylist(_playlist->MediaPlaylist());
+    if (_library.empty()) ui->default_placeholder->setVisible(true);
 }
 
 void MainWin::on_VolumeSlider_valueChanged(int value)

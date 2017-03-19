@@ -7,6 +7,7 @@
 #include "dialogeditlibrary.h"
 #include "playlist.h"
 #include "library.h"
+#include "iwidget.h"
 
 #include <QDir>
 #include <QFile>
@@ -18,6 +19,8 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QShortcut>
+#include <QBoxLayout>
+#include <QVector>
 
 
 #include <vector>
@@ -36,11 +39,16 @@ public:
     explicit MainWin(QWidget *parent = 0);
     ~MainWin();
 
-    void LoadAlbums();
-
-    void LoadSongs();
+protected:
 
     void UpdatePlaylist();
+
+    void CreateDropArea();
+
+    void CreateWidget(Album * const media, QBoxLayout *drop_row);
+    void CreateWidget(Song * const media, QBoxLayout * const drop_row);
+
+    void CreateNewRow(QVBoxLayout *drop_layout, QBoxLayout **drop_row);
 
 private slots:
     void on_VolumeSlider_valueChanged(int value);
@@ -77,6 +85,8 @@ private:
     QMediaPlayer* _media_player;
 
     Playlist* _playlist;
+
+    QVector<iWidget*> _icon_widgets;
 
     Library _library;
 };

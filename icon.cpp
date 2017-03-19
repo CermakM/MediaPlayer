@@ -1,20 +1,27 @@
 #include "icon.h"
 
-template <class T> Icon<T>::Icon(QWidget* parent) : QLabel(parent) {
-
+Icon::Icon(QWidget* parent) :
+    QLabel(parent)
+{
     _pixmap = new QPixmap(":/icons/icon_empty_folder");
+    _type = T_NOTYPE;
 
     qDebug() << "Invalid or unspecified media passed to Icon constructor";
     qDebug() << "Empty folder will be created";
 
     _path_to_media = "Unspecified";
     _media_ptr = nullptr;
+    _title = "Unknown";
 
     CreateLabel(_pixmap);
 }
 
-template<> Icon<Album>::Icon (Album *media, QWidget *parent) : QLabel(parent) {
+Icon::Icon (Album *media, QWidget *parent) :
+    QLabel(parent)
+{
     _media_ptr = media;
+    _title = _media_ptr->getTitle();
+    _type = T_ALBUM;
     Album* album_ptr = media;
 
     if(album_ptr->CurrentIcon()) {
@@ -30,9 +37,12 @@ template<> Icon<Album>::Icon (Album *media, QWidget *parent) : QLabel(parent) {
     CreateLabel(_pixmap);
 }
 
-template<> Icon<Song>::Icon(Song *media, QWidget *parent) : QLabel(parent) {
-
+Icon::Icon(Song *media, QWidget *parent) :
+    QLabel(parent)
+{
     _media_ptr = media;
+    _title = _media_ptr->getTitle();
+    _type = T_SONG;
     Song* song_ptr = media;
 
     _pixmap = new QPixmap(":/icons/icon_song");
@@ -45,47 +55,71 @@ template<> Icon<Song>::Icon(Song *media, QWidget *parent) : QLabel(parent) {
 }
 
 
-template<class T> Icon<T>::~Icon() {
+Icon::~Icon() {
 
-    delete _label;
     delete _pixmap;
 }
 
 
-template<class T> bool Icon<T>::CreateLabel(QPixmap* pixmap) {
+bool Icon::CreateLabel(QPixmap* pixmap) {
     if (!pixmap) {
         qDebug() << "Error creating QLabel: QPixmap = nullptr\n";
         return false;
     }
 
-    _label = new QLabel();
-
-    _label->setPixmap(*pixmap);
+    this->setPixmap(pixmap->scaled(_size, Qt::KeepAspectRatio));
+    this->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    this->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    this->setMinimumSize(_size);
+    this->setBaseSize(64,64);
 
     return true;
 }
 
-template<class T> void Icon<T>::mousePressEvent(QMouseEvent *ev)
+void Icon::setTitle(const QString &new_title)
+{
+    // Temporary solution
+    _title = new_title;
+}
+
+void Icon::mousePressEvent(QMouseEvent *ev)
 {
     (void) ev;
     _clicked = !_clicked;
     emit clicked();
-    emit pressed(true);
+    emit pressed();
 }
 
-template<class T> void Icon<T>::mouseReleaseEvent(QMouseEvent *ev)
+void Icon::mouseReleaseEvent(QMouseEvent *ev)
 {
     (void) ev;
-    emit pressed(false);
+    emit released();
 }
 
-template<class T> void Icon<T>::mouseDoubleClickEvent(QMouseEvent *ev)
+void Icon::mouseDoubleClickEvent(QMouseEvent *ev)
 {
     (void) ev;
     emit double_clicked();
 }
 
-template<class T> void Icon<T>::Update() {
+void Icon::Update() {
 
-    _label->setMaximumSize(_size);
+    this->setPixmap(_pixmap->scaled(_size, Qt::KeepAspectRatio));
+}
+
+
+void Icon::on_click()
+{
+
+}
+
+
+void Icon::on_doubleClick()
+{
+
+}
+
+void Icon::on_press()
+{
+
 }

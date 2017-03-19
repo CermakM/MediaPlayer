@@ -60,6 +60,8 @@ public:
 
     bool isAlbum(const QString& path);
 
+    bool empty() const { return _albums.empty(); }
+
     friend class DialogEditLibrary;
 
 private:

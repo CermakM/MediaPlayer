@@ -2,6 +2,7 @@
 #define ICON_H
 
 #include "library.h"
+#include "media.h"
 
 #include <QLabel>
 #include <QWidget>
@@ -11,27 +12,10 @@
 
 enum Type {T_NOTYPE, T_ALBUM, T_SONG};
 
-class iSignalSlots : public QObject {
+class Icon : public QLabel
+{
     Q_OBJECT
 
-public:
-    explicit iSignalSlots(QObject* parent = 0) : QObject(parent) {}
-
-signals:
-    void clicked();
-    void double_clicked();
-    void pressed(bool icon_pressed);
-
-public slots:
-    virtual void on_click() = 0;
-    virtual void on_doubleClick() = 0;
-    virtual void on_press(bool icon_pressed) = 0;
-
-};
-
-template <class T>
-class Icon : public QLabel, iSignalSlots
-{
 public:
    explicit Icon(QWidget* parent = 0);
    ~Icon();
@@ -45,8 +29,10 @@ public:
    }
 
    inline QString getTitle() const {
-       return _media_ptr ? _media_ptr->getTitle() : nullptr;
+       return _title;
    }
+
+   void setTitle(QString const& new_title);
 
    void mousePressEvent(QMouseEvent* ev);
 
@@ -56,19 +42,41 @@ public:
 
    void Update();
 
+   bool isNull() { return _pixmap == nullptr; }
+
+   QSize size() const {return this->_size; }
+
+   Type getType() const { return _type; }
+
+signals:
+   void clicked();
+
+   void double_clicked();
+
+   void pressed();
+
+   void released();
+
+
+public slots:
+
+   void on_click();
+
+   void on_doubleClick();
+
+   void on_press();
+
 private:
     QString _path_to_media;
+    QString _title;
     QPixmap* _pixmap;
-    QLabel* _label;
     Type _type;
-    T* _media_ptr;
+    Media* _media_ptr;
 
     bool _in_playlist = false;
     bool _clicked = false;
 
-    QSize _size = QSize(32, 32);
-
-
+    QSize _size = QSize(50, 50);
 };
 
 #endif // ICON_H

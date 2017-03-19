@@ -7,3 +7,5 @@
 ## Favourite playlists
 ## make Mainwin user messages not clickable!
 ## Finish shortcuts and arrow-controled slider
+
+## Editable icon names - changes the file name as well!

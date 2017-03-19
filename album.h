@@ -2,6 +2,7 @@
 #define ALBUM_H
 
 #include "song.h"
+#include "media.h"
 
 #include <QDir>
 #include <QFile>
@@ -11,7 +12,7 @@
 #include <QVector>
 #include <QIcon>
 
-class Album
+class Album : public Media
 {
 public:
     Album();
@@ -22,12 +23,6 @@ public:
     Album(const QString& path);
 
     QVector<Song>* getSongs() { return &_songs; }
-
-    QString getPath() const {return _path; }
-
-    QString getTitle() const { return _title; }
-
-    QString getInterpret() const { return _interpret; }
 
     QFileInfoList* getIcons() {return &_icons; }
 
@@ -41,8 +36,6 @@ public:
 
     void setTitle(const QString& title);
 
-    void setInterpret( const QString& interpret) { _interpret = interpret; }
-
     void PushSong(const Song& song) { _songs.push_back(song); }
 
     int CountSongs() const {return _songs.size(); }
@@ -55,15 +48,9 @@ public:
 
 private:
 
-    QString _path;
-    QString _title;
-    QString _interpret;
-
     QVector<Song> _songs;
     QFileInfoList _icons;
-
     QIcon _current_icon;
-
 };
 
 Q_DECLARE_METATYPE(Album)
