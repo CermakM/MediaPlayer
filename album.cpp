@@ -22,13 +22,15 @@ Album::Album(QVector<Song>& songs)
 
     QString album_path = songs[0].getPath();
 
-    album_path = album_path.left(album_path.lastIndexOf("/"));
-
-    _path = album_path;
+    _path = album_path.left(album_path.lastIndexOf("/"));
     _title = songs[0].getAlbumTitle();
     _interpret = songs[0].getInterpret();
 
     _songs = songs;
+
+    for (Song& song : _songs) {
+        song.setParent(this);
+    }
 
     SearchForIcons(_path);
 }
@@ -54,9 +56,7 @@ Album::Album(const QString &path) {
 
         for ( QFileInfo& song: song_paths) {
             QString song_path = song.absoluteFilePath();
-            //QString song_fname = song.fileName();
-            //songs.push_back(Song(song_path, song_fname, song_title, interpret, title));
-            _songs.push_back(Song(song_path));
+            _songs.push_back(Song(song_path, this));
         }
 
         SearchForIcons(_path);

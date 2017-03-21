@@ -9,6 +9,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QSpacerItem>
+#include <QBitmap>
 
 class iWidget : public QWidget
 {
@@ -18,11 +19,13 @@ public:
     explicit iWidget(QWidget* parent = 0);
     explicit iWidget(Icon* icon, QWidget* parent = 0);
 
-    void Adjust();
+    void DefaultAdjustement();
 
     void setTitle(QString const& new_title);
 
-    QString getTitle() const { return _icon_title_label->text(); }
+    QLineEdit* getTitleEditor() const { return _icon_title_editor; }
+
+    QString getTitle() const { return _icon_title_editor->text(); }
 
     Icon* getIcon() { return _icon; }
 
@@ -34,17 +37,25 @@ public:
 
     bool operator == (const iWidget& other);
 
-public slots:
+    void mousePressEvent(QMouseEvent* ev);
 
-    void on_click();
+    void mouseReleaseEvent(QMouseEvent* ev);
 
-    void on_doubleClick();
+    void mouseDoubleClickEvent(QMouseEvent* ev);
 
-    void on_press();
+signals:
+
+    void clicked();
+
+    void double_clicked();
+
+    void pressed();
+
+    void released();
 
 private:
     Icon* _icon;
-    QLineEdit* _icon_title_label;
+    QLineEdit* _icon_title_editor;
 };
 
 #endif // ICONPREVIEW_H

@@ -33,29 +33,29 @@ void DialogEditLibrary::LoadLibrary() {
 }
 
 
-void DialogEditLibrary::CreateTree(QVector<Album> * const album_vec) {
+void DialogEditLibrary::CreateTree(QVector<Album*> * const album_vec) {
 
-    for(Album& album : *album_vec) {
+    for(Album* const album : *album_vec) {
         CreateTreeItem(album);
     }
 }
 
 
-void DialogEditLibrary::CreateTreeItem(Album& album, QTreeWidgetItem* const tree_album_item) {
+void DialogEditLibrary::CreateTreeItem(Album* const album, QTreeWidgetItem* const tree_album_item) {
 
     QTreeWidgetItem* album_item = tree_album_item;
     QTreeWidgetItem* song_item  = nullptr;
 
-    if (album.getTitle() != "-" && !album_item) {
+    if (album->getTitle() != "-" && !album_item) {
         album_item = new QTreeWidgetItem(ui->AlbumsTree);
-        album_item->setText(0, album.getTitle());
-        album_item->setText(1, album.getInterpret());
+        album_item->setText(0, album->getTitle());
+        album_item->setText(1, album->getInterpret());
 
         // Add the top level item to the tree
         ui->AlbumsTree->addTopLevelItem(album_item);
     }
 
-    for (Song& temp_song : *(album.getSongs())) {
+    for (Song& temp_song : *(album->getSongs())) {
         album_item? song_item = new QTreeWidgetItem(album_item) : song_item = new QTreeWidgetItem(ui->SongsTree);
         // Create child item
         song_item->setText(0, temp_song.getTitle());

@@ -27,16 +27,16 @@ DialogEditPlaylist::DialogEditPlaylist(Library* library, QWidget *parent) :
 
 void DialogEditPlaylist::LoadLibrary() {
 
-    for (Album& temp_album : *(_library->getAlbums())) {
+    for (Album* const temp_album : *(_library->getAlbums())) {
         QTreeWidgetItem* topItm = new QTreeWidgetItem(ui->treeAlbum);
-        topItm->setText(0, temp_album.getTitle());
-        topItm->setText(1, temp_album.getInterpret());
+        topItm->setText(0, temp_album->getTitle());
+        topItm->setText(1, temp_album->getInterpret());
 
         // Add the top level item to the tree
         ui->treeAlbum->addTopLevelItem(topItm);
         QTreeWidgetItem* topPlistItm(topItm->clone());
 
-        for (Song& temp_song : *(temp_album.getSongs())) {
+        for (Song& temp_song : *(temp_album->getSongs())) {
             // Create child item
             QTreeWidgetItem* childItm = new QTreeWidgetItem(topItm);
             childItm->setText(0, temp_song.getTitle());

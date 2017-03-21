@@ -2,13 +2,15 @@
 #define ICON_H
 
 #include "library.h"
-#include "media.h"
 
 #include <QLabel>
 #include <QWidget>
 #include <QMouseEvent>
 #include <QEvent>
 #include <QDebug>
+
+#include <QPainter>
+#include <QBrush>
 
 enum Type {T_NOTYPE, T_ALBUM, T_SONG};
 
@@ -28,50 +30,27 @@ public:
        _size = size; this->Update();
    }
 
-   inline QString getTitle() const {
-       return _title;
-   }
-
    void setTitle(QString const& new_title);
 
-   void mousePressEvent(QMouseEvent* ev);
+   inline QString getTitle() const { return _title; }
 
-   void mouseReleaseEvent(QMouseEvent* ev);
-
-   void mouseDoubleClickEvent(QMouseEvent* ev);
+   inline Type getType() const { return _type; }
 
    void Update();
 
-   bool isNull() { return _pixmap == nullptr; }
+   inline bool isNull() { return _pixmap == nullptr; }
 
-   QSize size() const {return this->_size; }
-
-   Type getType() const { return _type; }
-
-signals:
-   void clicked();
-
-   void double_clicked();
-
-   void pressed();
-
-   void released();
-
+   inline QSize size() const {return this->_size; }
 
 public slots:
 
    void on_click();
-
-   void on_doubleClick();
-
-   void on_press();
 
 private:
     QString _path_to_media;
     QString _title;
     QPixmap* _pixmap;
     Type _type;
-    Media* _media_ptr;
 
     bool _in_playlist = false;
     bool _clicked = false;

@@ -10,7 +10,6 @@ Icon::Icon(QWidget* parent) :
     qDebug() << "Empty folder will be created";
 
     _path_to_media = "Unspecified";
-    _media_ptr = nullptr;
     _title = "Unknown";
 
     CreateLabel(_pixmap);
@@ -19,8 +18,7 @@ Icon::Icon(QWidget* parent) :
 Icon::Icon (Album *media, QWidget *parent) :
     QLabel(parent)
 {
-    _media_ptr = media;
-    _title = _media_ptr->getTitle();
+    _title = media->getTitle();
     _type = T_ALBUM;
     Album* album_ptr = media;
 
@@ -40,8 +38,7 @@ Icon::Icon (Album *media, QWidget *parent) :
 Icon::Icon(Song *media, QWidget *parent) :
     QLabel(parent)
 {
-    _media_ptr = media;
-    _title = _media_ptr->getTitle();
+    _title = media->getTitle();
     _type = T_SONG;
     Song* song_ptr = media;
 
@@ -82,44 +79,12 @@ void Icon::setTitle(const QString &new_title)
     _title = new_title;
 }
 
-void Icon::mousePressEvent(QMouseEvent *ev)
-{
-    (void) ev;
-    _clicked = !_clicked;
-    emit clicked();
-    emit pressed();
-}
-
-void Icon::mouseReleaseEvent(QMouseEvent *ev)
-{
-    (void) ev;
-    emit released();
-}
-
-void Icon::mouseDoubleClickEvent(QMouseEvent *ev)
-{
-    (void) ev;
-    emit double_clicked();
-}
-
 void Icon::Update() {
 
     this->setPixmap(_pixmap->scaled(_size, Qt::KeepAspectRatio));
 }
 
-
 void Icon::on_click()
-{
-
-}
-
-
-void Icon::on_doubleClick()
-{
-
-}
-
-void Icon::on_press()
 {
 
 }

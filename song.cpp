@@ -1,11 +1,5 @@
 #include "song.h"
 
-Song::Song() {
-
-    qDebug() << "Empty song has been creaded";
-
-}
-
 Song::Song(const QString path, Album* parent)
 {
     _parent = parent;

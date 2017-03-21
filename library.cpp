@@ -69,9 +69,9 @@ void Library::LoadDatabase()
             qDebug() << "Query not executed successfully" << query.lastError();
             return;
         }
-    }
 
-    tableList = _database.tables();
+        tableList = _database.tables();
+    }
 
     for (QString& table : tableList) {
 
@@ -99,8 +99,9 @@ void Library::LoadDatabase()
             songs.push_back(Song(title, path, interpret, album, year, inPlaylist));
         }
 
-        Album new_album(songs);
-        new_album.setTitle(table);
+        Album* new_album = new Album(songs);
+
+        new_album->setTitle(table);
 
         _albums.push_back(new_album);
     }
@@ -111,8 +112,8 @@ void Library::LoadDatabase()
 
 void Library::SetupPlaylist()
 {
-    for (Album& album : _albums) {
-        for(Song& song : *(album.getSongs()))
+    for (Album* const album : _albums) {
+        for(Song& song : *(album->getSongs()))
             if (song.is_in_playlist) _playlist.AddMedia(&song);
     }
 
@@ -206,7 +207,7 @@ void Library::AddMedia(Album *album) {
 
     // If there are duplicite songs, filter them
     if ( album->CountSongs() - songs_to_add.size()) {
-        Album* current_album = &(_albums[_albums.indexOf(*album)]);
+        Album* current_album = _albums[_albums.indexOf(album)];
         for (const Song& song : songs_to_add) {
             current_album->PushSong(song);
         }
@@ -214,10 +215,10 @@ void Library::AddMedia(Album *album) {
     else if (album->getTitle() == "-") {
         for (Song& song : *(album->getSongs()))
             // Untitled songs stored on 0. position of albums
-            _albums[0].PushSong(song);
+            _albums[0]->PushSong(song);
     }
     else {
-        _albums.push_back(*album);
+        _albums.push_back(album);
     }
 }
 
@@ -229,6 +230,12 @@ void Library::RemoveMedia(Album *album)
         return;
     }
 
+    if(!album) {
+        qDebug() << "Error in Library::RemoveMieda(Album*) : could not find a corresponding media for null";
+        return;
+    }
+
+
     QSqlQuery query(_database);
     if (!query.exec("DROP TABLE IF EXISTS '"+album->getTitle()+"'")) {
         qDebug() << "in Library::RemoveMedia : " << query.lastError();
@@ -237,7 +244,7 @@ void Library::RemoveMedia(Album *album)
 
     _database.close();
 
-    _albums.removeAt(_albums.indexOf(*album));
+    _albums.removeAt(_albums.indexOf(album));
 }
 
 void Library::RemoveMedia(Song *song)
@@ -246,7 +253,19 @@ void Library::RemoveMedia(Song *song)
         qDebug() << "in Library::RemoveMedia : " << _database.lastError();
         return;
     }
-    Album* const album_ptr= song->getAlbum();
+
+    if(!song) {
+        qDebug() << "Error in Library::RemoveMieda(Song*) : could not find a corresponding media for null";
+        return;
+    }
+
+    Album* album_ptr= song->getAlbum();
+
+    if(!album_ptr) {
+        qDebug() << "Laughing: every song has to have an album... enjoy the segmentation fault!";
+    }
+
+    const QString title = album_ptr->getTitle();
 
     QSqlQuery query(_database);
     if (!query.exec("DELETE FROM '"+album_ptr->getTitle()+"' where title='"+song->getTitle()+"'")) {
@@ -255,7 +274,6 @@ void Library::RemoveMedia(Song *song)
     }
 
     _database.close();
-
 
     QVector<Song>* song_vec = album_ptr->getSongs();
     const int index_of_song = song_vec->indexOf(*song);
@@ -272,8 +290,8 @@ void Library::infoDatabaseAddress() const
 Song* Library::getSongByTitle(const QString & title)
 {
     Song* song_ptr = nullptr;
-    for(Album& album : _albums) {
-        for( Song& song : *(album.getSongs())) {
+    for(Album* const album : _albums) {
+        for( Song& song : *(album->getSongs())) {
             if ( song.getTitle() == title) {
                 song_ptr = &song;
                 qDebug() << "Song found: " << song.getTitle() << " | Album: " << song.getAlbumTitle();
@@ -288,9 +306,9 @@ Song* Library::getSongByTitle(const QString & title)
 Album* Library::getAlbumByTitle(const QString & title)
 {
     Album* album_ptr = nullptr;
-    for (Album& album : _albums) {
-        if ( album.getTitle() == title)
-            album_ptr = &album;
+    for (Album* const album : _albums) {
+        if ( album->getTitle() == title)
+            album_ptr = album;
     }
 
     return album_ptr;

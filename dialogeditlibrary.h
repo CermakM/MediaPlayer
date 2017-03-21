@@ -30,9 +30,9 @@ public:
 
     void LoadLibrary();
 
-    void CreateTree(QVector<Album>* const album_vec);
+    void CreateTree(QVector<Album*>* const album_vec);
 
-    void CreateTreeItem(Album &album, QTreeWidgetItem * const tree_album_item = nullptr);
+    void CreateTreeItem(Album * const album, QTreeWidgetItem * const tree_album_item = nullptr);
 
 signals:
     void UpdatePlaylist(bool b);

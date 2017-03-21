@@ -20,6 +20,7 @@
 #include <QMessageBox>
 #include <QShortcut>
 #include <QBoxLayout>
+#include <QSignalMapper>
 #include <QVector>
 
 
@@ -48,7 +49,9 @@ protected:
     void CreateWidget(Album * const media, QBoxLayout *drop_row);
     void CreateWidget(Song * const media, QBoxLayout * const drop_row);
 
-    void CreateNewRow(QVBoxLayout *drop_layout, QBoxLayout **drop_row);
+    void CreateNewRow(QBoxLayout *drop_layout, QBoxLayout **drop_row);
+
+    void ConnectSignals();
 
 private slots:
     void on_VolumeSlider_valueChanged(int value);
@@ -79,6 +82,14 @@ private slots:
 
     void on_actionEditLibrary_triggered();
 
+    void on_Icon_click(QWidget* target);
+
+    void on_Icon_doubleClick(QWidget* target);
+
+    void on_ButtonDeselect_clicked();
+
+    void on_ButtonRemove_clicked();
+
 private:
     Ui::MainWin *ui;
 
@@ -86,9 +97,13 @@ private:
 
     Playlist* _playlist;
 
+    Library _library;
+
     QVector<iWidget*> _icon_widgets;
 
-    Library _library;
+    QVector<iWidget*> _selected_icons;
+
+    QSignalMapper* _icon_signal_mapper;
 };
 
 #endif // MAINWIN_H

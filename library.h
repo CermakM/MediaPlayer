@@ -46,7 +46,7 @@ public:
 
     QString getDatabasePath() const { return _database_path; }
 
-    QVector<Album>* getAlbums() {return &_albums; }
+    QVector<Album*> * getAlbums() {return &_albums; }
 
     Song* getSongByTitle(const QString & title);
 
@@ -72,7 +72,7 @@ private:
 
     Playlist _playlist;
 
-    QVector<Album> _albums;
+    QVector<Album*> _albums;
 
     QString _database_path;
 

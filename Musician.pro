@@ -37,14 +37,12 @@ SOURCES += \
     dialogeditplaylist.cpp \
     dragarea.cpp \
     icon.cpp \
-    idelegate.cpp \
     iwidget.cpp \
     library.cpp \
     main.cpp \
     mainwin.cpp \
     playlist.cpp \
-    song.cpp \
-    media.cpp
+    song.cpp
 
 HEADERS  += \
     album.h \
@@ -54,14 +52,12 @@ HEADERS  += \
     dialogeditplaylist.h \
     dragarea.h \
     icon.h \
-    idelegate.h \
     iwidget.h \
     library.h \
     mainwin.h \
     playlist.h \
     probe.h \
-    song.h \
-    media.h
+    song.h
 
 RESOURCES += \
     resource.qrc

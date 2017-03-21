@@ -10,31 +10,11 @@ MainWin::MainWin(QWidget *parent) :
     _media_player = new QMediaPlayer(this);
     _playlist = _library.getPlaylist();
 
-    // Connect Signals and slots
-    connect(_media_player, &QMediaPlayer::positionChanged, this, &MainWin::on_PositionChange);
-    connect(_media_player, &QMediaPlayer::durationChanged, this, &MainWin::on_DurationChange);
-    connect(_playlist->MediaPlaylist(), SIGNAL(currentIndexChanged(int)), this, SLOT(on_EndOfSong()));
+    CreateDropArea();
 
-    // Connect shortcuts
-    QShortcut* shortcutAddAlbum = new QShortcut(QKeySequence("Ctrl+A"), this);
-    QShortcut* shortcutAddSongs = new QShortcut(QKeySequence("Ctrl+S"), this);
-    QShortcut* shortcutEditPlaylist = new QShortcut(QKeySequence("Ctrl+P"), this);
-    QShortcut* shortcutEditLibrary = new QShortcut(QKeySequence("Ctrl+L"), this);
-    QShortcut* shortcutPlayButton = new QShortcut(QKeySequence("P"), this);
-    QShortcut* shortcutStopButton = new QShortcut(QKeySequence("S"), this);
-    QShortcut* shortcutForwardButton = new QShortcut(QKeySequence(Qt::Key_Right), this);
-    QShortcut* shortcutBackwardButton = new QShortcut(QKeySequence(Qt::Key_Left), this);
-
-    connect(shortcutAddAlbum, SIGNAL(activated()), this, SLOT(on_actionAddNewAlbum_triggered()));
-    connect(shortcutAddSongs, SIGNAL(activated()), this, SLOT(on_actionAddNewSongs_triggered()));
-    connect(shortcutEditPlaylist, SIGNAL(activated()), this, SLOT(on_actionEditPlaylist_triggered()));
-    connect(shortcutEditLibrary, SIGNAL(activated()), this, SLOT(on_actionEditLibrary_triggered()));
-    connect(shortcutPlayButton, SIGNAL(activated()), this, SLOT(on_PlayMusicButton_clicked()));
-    connect(shortcutStopButton, SIGNAL(activated()), this, SLOT(on_StopMusicButton_clicked()));
+    ConnectSignals();
 
     UpdatePlaylist();
-
-    CreateDropArea();
 }
 
 MainWin::~MainWin()
@@ -63,33 +43,23 @@ void MainWin::CreateDropArea()
 {
     if (!_library.empty()) ui->default_placeholder->setVisible(false);
 
-    QVBoxLayout* drop_layout = new QVBoxLayout();
+    QBoxLayout* drop_layout = new QBoxLayout(QBoxLayout::TopToBottom, ui->dropArea);
+    drop_layout->setSpacing(20);
     ui->dropArea->setLayout(drop_layout);
-
-    /* TEST CODE
-
-    iWidget* sample_widget = new iWidget(ui->dropArea);
-    sample_widget->setTitle("sample");
-    iWidget* sample_widget1 = new iWidget(ui->dropArea);
-    sample_widget1->setTitle("sample1");
-    iWidget* sample_widget2 = new iWidget(ui->dropArea);
-    sample_widget2->setTitle("sample2");
-    drop_layout->addWidget(sample_widget, 0, Qt::AlignTop | Qt::AlignLeft);
-    drop_layout->addWidget(sample_widget1, 0, Qt::AlignTop | Qt::AlignLeft);
-    drop_layout->addWidget(sample_widget2, 0, Qt::AlignTop | Qt::AlignLeft);
-
-    */
 
     const int MAX_WIDGET_SIZE = 128;
     int max_widget_count = this->width() / MAX_WIDGET_SIZE * 2;
 
-    QBoxLayout* drop_row = new QBoxLayout(QBoxLayout::LeftToRight);
+    QBoxLayout* drop_row = new QBoxLayout(QBoxLayout::LeftToRight, ui->dropArea);
     drop_row->setSpacing(10);
+    drop_row->setSizeConstraint(QLayout::SetMaximumSize);
     drop_layout->addLayout(drop_row);
 
-    for (Album album : *(_library.getAlbums())) {
-        if ( album.getTitle() != "-") {
-            for (Song song : *(album.getSongs())) {
+    _icon_signal_mapper = new QSignalMapper(this);
+
+    for (Album* const album : *(_library.getAlbums())) {
+        if ( album->getTitle() != "-") {
+            for (Song& song : *(album->getSongs())) {
                 CreateWidget(&song, drop_row);
                 if (max_widget_count == drop_row->count()) {
                     qDebug() << drop_row->count();
@@ -98,13 +68,12 @@ void MainWin::CreateDropArea()
             }
         }
         else {
-            CreateWidget(&album, drop_row);
+            CreateWidget(album, drop_row);
             if (max_widget_count == drop_row->count()) {
                 CreateNewRow(drop_layout, &drop_row);
             }
         }
     }
-
 
     QSpacerItem* right_spacer = new QSpacerItem(20, 0, QSizePolicy::Expanding);
     drop_row->addSpacerItem(right_spacer);
@@ -117,6 +86,9 @@ void MainWin::CreateWidget(Album* const media, QBoxLayout* drop_row) {
     _icon_widgets.push_back(new_widget);
     drop_row->addWidget(new_widget, 0, Qt::AlignTop | Qt::AlignLeft);
     drop_row->insertSpacing(-1, 10);
+
+    _icon_signal_mapper->setMapping(new_widget, new_widget);
+    connect(new_widget, SIGNAL(clicked()), _icon_signal_mapper, SLOT(map()));
 }
 
 void MainWin::CreateWidget(Song* const media, QBoxLayout* const drop_row) {
@@ -125,14 +97,46 @@ void MainWin::CreateWidget(Song* const media, QBoxLayout* const drop_row) {
     _icon_widgets.push_back(new_widget);
     drop_row->addWidget(new_widget, 0, Qt::AlignTop | Qt::AlignLeft);
     drop_row->insertSpacing(-1, 10);
+
+    _icon_signal_mapper->setMapping(new_widget, new_widget);
+    connect(new_widget, SIGNAL(clicked()), _icon_signal_mapper, SLOT(map()));
 }
 
-void MainWin::CreateNewRow(QVBoxLayout* drop_layout, QBoxLayout** drop_row) {
+void MainWin::CreateNewRow(QBoxLayout* drop_layout, QBoxLayout** drop_row) {
     QSpacerItem* right_spacer = new QSpacerItem(20, 0, QSizePolicy::Expanding);
     (*drop_row)->addSpacerItem(right_spacer);
-    *drop_row = new QBoxLayout(QBoxLayout::LeftToRight);
+    *drop_row = new QBoxLayout(QBoxLayout::LeftToRight, ui->dropArea);
     (*drop_row)->setSpacing(10);
     drop_layout->addLayout(*drop_row);
+}
+
+void MainWin::ConnectSignals()
+{
+
+    // Connect Signals and slots
+    connect(_media_player, &QMediaPlayer::positionChanged, this, &MainWin::on_PositionChange);
+    connect(_media_player, &QMediaPlayer::durationChanged, this, &MainWin::on_DurationChange);
+    connect(_playlist->MediaPlaylist(), SIGNAL(currentIndexChanged(int)), this, SLOT(on_EndOfSong()));
+
+
+    // Shortcuts
+    QShortcut* shortcutAddAlbum = new QShortcut(QKeySequence("Ctrl+A"), this);
+    QShortcut* shortcutAddSongs = new QShortcut(QKeySequence("Ctrl+S"), this);
+    QShortcut* shortcutEditPlaylist = new QShortcut(QKeySequence("Ctrl+P"), this);
+    QShortcut* shortcutEditLibrary = new QShortcut(QKeySequence("Ctrl+L"), this);
+    QShortcut* shortcutPlayButton = new QShortcut(QKeySequence("P"), this);
+    QShortcut* shortcutStopButton = new QShortcut(QKeySequence("S"), this);
+    QShortcut* shortcutForwardButton = new QShortcut(QKeySequence(Qt::Key_Right), this);
+    QShortcut* shortcutBackwardButton = new QShortcut(QKeySequence(Qt::Key_Left), this);
+
+    connect(shortcutAddAlbum, SIGNAL(activated()), this, SLOT(on_actionAddNewAlbum_triggered()));
+    connect(shortcutAddSongs, SIGNAL(activated()), this, SLOT(on_actionAddNewSongs_triggered()));
+    connect(shortcutEditPlaylist, SIGNAL(activated()), this, SLOT(on_actionEditPlaylist_triggered()));
+    connect(shortcutEditLibrary, SIGNAL(activated()), this, SLOT(on_actionEditLibrary_triggered()));
+    connect(shortcutPlayButton, SIGNAL(activated()), this, SLOT(on_PlayMusicButton_clicked()));
+    connect(shortcutStopButton, SIGNAL(activated()), this, SLOT(on_StopMusicButton_clicked()));
+
+    connect(_icon_signal_mapper, SIGNAL(mapped(QWidget*)), this, SLOT(on_Icon_click(QWidget*)));
 }
 
 void MainWin::on_EndOfSong() {
@@ -252,4 +256,51 @@ void MainWin::on_ButtonBackward_clicked()
     _media_player->playlist()->previous();
 }
 
+void MainWin::on_Icon_click(QWidget *target)
+{
+    iWidget* d_target = dynamic_cast<iWidget*>(target);
 
+    d_target->getIcon()->setStyleSheet("background: #cccccc");
+
+    QLineEdit* icon_title_editor = d_target->getTitleEditor();
+
+    icon_title_editor->setFocus();
+    icon_title_editor->raise();
+    icon_title_editor->setFont(QFont("Tahoma", 11, QFont::Bold));
+
+    _selected_icons.push_back(d_target);
+}
+
+void MainWin::on_Icon_doubleClick(QWidget *target)
+{
+
+}
+
+void MainWin::on_ButtonDeselect_clicked()
+{
+    for (iWidget* icon : _selected_icons ) {
+        icon->DefaultAdjustement();
+    }
+
+    _selected_icons.clear();
+    QVector<iWidget*>().swap(_selected_icons);
+}
+
+void MainWin::on_ButtonRemove_clicked()
+{
+    while( !_selected_icons.empty()) {
+        iWidget* icon = _selected_icons.front();
+
+        ui->dropArea->layout()->removeWidget(icon);
+        if (icon->getType() == Type::T_ALBUM) {
+            _library.RemoveMedia(_library.getAlbumByTitle(icon->getTitle()));
+        }
+        else {
+            _library.RemoveMedia(_library.getSongByTitle(icon->getTitle()));
+        }
+        _selected_icons.removeFirst();
+        delete icon;
+    }
+
+    QVector<iWidget*>().swap(_selected_icons);
+}
