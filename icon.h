@@ -34,6 +34,8 @@ public:
 
    inline QString getTitle() const { return _title; }
 
+   inline QString getPath() const { return _path_to_media; }
+
    inline Type getType() const { return _type; }
 
    void Update();

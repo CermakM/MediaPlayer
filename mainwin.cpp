@@ -58,9 +58,9 @@ void MainWin::CreateDropArea()
     _icon_signal_mapper = new QSignalMapper(this);
 
     for (Album* const album : *(_library.getAlbums())) {
-        if ( album->getTitle() != "-") {
+        if ( album->getTitle() == "-") {
             for (Song& song : *(album->getSongs())) {
-                CreateWidget(&song, drop_row);
+                CreateWidget(&song, drop_row, T_SONG);
                 if (max_widget_count == drop_row->count()) {
                     qDebug() << drop_row->count();
                     CreateNewRow(drop_layout, &drop_row);
@@ -68,7 +68,7 @@ void MainWin::CreateDropArea()
             }
         }
         else {
-            CreateWidget(album, drop_row);
+            CreateWidget(album, drop_row, T_ALBUM);
             if (max_widget_count == drop_row->count()) {
                 CreateNewRow(drop_layout, &drop_row);
             }
@@ -79,9 +79,18 @@ void MainWin::CreateDropArea()
     drop_row->addSpacerItem(right_spacer);
 }
 
+void MainWin::CreateWidget(void* const media, QBoxLayout* drop_row, Type type) {
 
-void MainWin::CreateWidget(Album* const media, QBoxLayout* drop_row) {
-    iWidget* new_widget = new iWidget(new Icon(media), this);
+    iWidget* new_widget = nullptr;
+    if ( type == T_ALBUM )
+        new_widget = new iWidget(new Icon(static_cast<Album*>(media)), this);
+    else if ( type == T_SONG)
+        new_widget = new iWidget(new Icon(static_cast<Song*>(media)), this);
+    else {
+        qDebug() << "Icon type T_NOTYPE specified. Default folder will be created";
+        new_widget = new iWidget(new Icon(), this);
+    }
+
     new_widget->getIcon()->setParent(new_widget);
     _icon_widgets.push_back(new_widget);
     drop_row->addWidget(new_widget, 0, Qt::AlignTop | Qt::AlignLeft);
@@ -89,18 +98,32 @@ void MainWin::CreateWidget(Album* const media, QBoxLayout* drop_row) {
 
     _icon_signal_mapper->setMapping(new_widget, new_widget);
     connect(new_widget, SIGNAL(clicked()), _icon_signal_mapper, SLOT(map()));
+    connect(new_widget, SIGNAL(double_clicked()), _icon_signal_mapper, SLOT(map()));
 }
 
-void MainWin::CreateWidget(Song* const media, QBoxLayout* const drop_row) {
-    iWidget* new_widget = new iWidget(new Icon(media), this);
-    new_widget->getIcon()->setParent(new_widget);
-    _icon_widgets.push_back(new_widget);
-    drop_row->addWidget(new_widget, 0, Qt::AlignTop | Qt::AlignLeft);
-    drop_row->insertSpacing(-1, 10);
+//void MainWin::CreateWidget(Album* const media, QBoxLayout* drop_row) {
+//    iWidget* new_widget = new iWidget(new Icon(media), this);
+//    new_widget->getIcon()->setParent(new_widget);
+//    _icon_widgets.push_back(new_widget);
+//    drop_row->addWidget(new_widget, 0, Qt::AlignTop | Qt::AlignLeft);
+//    drop_row->insertSpacing(-1, 10);
 
-    _icon_signal_mapper->setMapping(new_widget, new_widget);
-    connect(new_widget, SIGNAL(clicked()), _icon_signal_mapper, SLOT(map()));
-}
+//    _icon_signal_mapper->setMapping(new_widget, new_widget);
+//    connect(new_widget, SIGNAL(clicked()), _icon_signal_mapper, SLOT(map()));
+//    connect(new_widget, SIGNAL(double_clicked()), _icon_signal_mapper, SLOT(map()));
+//}
+
+//void MainWin::CreateWidget(Song* const media, QBoxLayout* const drop_row) {
+//    iWidget* new_widget = new iWidget(new Icon(media), this);
+//    new_widget->getIcon()->setParent(new_widget);
+//    _icon_widgets.push_back(new_widget);
+//    drop_row->addWidget(new_widget, 0, Qt::AlignTop | Qt::AlignLeft);
+//    drop_row->insertSpacing(-1, 10);
+
+//    _icon_signal_mapper->setMapping(new_widget, new_widget);
+//    connect(new_widget, SIGNAL(clicked()), _icon_signal_mapper, SLOT(map()));
+//    connect(new_widget, SIGNAL(double_clicked()), _icon_signal_mapper, SLOT(map()));
+//}
 
 void MainWin::CreateNewRow(QBoxLayout* drop_layout, QBoxLayout** drop_row) {
     QSpacerItem* right_spacer = new QSpacerItem(20, 0, QSizePolicy::Expanding);
@@ -133,10 +156,11 @@ void MainWin::ConnectSignals()
     connect(shortcutAddSongs, SIGNAL(activated()), this, SLOT(on_actionAddNewSongs_triggered()));
     connect(shortcutEditPlaylist, SIGNAL(activated()), this, SLOT(on_actionEditPlaylist_triggered()));
     connect(shortcutEditLibrary, SIGNAL(activated()), this, SLOT(on_actionEditLibrary_triggered()));
-    connect(shortcutPlayButton, SIGNAL(activated()), this, SLOT(on_PlayMusicButton_clicked()));
-    connect(shortcutStopButton, SIGNAL(activated()), this, SLOT(on_StopMusicButton_clicked()));
+    connect(shortcutPlayButton, SIGNAL(activated()), this, SLOT(on_ButtonPlay_clicked()));
+    connect(shortcutStopButton, SIGNAL(activated()), this, SLOT(on_ButtonStop_clicked()));
 
     connect(_icon_signal_mapper, SIGNAL(mapped(QWidget*)), this, SLOT(on_Icon_click(QWidget*)));
+    connect(_icon_signal_mapper, SIGNAL(mapped(QWidget*)), this, SLOT(on_Icon_doubleClick(QWidget*)));
 }
 
 void MainWin::on_EndOfSong() {
@@ -194,13 +218,13 @@ void MainWin::on_DurationChange(qint64 position)
 }
 
 
-void MainWin::on_PlayMusicButton_clicked()
+void MainWin::on_ButtonPlay_clicked()
 {
     _media_player->state() == QMediaPlayer::PlayingState ?
     _media_player->pause() : _media_player->play();
 }
 
-void MainWin::on_StopMusicButton_clicked()
+void MainWin::on_ButtonStop_clicked()
 {
     _media_player->stop();
 }
@@ -248,12 +272,12 @@ void MainWin::on_actionEditLibrary_triggered()
 
 void MainWin::on_ButtonForward_clicked()
 {
-    _media_player->playlist()->next();
+    if (_media_player->playlist()) _media_player->playlist()->next();
 }
 
 void MainWin::on_ButtonBackward_clicked()
 {
-    _media_player->playlist()->previous();
+    if (_media_player->playlist()) _media_player->playlist()->previous();
 }
 
 void MainWin::on_Icon_click(QWidget *target)
@@ -272,9 +296,23 @@ void MainWin::on_Icon_click(QWidget *target)
 }
 
 void MainWin::on_Icon_doubleClick(QWidget *target)
-{
+{  
+        iWidget* icon = dynamic_cast<iWidget*>(target);
 
+        if (icon->getType() == Type::T_SONG) {
+            _media_player->stop();
+            _media_player->setMedia(QMediaContent(QUrl::fromLocalFile(icon->getPath())));
+            Song* song_to_play = _library.getSongByTitle(icon->getTitle());
+            ui->CurrentAlbumLine->setText(song_to_play->getAlbumTitle());
+            ui->CurrentSongLine->setText(song_to_play->getTitle());
+            _media_player->play();
+        }
+        else if (icon->getType() == Type::T_ALBUM){
+            // Open the Album folder
+
+        }
 }
+
 
 void MainWin::on_ButtonDeselect_clicked()
 {

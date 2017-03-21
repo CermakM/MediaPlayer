@@ -5,7 +5,8 @@
 ## Create forw / backward buttons - edit icons of the buttons
 ## Rate songs and albums (stars / hearts... ) 
 ## Favourite playlists
-## make Mainwin user messages not clickable!
 ## Finish shortcuts and arrow-controled slider
 
 ## Editable icon names - changes the file name as well!
+## Adjust SQL to delete files with " ' " properly
+## Work on a better layout....

@@ -46,8 +46,11 @@ protected:
 
     void CreateDropArea();
 
-    void CreateWidget(Album * const media, QBoxLayout *drop_row);
-    void CreateWidget(Song * const media, QBoxLayout * const drop_row);
+    void UpdateDropArea();
+
+//    void CreateWidget(Album * const media, QBoxLayout *drop_row);
+//    void CreateWidget(Song * const media, QBoxLayout * const drop_row);
+    void CreateWidget(void* const media, QBoxLayout* drop_row, Type type);
 
     void CreateNewRow(QBoxLayout *drop_layout, QBoxLayout **drop_row);
 
@@ -62,9 +65,9 @@ private slots:
 
     void on_DurationChange( qint64 position );
 
-    void on_PlayMusicButton_clicked();
+    void on_ButtonPlay_clicked();
 
-    void on_StopMusicButton_clicked();
+    void on_ButtonStop_clicked();
 
     void on_actionAddNewAlbum_triggered();
 

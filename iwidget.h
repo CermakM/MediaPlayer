@@ -21,15 +21,17 @@ public:
 
     void DefaultAdjustement();
 
-    void setTitle(QString const& new_title);
+    inline void setTitle(QString const& new_title);
 
-    QLineEdit* getTitleEditor() const { return _icon_title_editor; }
+    inline QLineEdit* getTitleEditor() const { return _icon_title_editor; }
 
-    QString getTitle() const { return _icon_title_editor->text(); }
+    inline QString getTitle() const { return _icon_title_editor->text(); }
 
-    Icon* getIcon() { return _icon; }
+    inline Icon* getIcon() { return _icon; }
 
-    Type  getType() const { return _icon->getType(); }
+    inline Type  getType() const { return _icon->getType(); }
+
+    inline QString getPath() const { return _icon->getPath(); }
 
     QSize sizeHint();
 
