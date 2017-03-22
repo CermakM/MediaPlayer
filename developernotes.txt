@@ -10,3 +10,5 @@
 ## Editable icon names - changes the file name as well!
 ## Adjust SQL to delete files with " ' " properly
 ## Work on a better layout....
+## Segmentation fault if adding songs from multiple folders
+

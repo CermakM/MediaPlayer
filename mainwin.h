@@ -8,6 +8,7 @@
 #include "playlist.h"
 #include "library.h"
 #include "iwidget.h"
+#include "flowlayout.h"
 
 #include <QDir>
 #include <QFile>
@@ -27,6 +28,7 @@
 #include <vector>
 #include <fstream>
 
+const int MAX_WIDGET_SIZE = 128;
 
 namespace Ui {
 class MainWin;
@@ -46,17 +48,16 @@ protected:
 
     void CreateDropArea();
 
-    void UpdateDropArea();
-
 //    void CreateWidget(Album * const media, QBoxLayout *drop_row);
 //    void CreateWidget(Song * const media, QBoxLayout * const drop_row);
-    void CreateWidget(void* const media, QBoxLayout* drop_row, Type type);
+    void CreateWidget(void* const media, Type type);
 
     void CreateNewRow(QBoxLayout *drop_layout, QBoxLayout **drop_row);
 
     void ConnectSignals();
 
 private slots:
+
     void on_VolumeSlider_valueChanged(int value);
 
     void on_ProgressSlider_sliderMoved(int position);

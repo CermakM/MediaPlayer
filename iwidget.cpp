@@ -53,7 +53,7 @@ void iWidget::DefaultAdjustement() {
 
 QSize iWidget::sizeHint()
 {
-    return _icon->isNull() ? QWidget::sizeHint() : _icon->size() + QSize(5, 5);
+    return _icon->isNull() ? QWidget::sizeHint() : this->baseSize();
 }
 
 bool iWidget::operator ==(const iWidget &other)
@@ -79,4 +79,9 @@ void iWidget::mouseDoubleClickEvent(QMouseEvent *ev)
 {
     (void) ev;
     emit double_clicked();
+}
+
+bool iWidget::hasHeightForWidth() const
+{
+    return true;
 }

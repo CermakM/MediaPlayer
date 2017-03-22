@@ -41,51 +41,34 @@ void MainWin::UpdatePlaylist() {
 
 void MainWin::CreateDropArea()
 {
+    FlowLayout* flow_layout = new FlowLayout(ui->dropArea);
+    ui->dropAreaContent->setLayout(flow_layout);
+
     if (!_library.empty()) ui->default_placeholder->setVisible(false);
-
-    QBoxLayout* drop_layout = new QBoxLayout(QBoxLayout::TopToBottom, ui->dropArea);
-    drop_layout->setSpacing(20);
-    ui->dropArea->setLayout(drop_layout);
-
-    const int MAX_WIDGET_SIZE = 128;
-    int max_widget_count = this->width() / MAX_WIDGET_SIZE * 2;
-
-    QBoxLayout* drop_row = new QBoxLayout(QBoxLayout::LeftToRight, ui->dropArea);
-    drop_row->setSpacing(10);
-    drop_row->setSizeConstraint(QLayout::SetMaximumSize);
-    drop_layout->addLayout(drop_row);
 
     _icon_signal_mapper = new QSignalMapper(this);
 
     for (Album* const album : *(_library.getAlbums())) {
         if ( album->getTitle() == "-") {
             for (Song& song : *(album->getSongs())) {
-                CreateWidget(&song, drop_row, T_SONG);
-                if (max_widget_count == drop_row->count()) {
-                    qDebug() << drop_row->count();
-                    CreateNewRow(drop_layout, &drop_row);
-                }
+                CreateWidget(&song, T_SONG);
             }
         }
         else {
-            CreateWidget(album, drop_row, T_ALBUM);
-            if (max_widget_count == drop_row->count()) {
-                CreateNewRow(drop_layout, &drop_row);
-            }
+            CreateWidget(album, T_ALBUM);
         }
     }
 
-    QSpacerItem* right_spacer = new QSpacerItem(20, 0, QSizePolicy::Expanding);
-    drop_row->addSpacerItem(right_spacer);
+    ui->dropArea->setWidget(ui->dropAreaContent);
 }
 
-void MainWin::CreateWidget(void* const media, QBoxLayout* drop_row, Type type) {
+void MainWin::CreateWidget(void* const media,  Type type) {
 
     iWidget* new_widget = nullptr;
     if ( type == T_ALBUM )
-        new_widget = new iWidget(new Icon(static_cast<Album*>(media)), this);
+        new_widget = new iWidget(new Icon(static_cast<Album*>(media)), ui->dropArea);
     else if ( type == T_SONG)
-        new_widget = new iWidget(new Icon(static_cast<Song*>(media)), this);
+        new_widget = new iWidget(new Icon(static_cast<Song*>(media)), ui->dropArea);
     else {
         qDebug() << "Icon type T_NOTYPE specified. Default folder will be created";
         new_widget = new iWidget(new Icon(), this);
@@ -93,8 +76,8 @@ void MainWin::CreateWidget(void* const media, QBoxLayout* drop_row, Type type) {
 
     new_widget->getIcon()->setParent(new_widget);
     _icon_widgets.push_back(new_widget);
-    drop_row->addWidget(new_widget, 0, Qt::AlignTop | Qt::AlignLeft);
-    drop_row->insertSpacing(-1, 10);
+
+    ui->dropAreaContent->layout()->addWidget(new_widget);
 
     _icon_signal_mapper->setMapping(new_widget, new_widget);
     connect(new_widget, SIGNAL(clicked()), _icon_signal_mapper, SLOT(map()));
@@ -124,14 +107,6 @@ void MainWin::CreateWidget(void* const media, QBoxLayout* drop_row, Type type) {
 //    connect(new_widget, SIGNAL(clicked()), _icon_signal_mapper, SLOT(map()));
 //    connect(new_widget, SIGNAL(double_clicked()), _icon_signal_mapper, SLOT(map()));
 //}
-
-void MainWin::CreateNewRow(QBoxLayout* drop_layout, QBoxLayout** drop_row) {
-    QSpacerItem* right_spacer = new QSpacerItem(20, 0, QSizePolicy::Expanding);
-    (*drop_row)->addSpacerItem(right_spacer);
-    *drop_row = new QBoxLayout(QBoxLayout::LeftToRight, ui->dropArea);
-    (*drop_row)->setSpacing(10);
-    drop_layout->addLayout(*drop_row);
-}
 
 void MainWin::ConnectSignals()
 {
@@ -309,7 +284,6 @@ void MainWin::on_Icon_doubleClick(QWidget *target)
         }
         else if (icon->getType() == Type::T_ALBUM){
             // Open the Album folder
-
         }
 }
 

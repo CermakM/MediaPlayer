@@ -45,6 +45,8 @@ public:
 
     void mouseDoubleClickEvent(QMouseEvent* ev);
 
+    bool hasHeightForWidth() const;
+
 signals:
 
     void clicked();
