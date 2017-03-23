@@ -48,8 +48,6 @@ protected:
 
     void CreateDropArea();
 
-//    void CreateWidget(Album * const media, QBoxLayout *drop_row);
-//    void CreateWidget(Song * const media, QBoxLayout * const drop_row);
     void CreateWidget(void* const media, Type type);
 
     void CreateNewRow(QBoxLayout *drop_layout, QBoxLayout **drop_row);

@@ -46,6 +46,11 @@ void DialogEditLibrary::CreateTreeItem(Album* const album, QTreeWidgetItem* cons
     QTreeWidgetItem* album_item = tree_album_item;
     QTreeWidgetItem* song_item  = nullptr;
 
+    if (album->getSongs()->empty()) {
+        qDebug() << "in DialogEditLibrary::CreateTreeItem: Empty album has been provided";
+        return;
+    }
+
     if (album->getTitle() != "-" && !album_item) {
         album_item = new QTreeWidgetItem(ui->AlbumsTree);
         album_item->setText(0, album->getTitle());

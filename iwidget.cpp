@@ -4,6 +4,7 @@ iWidget::iWidget(QWidget* parent) :
     QWidget(parent)
 {
     _icon = new Icon();
+    _event_timer = new QTimer(this);
     _icon_title_editor = new QLineEdit("Unknown", this);
 
     DefaultAdjustement();
@@ -13,12 +14,20 @@ iWidget::iWidget(Icon *icon, QWidget *parent) :
     QWidget(parent)
 {
     _icon = icon;
+    _event_timer = new QTimer(this);
 
     QString icon_title = icon->getTitle();
     _icon_title_editor = new QLineEdit(icon_title, this);
     _icon_title_editor->setStyleSheet("border-radius: 3px; ");
 
     DefaultAdjustement();
+}
+
+iWidget::~iWidget()
+{
+    delete _icon;
+    delete _icon_title_editor;
+    delete _event_timer;
 }
 
 void iWidget::setTitle(const QString &new_title)
@@ -34,6 +43,8 @@ void iWidget::DefaultAdjustement() {
 
     this->setLayout(new QGridLayout(this));
 
+    _event_timer->setSingleShot(true);
+    _event_timer->setInterval(200);
     _icon_title_editor->setFont(QFont("Tahoma", 12, QFont::Normal));
     _icon_title_editor->setStyleSheet("background: transparent");
     _icon_title_editor->setFrame(false);
@@ -65,8 +76,11 @@ bool iWidget::operator ==(const iWidget &other)
 void iWidget::mousePressEvent(QMouseEvent *ev)
 {
     (void) ev;
-    emit clicked();
-    emit pressed();
+    if (!_event_timer->isActive()) {
+        emit clicked();
+        _event_timer->start();
+    }
+    else emit double_clicked(this);
 }
 
 void iWidget::mouseReleaseEvent(QMouseEvent *ev)
@@ -75,11 +89,11 @@ void iWidget::mouseReleaseEvent(QMouseEvent *ev)
     emit released();
 }
 
-void iWidget::mouseDoubleClickEvent(QMouseEvent *ev)
-{
-    (void) ev;
-    emit double_clicked();
-}
+//void iWidget::mouseDoubleClickEvent(QMouseEvent *ev)
+//{
+//    (void) ev;
+//    emit double_clicked();
+//}
 
 bool iWidget::hasHeightForWidth() const
 {

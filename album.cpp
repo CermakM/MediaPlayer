@@ -93,7 +93,7 @@ void Album::SearchForIcons(const QString &path)
 {
     QDir dir(path);
     if(!dir.exists()) {
-        qDebug() << "in Album::createIcons: Cannot find directory" << path ;
+        qDebug() << "in Album::SearchForIcons: Cannot find directory" << path ;
     }
 
     QStringList filters;

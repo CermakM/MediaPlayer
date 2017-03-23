@@ -41,10 +41,18 @@ void MainWin::UpdatePlaylist() {
 
 void MainWin::CreateDropArea()
 {
+    ui->default_placeholder->setVisible(false);
+
+    if (_library.empty()) {
+        ui->default_placeholder->setVisible(true);
+        ui->dropAreaContent->setLayout(new QGridLayout(ui->dropArea));
+        ui->dropAreaContent->layout()->addWidget(ui->default_placeholder);
+        ui->dropArea->setWidget(ui->dropAreaContent);
+        return;
+    }
+
     FlowLayout* flow_layout = new FlowLayout(ui->dropArea);
     ui->dropAreaContent->setLayout(flow_layout);
-
-    if (!_library.empty()) ui->default_placeholder->setVisible(false);
 
     _icon_signal_mapper = new QSignalMapper(this);
 
@@ -81,32 +89,8 @@ void MainWin::CreateWidget(void* const media,  Type type) {
 
     _icon_signal_mapper->setMapping(new_widget, new_widget);
     connect(new_widget, SIGNAL(clicked()), _icon_signal_mapper, SLOT(map()));
-    connect(new_widget, SIGNAL(double_clicked()), _icon_signal_mapper, SLOT(map()));
+    connect(new_widget, SIGNAL(double_clicked(QWidget*)), this, SLOT(on_Icon_doubleClick(QWidget*)));
 }
-
-//void MainWin::CreateWidget(Album* const media, QBoxLayout* drop_row) {
-//    iWidget* new_widget = new iWidget(new Icon(media), this);
-//    new_widget->getIcon()->setParent(new_widget);
-//    _icon_widgets.push_back(new_widget);
-//    drop_row->addWidget(new_widget, 0, Qt::AlignTop | Qt::AlignLeft);
-//    drop_row->insertSpacing(-1, 10);
-
-//    _icon_signal_mapper->setMapping(new_widget, new_widget);
-//    connect(new_widget, SIGNAL(clicked()), _icon_signal_mapper, SLOT(map()));
-//    connect(new_widget, SIGNAL(double_clicked()), _icon_signal_mapper, SLOT(map()));
-//}
-
-//void MainWin::CreateWidget(Song* const media, QBoxLayout* const drop_row) {
-//    iWidget* new_widget = new iWidget(new Icon(media), this);
-//    new_widget->getIcon()->setParent(new_widget);
-//    _icon_widgets.push_back(new_widget);
-//    drop_row->addWidget(new_widget, 0, Qt::AlignTop | Qt::AlignLeft);
-//    drop_row->insertSpacing(-1, 10);
-
-//    _icon_signal_mapper->setMapping(new_widget, new_widget);
-//    connect(new_widget, SIGNAL(clicked()), _icon_signal_mapper, SLOT(map()));
-//    connect(new_widget, SIGNAL(double_clicked()), _icon_signal_mapper, SLOT(map()));
-//}
 
 void MainWin::ConnectSignals()
 {
@@ -135,7 +119,6 @@ void MainWin::ConnectSignals()
     connect(shortcutStopButton, SIGNAL(activated()), this, SLOT(on_ButtonStop_clicked()));
 
     connect(_icon_signal_mapper, SIGNAL(mapped(QWidget*)), this, SLOT(on_Icon_click(QWidget*)));
-    connect(_icon_signal_mapper, SIGNAL(mapped(QWidget*)), this, SLOT(on_Icon_doubleClick(QWidget*)));
 }
 
 void MainWin::on_EndOfSong() {

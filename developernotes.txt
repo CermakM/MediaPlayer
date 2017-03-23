@@ -1,14 +1,15 @@
 # Developer notes
 
-## Allow dragging albums & songs into main widget
-## Create library edit widget
-## Create forw / backward buttons - edit icons of the buttons
-## Rate songs and albums (stars / hearts... ) 
-## Favourite playlists
-## Finish shortcuts and arrow-controled slider
+## Allow dragging albums & songs into main widget ***
+## Create library edit widget ****
+## Create forw / backward buttons - edit icons of the buttons *
+## Rate songs and albums (stars / hearts... ) *
+## Favourite playlists *
+## Finish shortcuts and arrow-controled slider *
 
-## Editable icon names - changes the file name as well!
-## Adjust SQL to delete files with " ' " properly
-## Work on a better layout....
-## Segmentation fault if adding songs from multiple folders
+## Editable icon names - changes the file name as well! **
+## Adjust SQL to delete files with " ' " properly **
+## Work on a better layout.... *
+## Segmentation fault if adding songs from multiple folders *****
 
+## What to do when album or song can not be found? **

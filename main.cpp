@@ -17,5 +17,5 @@ int main(int argc, char *argv[])
     w.setWindowTitle("Musician");
     w.show();
 
-    return a.exec();
+        return a.exec();
 }

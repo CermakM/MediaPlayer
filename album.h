@@ -43,7 +43,7 @@ public:
 
     QString getInterpret() const { return _interpret; }
 
-    void PushSong(const Song& song) { _songs.push_back(song); }
+    void PushSong(Song song) { song.setParent(this); _songs.push_back(song); }
 
     int  CountSongs() const {return _songs.size(); }
 

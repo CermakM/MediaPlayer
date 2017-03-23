@@ -47,16 +47,16 @@
          <x>0</x>
          <y>0</y>
          <width>654</width>
-         <height>275</height>
+         <height>272</height>
         </rect>
        </property>
        <widget class="QLineEdit" name="default_placeholder">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="geometry">
          <rect>
-          <x>230</x>
+          <x>220</x>
           <y>140</y>
           <width>250</width>
           <height>22</height>
@@ -307,7 +307,7 @@
      <x>0</x>
      <y>0</y>
      <width>780</width>
-     <height>19</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFilter">

@@ -8,8 +8,7 @@
 #include <QObject>
 #include <QLabel>
 #include <QLineEdit>
-#include <QSpacerItem>
-#include <QBitmap>
+#include <QTimer>
 
 class iWidget : public QWidget
 {
@@ -18,6 +17,7 @@ class iWidget : public QWidget
 public:
     explicit iWidget(QWidget* parent = 0);
     explicit iWidget(Icon* icon, QWidget* parent = 0);
+    ~iWidget();
 
     void DefaultAdjustement();
 
@@ -43,7 +43,7 @@ public:
 
     void mouseReleaseEvent(QMouseEvent* ev);
 
-    void mouseDoubleClickEvent(QMouseEvent* ev);
+//    void mouseDoubleClickEvent(QMouseEvent* ev);
 
     bool hasHeightForWidth() const;
 
@@ -51,13 +51,12 @@ signals:
 
     void clicked();
 
-    void double_clicked();
-
-    void pressed();
+    void double_clicked(QWidget*);
 
     void released();
 
 private:
+    QTimer* _event_timer;
     Icon* _icon;
     QLineEdit* _icon_title_editor;
 };

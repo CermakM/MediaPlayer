@@ -18,6 +18,7 @@ DialogAddSongs::~DialogAddSongs()
 }
 
 void DialogAddSongs::on_BrowseButton_clicked()
+
 {
     QStringList files_to_add = QFileDialog::getOpenFileNames(this, tr("Select one or more files"), QDir::root().absolutePath(), "Audio (*.mp3)");
 
@@ -50,13 +51,13 @@ void DialogAddSongs::on_RemoveButton_clicked()
 
 void DialogAddSongs::on_buttonBox_accepted()
 {
-    for(Song& song : _song_vector) {
-        Album empty_album;
-        empty_album.PushSong(song);
-        empty_album.setInterpret(song.getInterpret());
-        empty_album.setTitle(song.getAlbumTitle());
+    for(Song const& song : _song_vector) {
+        Album* empty_album = new Album();
+        empty_album->PushSong(song);
+        empty_album->setInterpret(song.getInterpret());
+        empty_album->setTitle(song.getAlbumTitle());
 
-        _library->AddMedia(&empty_album);
+        _library->AddMedia(empty_album);
     }
 
     emit Change(true);
