@@ -35,8 +35,6 @@ public:
 
     QSize sizeHint();
 
-    QSize size() { return this->size(); }
-
     bool operator == (const iWidget& other);
 
     void mousePressEvent(QMouseEvent* ev);
@@ -47,6 +45,14 @@ public:
 
     bool hasHeightForWidth() const;
 
+    bool isPlaying() const { return _is_playing; }
+
+    bool isPlaying(bool state) { emit state_changed(state); return _is_playing = state;}
+
+    bool isSelected() const { return _is_selected; }
+
+    bool isSelected(bool state) { return  _is_selected = state; }
+
 signals:
 
     void clicked();
@@ -55,10 +61,21 @@ signals:
 
     void released();
 
+    void state_changed(bool state);
+
+
+private slots:
+
+    void on_state_change(bool state) { _label_play->setVisible(state); }
+
 private:
     QTimer* _event_timer;
     Icon* _icon;
     QLineEdit* _icon_title_editor;
+    QLabel* _label_play;
+
+    bool _is_playing = false;
+    bool _is_selected = false;
 };
 
 #endif // ICONPREVIEW_H

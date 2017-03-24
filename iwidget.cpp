@@ -4,6 +4,7 @@ iWidget::iWidget(QWidget* parent) :
     QWidget(parent)
 {
     _icon = new Icon();
+    _label_play = new QLabel(_icon);
     _event_timer = new QTimer(this);
     _icon_title_editor = new QLineEdit("Unknown", this);
 
@@ -14,17 +15,19 @@ iWidget::iWidget(Icon *icon, QWidget *parent) :
     QWidget(parent)
 {
     _icon = icon;
+    _label_play = new QLabel(_icon);
     _event_timer = new QTimer(this);
 
     QString icon_title = icon->getTitle();
     _icon_title_editor = new QLineEdit(icon_title, this);
-    _icon_title_editor->setStyleSheet("border-radius: 3px; ");
+    _icon_title_editor->setStyleSheet("border-radius: 15px; ");
 
     DefaultAdjustement();
 }
 
 iWidget::~iWidget()
 {
+    delete _label_play;
     delete _icon;
     delete _icon_title_editor;
     delete _event_timer;
@@ -40,6 +43,14 @@ void iWidget::DefaultAdjustement() {
 
     _icon->setBuddy(_icon_title_editor);
     _icon->setStyleSheet("background: transparent;");
+
+    _label_play->setPixmap((new QPixmap(":/icons/icon_play"))->scaled(32,32, Qt::KeepAspectRatio));
+    _label_play->setFixedSize(32,32);
+    _label_play->move(this->width() - 1.8* _label_play->width(), 0);
+    _label_play->raise();
+    _label_play->setVisible(_is_playing);
+
+    connect(this, SIGNAL(state_changed(bool)), this, SLOT(on_state_change(bool)));
 
     this->setLayout(new QGridLayout(this));
 

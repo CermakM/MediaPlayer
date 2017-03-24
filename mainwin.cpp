@@ -70,7 +70,8 @@ void MainWin::CreateDropArea()
     ui->dropArea->setWidget(ui->dropAreaContent);
 }
 
-void MainWin::CreateWidget(void* const media,  Type type) {
+
+void MainWin::CreateWidget(void* const media, Type type) {
 
     iWidget* new_widget = nullptr;
     if ( type == T_ALBUM )
@@ -242,19 +243,22 @@ void MainWin::on_Icon_click(QWidget *target)
 {
     iWidget* d_target = dynamic_cast<iWidget*>(target);
 
+    if( d_target->isSelected()) return;
+
     d_target->getIcon()->setStyleSheet("background: #cccccc");
 
     QLineEdit* icon_title_editor = d_target->getTitleEditor();
 
-    icon_title_editor->setFocus();
-    icon_title_editor->raise();
     icon_title_editor->setFont(QFont("Tahoma", 11, QFont::Bold));
 
+    d_target->isSelected(true);
     _selected_icons.push_back(d_target);
 }
 
 void MainWin::on_Icon_doubleClick(QWidget *target)
 {  
+        on_Icon_deselect();
+
         iWidget* icon = dynamic_cast<iWidget*>(target);
 
         if (icon->getType() == Type::T_SONG) {
@@ -264,14 +268,26 @@ void MainWin::on_Icon_doubleClick(QWidget *target)
             ui->CurrentAlbumLine->setText(song_to_play->getAlbumTitle());
             ui->CurrentSongLine->setText(song_to_play->getTitle());
             _media_player->play();
+            icon->isPlaying(true);
         }
-        else if (icon->getType() == Type::T_ALBUM){
+        else if (icon->getType() == Type::T_ALBUM) {
             // Open the Album folder
+            _cache_dropAreaContent = ui->dropArea->takeWidget();
+            QWidget* temp_dropAreaContent = new QWidget(ui->dropArea) ;
+            Album* target_album = _library.getAlbumByTitle(icon->getTitle());
+
+            CreateAlbumContentArea(target_album, temp_dropAreaContent);
+
+            connect(_temporary_signal_mapper, SIGNAL(mapped(QWidget*)), this, SLOT(on_Icon_click(QWidget*)));
+
+            ui->dropArea->setWidget(temp_dropAreaContent);
+            ui->TitleLibrary->setText(icon->getTitle());
+            _temporary_window_entered = true;
         }
 }
 
 
-void MainWin::on_ButtonDeselect_clicked()
+void MainWin::on_Icon_deselect()
 {
     for (iWidget* icon : _selected_icons ) {
         icon->DefaultAdjustement();
@@ -279,6 +295,39 @@ void MainWin::on_ButtonDeselect_clicked()
 
     _selected_icons.clear();
     QVector<iWidget*>().swap(_selected_icons);
+}
+
+void MainWin::CreateAlbumContentArea(Album* const target_album, QWidget* drop_area_container)
+{
+    ui->default_placeholder->setVisible(false);
+
+    if (_library.empty()) {
+        ui->default_placeholder->setVisible(true);
+        drop_area_container->setLayout(new QGridLayout(ui->dropArea));
+        drop_area_container->layout()->addWidget(ui->default_placeholder);
+        return;
+    }
+
+    FlowLayout* flow_layout = new FlowLayout(drop_area_container);
+    drop_area_container->setLayout(flow_layout);
+
+    _temporary_signal_mapper = new QSignalMapper(this);
+
+    for (Song& song : *(target_album->getSongs()) ) {
+        iWidget* song_icon = new iWidget(new Icon(&song), drop_area_container);
+        song_icon->getIcon()->setParent(song_icon);
+        drop_area_container->layout()->addWidget(song_icon);
+        _temporary_icon_widgets.push_back(song_icon);
+
+        _temporary_signal_mapper->setMapping(song_icon, song_icon);
+        connect(song_icon, SIGNAL(clicked()), _temporary_signal_mapper, SLOT(map()));
+        connect(song_icon, SIGNAL(double_clicked(QWidget*)), this, SLOT(on_Icon_doubleClick(QWidget*)));
+    }
+}
+
+void MainWin::on_ButtonDeselect_clicked()
+{
+    on_Icon_deselect();
 }
 
 void MainWin::on_ButtonRemove_clicked()
@@ -298,4 +347,28 @@ void MainWin::on_ButtonRemove_clicked()
     }
 
     QVector<iWidget*>().swap(_selected_icons);
+}
+
+void MainWin::on_ButtonHome_clicked()
+{
+    if (_cache_dropAreaContent == nullptr)
+        return;
+
+    on_Icon_deselect();
+    while( !_temporary_icon_widgets.empty()) {
+        iWidget* widget_to_delete = _temporary_icon_widgets.front();
+        _temporary_icon_widgets.removeFirst();
+        delete widget_to_delete;
+    }
+    ui->dropArea->setWidget(_cache_dropAreaContent);
+
+    QVector<iWidget*>().swap(_temporary_icon_widgets);
+
+    delete _temporary_signal_mapper;
+    _temporary_signal_mapper = nullptr;
+
+    _temporary_window_entered = false;
+    _cache_dropAreaContent = nullptr;
+
+    ui->TitleLibrary->setText("MY LIBRARY");
 }

@@ -23,6 +23,7 @@
 #include <QBoxLayout>
 #include <QSignalMapper>
 #include <QVector>
+#include <QScrollArea>
 
 
 #include <vector>
@@ -47,6 +48,8 @@ protected:
     void UpdatePlaylist();
 
     void CreateDropArea();
+
+    void CreateAlbumContentArea(Album* const target_album, QWidget* drop_area_container);
 
     void CreateWidget(void* const media, Type type);
 
@@ -84,6 +87,8 @@ private slots:
 
     void on_actionEditLibrary_triggered();
 
+    void on_Icon_deselect();
+
     void on_Icon_click(QWidget* target);
 
     void on_Icon_doubleClick(QWidget* target);
@@ -91,6 +96,8 @@ private slots:
     void on_ButtonDeselect_clicked();
 
     void on_ButtonRemove_clicked();
+
+    void on_ButtonHome_clicked();
 
 private:
     Ui::MainWin *ui;
@@ -106,6 +113,14 @@ private:
     QVector<iWidget*> _selected_icons;
 
     QSignalMapper* _icon_signal_mapper;
+
+    QWidget* _cache_dropAreaContent = nullptr;
+
+    QVector<iWidget*> _temporary_icon_widgets;
+
+    QSignalMapper* _temporary_signal_mapper;
+
+    bool _temporary_window_entered = false;
 };
 
 #endif // MAINWIN_H
