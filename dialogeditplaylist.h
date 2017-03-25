@@ -38,7 +38,7 @@ protected slots:
 
 signals:
 
-    void Change(bool);
+    void change(bool);
 
 
 private:

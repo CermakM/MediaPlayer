@@ -36,6 +36,10 @@ public:
 
     Album*  getAlbum() { return _parent; }
 
+    bool* isPlaying() { return &_is_playing; }
+
+    bool isPlaying(bool const& state) { return _is_playing = state; }
+
     bool is_in_playlist = false;
 
     friend bool operator== (const Song& s1, const Song& s2);
@@ -48,6 +52,8 @@ private:
     QString _interpret;
     QString _album_title;
     int _year;
+
+    bool _is_playing = false;
 };
 
 Q_DECLARE_METATYPE(Song)

@@ -92,7 +92,7 @@ void DialogEditLibrary::on_AddAlbumsButton_clicked()
     // Create empty library without loading the database to make user changes easier
     // In preview mode no changes will be written into database
     DialogAddAlbum AlbumBrowser(_pseudo_library, this);
-    connect(&AlbumBrowser, SIGNAL(Change(bool)), this, SLOT(UpdateTree(bool)));
+    connect(&AlbumBrowser, SIGNAL(change(bool)), this, SLOT(UpdateTree(bool)));
     AlbumBrowser.setWindowTitle("Add your Album");
     AlbumBrowser.setModal(true);
     AlbumBrowser.exec();
@@ -103,7 +103,7 @@ void DialogEditLibrary::on_AddSongsButton_clicked()
     // Create empty library without loading the database to make user changes easier
     // In preview mode no changes will be written into database
     DialogAddSongs SongsBrowser(_pseudo_library, this);
-    connect(&SongsBrowser, SIGNAL(Change(bool)), this, SLOT(UpdateTree(bool)));
+    connect(&SongsBrowser, SIGNAL(change(bool)), this, SLOT(UpdateTree(bool)));
     SongsBrowser.setWindowTitle("Add your Songs");
     SongsBrowser.setModal(true);
     SongsBrowser.exec();
@@ -133,7 +133,6 @@ void DialogEditLibrary::on_RemoveButton_clicked()
 
 void DialogEditLibrary::on_buttonBox_accepted()
 {
-
     QString working_dir = QDir::currentPath();
     QDir::setCurrent(working_dir + "/Media");
     QFile ftoRemove;

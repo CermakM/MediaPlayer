@@ -10,7 +10,8 @@ Album::Album() {
 }
 
 Album::~Album() {
-
+    qDebug() << "Calling destructor for album";
+    delete this;
 }
 
 Album::Album(QVector<Song>& songs)

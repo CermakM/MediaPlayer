@@ -19,7 +19,8 @@ public:
     ~DialogAddSongs();
 
 signals:
-    void Change(bool);
+    void change(Album*, Library::ChangeState);
+    void change(bool);
 
 private slots:
     void on_BrowseButton_clicked();

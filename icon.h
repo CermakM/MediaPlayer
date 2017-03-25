@@ -34,6 +34,8 @@ public:
 
    inline QString getTitle() const { return _title; }
 
+   inline QString getAlbumTitle() const { return _album_title; }
+
    inline QString getPath() const { return _path_to_media; }
 
    inline Type getType() const { return _type; }
@@ -51,6 +53,7 @@ public slots:
 private:
     QString _path_to_media;
     QString _title;
+    QString _album_title;
     QPixmap* _pixmap;
     Type _type;
 

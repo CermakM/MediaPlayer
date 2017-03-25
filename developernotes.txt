@@ -10,6 +10,8 @@
 ## Editable icon names - changes the file name as well! **
 ## Adjust SQL to delete files with " ' " properly **
 ## Work on a better layout.... *
-## Segmentation fault if adding songs from multiple folders *****
 
 ## What to do when album or song can not be found? **
+## Muliple-album issue when adding more songs of a same album ***
+## Updating library layout after library configuration *****
+## Delete the :PLAY: sign on a song after song end or another is selected

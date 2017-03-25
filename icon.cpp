@@ -31,6 +31,7 @@ Icon::Icon (Album *media, QWidget *parent) :
     }
 
     _path_to_media = album_ptr->getPath();
+    _album_title = _title;
 
     CreateLabel(_pixmap);
 }
@@ -47,6 +48,8 @@ Icon::Icon(Song *media, QWidget *parent) :
     _in_playlist = song_ptr->is_in_playlist;
 
     _path_to_media = song_ptr->getPath();
+
+    _album_title = song_ptr->getAlbumTitle();
 
     CreateLabel(_pixmap);
 }

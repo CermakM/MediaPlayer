@@ -73,19 +73,23 @@ private slots:
 
     void on_actionAddNewAlbum_triggered();
 
+    void on_actionAddNewSongs_triggered();
+
     void on_actionEditPlaylist_triggered();
 
-    void on_EndOfSong();
+    void on_actionEditLibrary_triggered();
 
-    void on_EditPlaylistOver(bool b);
+    void on_EditPlaylistOver(Album*, Library::ChangeState);
 
-    void on_actionAddNewSongs_triggered();
+    void on_EditPlaylistOver(bool);
 
     void on_ButtonForward_clicked();
 
     void on_ButtonBackward_clicked();
 
-    void on_actionEditLibrary_triggered();
+    void on_EndOfSong();
+
+    void on_Library_change(Album* album, Library::ChangeState state);
 
     void on_Icon_deselect();
 
@@ -113,6 +117,7 @@ private:
     QVector<iWidget*> _selected_icons;
 
     QSignalMapper* _icon_signal_mapper;
+
 
     QWidget* _cache_dropAreaContent = nullptr;
 

@@ -33,27 +33,27 @@ void DialogAddAlbum::on_buttonBox_accepted()
     QString pathToAdd = ui->PathSelect->text();
 
     if(pathToAdd.isEmpty()) {
-        emit Change(false);
         return; // no change has happened
     }
 
-    Album newAlbum (pathToAdd);
+    Album* newAlbum = new Album(pathToAdd);
 
     if(_addToPlaylist) {
-        for (Song& song : *(newAlbum.getSongs())) {
+        for (Song& song : *(newAlbum->getSongs())) {
             song.is_in_playlist = true;
         }
     }
     if (ui->TitleSelect->isModified()) {
         QString title = ui->TitleSelect->text();
-        newAlbum.setTitle(title);
+        newAlbum->setTitle(title);
     }
 
-    _library->AddMedia(&newAlbum);
+    _library->AddMedia(newAlbum);
 
     qInfo("The new album has been added");
 
-    emit Change(true);
+    emit change(newAlbum, Library::ADD);
+    emit change(true);
 }
 
 void DialogAddAlbum::on_BrowseButton_clicked()

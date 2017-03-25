@@ -34,7 +34,8 @@ private slots:
 
 signals:
 
-    void Change(bool);
+    void change(Album* = nullptr, Library::ChangeState = Library::NOCHANGE);
+    void change(bool);
 
 private:
     Ui::DialogAddAlbum *ui;

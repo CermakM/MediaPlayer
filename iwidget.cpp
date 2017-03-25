@@ -7,16 +7,22 @@ iWidget::iWidget(QWidget* parent) :
     _label_play = new QLabel(_icon);
     _event_timer = new QTimer(this);
     _icon_title_editor = new QLineEdit("Unknown", this);
+    _is_playing = new bool(false);
 
     DefaultAdjustement();
 }
 
-iWidget::iWidget(Icon *icon, QWidget *parent) :
+iWidget::iWidget(Icon *icon, Library* const library, QWidget *parent) :
     QWidget(parent)
 {
     _icon = icon;
     _label_play = new QLabel(_icon);
     _event_timer = new QTimer(this);
+    _library = library;
+    if (icon->getType() == Type::T_SONG)
+        _is_playing = _library->getSongByTitle(icon->getTitle())->isPlaying();
+
+    else _is_playing = new bool(false);
 
     QString icon_title = icon->getTitle();
     _icon_title_editor = new QLineEdit(icon_title, this);
@@ -31,6 +37,7 @@ iWidget::~iWidget()
     delete _icon;
     delete _icon_title_editor;
     delete _event_timer;
+    delete _is_playing;
 }
 
 void iWidget::setTitle(const QString &new_title)
@@ -48,7 +55,7 @@ void iWidget::DefaultAdjustement() {
     _label_play->setFixedSize(32,32);
     _label_play->move(this->width() - 1.8* _label_play->width(), 0);
     _label_play->raise();
-    _label_play->setVisible(_is_playing);
+    _label_play->setVisible(*_is_playing);
 
     connect(this, SIGNAL(state_changed(bool)), this, SLOT(on_state_change(bool)));
 
@@ -78,10 +85,15 @@ QSize iWidget::sizeHint()
     return _icon->isNull() ? QWidget::sizeHint() : this->baseSize();
 }
 
-bool iWidget::operator ==(const iWidget &other)
+bool iWidget::operator == (const iWidget &other)
 {
     return this->_icon_title_editor->text() == other.getTitle() &&
-           this->getType() == other.getType();
+            this->getType() == other.getType();
+}
+
+bool iWidget::operator ==(Album * const album)
+{
+    return this->_icon_title_editor->text() == album->getTitle();
 }
 
 void iWidget::mousePressEvent(QMouseEvent *ev)

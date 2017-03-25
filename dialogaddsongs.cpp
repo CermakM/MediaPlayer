@@ -52,13 +52,22 @@ void DialogAddSongs::on_RemoveButton_clicked()
 void DialogAddSongs::on_buttonBox_accepted()
 {
     for(Song const& song : _song_vector) {
-        Album* empty_album = new Album();
-        empty_album->PushSong(song);
-        empty_album->setInterpret(song.getInterpret());
-        empty_album->setTitle(song.getAlbumTitle());
-
-        _library->AddMedia(empty_album);
+        Album* album = _library->getAlbumByTitle(song.getAlbumTitle());
+        if (album == nullptr) {
+            Album* album = new Album();
+            album->PushSong(song);
+            album->setInterpret(song.getInterpret());
+            album->setTitle(song.getAlbumTitle());
+            emit change(album, Library::ADD);
+            emit change(true);
+            _library->AddMedia(album);
+        }
+        else {
+            album->PushSong(song);
+            album->setInterpret(song.getInterpret());
+            album->setTitle(song.getAlbumTitle());
+            emit change(album, Library::CHANGE);
+            emit change(true);
+        }
     }
-
-    emit Change(true);
 }

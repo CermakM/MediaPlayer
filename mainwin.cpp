@@ -41,6 +41,7 @@ void MainWin::UpdatePlaylist() {
 
 void MainWin::CreateDropArea()
 {
+    _icon_signal_mapper = new QSignalMapper(this);
     ui->default_placeholder->setVisible(false);
 
     if (_library.empty()) {
@@ -54,7 +55,6 @@ void MainWin::CreateDropArea()
     FlowLayout* flow_layout = new FlowLayout(ui->dropArea);
     ui->dropAreaContent->setLayout(flow_layout);
 
-    _icon_signal_mapper = new QSignalMapper(this);
 
     for (Album* const album : *(_library.getAlbums())) {
         if ( album->getTitle() == "-") {
@@ -75,12 +75,12 @@ void MainWin::CreateWidget(void* const media, Type type) {
 
     iWidget* new_widget = nullptr;
     if ( type == T_ALBUM )
-        new_widget = new iWidget(new Icon(static_cast<Album*>(media)), ui->dropArea);
+        new_widget = new iWidget(new Icon(static_cast<Album*>(media)), &_library, ui->dropArea);
     else if ( type == T_SONG)
-        new_widget = new iWidget(new Icon(static_cast<Song*>(media)), ui->dropArea);
+        new_widget = new iWidget(new Icon(static_cast<Song*>(media)), &_library, ui->dropArea);
     else {
         qDebug() << "Icon type T_NOTYPE specified. Default folder will be created";
-        new_widget = new iWidget(new Icon(), this);
+        new_widget = new iWidget(this);
     }
 
     new_widget->getIcon()->setParent(new_widget);
@@ -101,7 +101,6 @@ void MainWin::ConnectSignals()
     connect(_media_player, &QMediaPlayer::durationChanged, this, &MainWin::on_DurationChange);
     connect(_playlist->MediaPlaylist(), SIGNAL(currentIndexChanged(int)), this, SLOT(on_EndOfSong()));
 
-
     // Shortcuts
     QShortcut* shortcutAddAlbum = new QShortcut(QKeySequence("Ctrl+A"), this);
     QShortcut* shortcutAddSongs = new QShortcut(QKeySequence("Ctrl+S"), this);
@@ -111,6 +110,7 @@ void MainWin::ConnectSignals()
     QShortcut* shortcutStopButton = new QShortcut(QKeySequence("S"), this);
     QShortcut* shortcutForwardButton = new QShortcut(QKeySequence(Qt::Key_Right), this);
     QShortcut* shortcutBackwardButton = new QShortcut(QKeySequence(Qt::Key_Left), this);
+    QShortcut* shortcutDeselect = new QShortcut(QKeySequence(Qt::Key_Escape), this);
 
     connect(shortcutAddAlbum, SIGNAL(activated()), this, SLOT(on_actionAddNewAlbum_triggered()));
     connect(shortcutAddSongs, SIGNAL(activated()), this, SLOT(on_actionAddNewSongs_triggered()));
@@ -118,6 +118,7 @@ void MainWin::ConnectSignals()
     connect(shortcutEditLibrary, SIGNAL(activated()), this, SLOT(on_actionEditLibrary_triggered()));
     connect(shortcutPlayButton, SIGNAL(activated()), this, SLOT(on_ButtonPlay_clicked()));
     connect(shortcutStopButton, SIGNAL(activated()), this, SLOT(on_ButtonStop_clicked()));
+    connect(shortcutDeselect, SIGNAL(activated()), this, SLOT(on_Icon_deselect()));
 
     connect(_icon_signal_mapper, SIGNAL(mapped(QWidget*)), this, SLOT(on_Icon_click(QWidget*)));
 }
@@ -137,9 +138,17 @@ void MainWin::on_EndOfSong() {
 }
 
 
-void MainWin::on_EditPlaylistOver(bool b) {
+void MainWin::on_EditPlaylistOver(Album* album, Library::ChangeState change) {
 
-    if (b)
+    if (change)
+        UpdatePlaylist();
+
+    if (_library.empty()) ui->default_placeholder->setVisible(true);
+}
+
+void MainWin::on_EditPlaylistOver(bool change)
+{
+    if (change)
         UpdatePlaylist();
 
     if (_library.empty()) ui->default_placeholder->setVisible(true);
@@ -192,7 +201,8 @@ void MainWin::on_ButtonStop_clicked()
 void MainWin::on_actionAddNewAlbum_triggered()
 {
     DialogAddAlbum AlbumBrowser(&_library, this);
-    connect(&AlbumBrowser, SIGNAL(Change(bool)), this, SLOT(on_EditPlaylistOver(bool)));
+    connect(&AlbumBrowser, SIGNAL(change(Album*,Library::ChangeState)), this, SLOT(on_EditPlaylistOver(Album*,Library::ChangeState)));
+    connect(&AlbumBrowser, SIGNAL(change(Album*,Library::ChangeState)), this, SLOT(on_Library_change(Album*,Library::ChangeState)));
     AlbumBrowser.setWindowTitle("Add your Album");
     AlbumBrowser.setModal(true);
     AlbumBrowser.exec();
@@ -201,7 +211,8 @@ void MainWin::on_actionAddNewAlbum_triggered()
 void MainWin::on_actionAddNewSongs_triggered()
 {
     DialogAddSongs SongsBrowser(&_library, this);
-    connect(&SongsBrowser, SIGNAL(Change(bool)), this, SLOT(on_EditPlaylistOver(bool)));
+    connect(&SongsBrowser, SIGNAL(change(Album*,Library::ChangeState)), this, SLOT(on_EditPlaylistOver(Album*, Library::ChangeState)));
+    connect(&SongsBrowser, SIGNAL(change(Album*,Library::ChangeState)), this, SLOT(on_Library_change(Album*,Library::ChangeState)));
     SongsBrowser.setWindowTitle("Add your Songs");
     SongsBrowser.setModal(true);
     SongsBrowser.exec();
@@ -211,7 +222,7 @@ void MainWin::on_actionEditPlaylist_triggered()
 {
     DialogEditPlaylist EditPlaylist(&_library, this);
 
-    connect(&EditPlaylist, &DialogEditPlaylist::Change, this, &MainWin::on_EditPlaylistOver);
+    connect(&EditPlaylist, SIGNAL(change(bool)), this, SLOT(on_EditPlaylistOver(bool)));
 
     EditPlaylist.setWindowTitle("Edit playlist");
     EditPlaylist.setModal(true);
@@ -227,6 +238,75 @@ void MainWin::on_actionEditLibrary_triggered()
 
     EditLibrary.setModal(true);
     EditLibrary.exec();
+}
+
+void MainWin::on_Library_change(Album* album, Library::ChangeState state)
+{
+    if (!_library.empty()) ui->default_placeholder->hide();
+
+    iWidget* widget_to_change = nullptr;
+    int widget_index = 0;
+    if (state == Library::CHANGE) {
+        if (album->getTitle() == '-') {
+            int widget_count = album->CountSongs();
+            QVector<Song>* album_songs = album->getSongs();
+            while (widget_count) {
+                widget_to_change = _icon_widgets.at(widget_index);
+                if (widget_to_change->getAlbumTitle() == '-') {
+                    ui->dropAreaContent->layout()->removeWidget(widget_to_change);
+                    _icon_widgets.removeAt(widget_index);
+                    delete widget_to_change;
+                    widget_to_change = nullptr;
+                }
+                widget_index++; widget_count--;
+            }
+            for (Song& song : *album_songs){
+                CreateWidget(&song, T_SONG);
+            }
+            return;
+        }
+        else {
+            for (iWidget* const widget : _icon_widgets) {
+                if ( widget->getTitle() == album->getTitle()) {
+                    widget_to_change = widget;
+                }
+                widget_index++;
+                }
+        }
+        if (!widget_to_change) {
+            qDebug() << "in MainWin::on_Library_change: No remaining widgets to change " + album->getTitle();
+            return;
+        }
+
+        _icon_widgets.removeAt(widget_index);
+
+        iWidget* new_widget = new iWidget(new Icon(static_cast<Album*>(album)), &_library, ui->dropArea);
+        new_widget->getIcon()->setParent(new_widget);
+        _icon_widgets.push_back(new_widget);
+
+        delete ui->dropAreaContent->layout()->replaceWidget(widget_to_change, new_widget);
+
+        _icon_signal_mapper->setMapping(new_widget, new_widget);
+        connect(new_widget, SIGNAL(clicked()), _icon_signal_mapper, SLOT(map()));
+        connect(new_widget, SIGNAL(double_clicked(QWidget*)), this, SLOT(on_Icon_doubleClick(QWidget*)));
+        return;
+    }
+    if (state == Library::ADD) {
+        CreateWidget(album, Type::T_ALBUM);
+        return;
+    }
+    if (state == Library::REMOVE) {
+        for (iWidget* const widget : _icon_widgets) {
+            if ( widget->getTitle() == album->getTitle()) {
+                ui->dropAreaContent->layout()->removeWidget(widget);
+                _icon_widgets.removeAt(widget_index);
+                delete widget;
+                return;
+            }
+            widget_index++;
+        }
+        qDebug() << "in MainWin::on_Library_change: Could not find icon of " + album->getTitle() + " to be removed";
+    }
 }
 
 void MainWin::on_ButtonForward_clicked()
@@ -291,6 +371,7 @@ void MainWin::on_Icon_deselect()
 {
     for (iWidget* icon : _selected_icons ) {
         icon->DefaultAdjustement();
+        icon->isSelected(false);
     }
 
     _selected_icons.clear();
@@ -314,7 +395,7 @@ void MainWin::CreateAlbumContentArea(Album* const target_album, QWidget* drop_ar
     _temporary_signal_mapper = new QSignalMapper(this);
 
     for (Song& song : *(target_album->getSongs()) ) {
-        iWidget* song_icon = new iWidget(new Icon(&song), drop_area_container);
+        iWidget* song_icon = new iWidget(new Icon(&song), &_library, drop_area_container);
         song_icon->getIcon()->setParent(song_icon);
         drop_area_container->layout()->addWidget(song_icon);
         _temporary_icon_widgets.push_back(song_icon);
@@ -335,7 +416,7 @@ void MainWin::on_ButtonRemove_clicked()
     while( !_selected_icons.empty()) {
         iWidget* icon = _selected_icons.front();
 
-        ui->dropArea->layout()->removeWidget(icon);
+        ui->dropAreaContent->layout()->removeWidget(icon);
         if (icon->getType() == Type::T_ALBUM) {
             _library.RemoveMedia(_library.getAlbumByTitle(icon->getTitle()));
         }

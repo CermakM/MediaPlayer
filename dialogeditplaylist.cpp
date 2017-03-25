@@ -133,5 +133,5 @@ void DialogEditPlaylist::on_buttonBox_accepted()
         delete itm;
     }
 
-    emit Change(true);
+    emit change(true);
 }

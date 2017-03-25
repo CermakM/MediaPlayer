@@ -60,9 +60,11 @@ public:
 
     bool isAlbum(const QString& path);
 
-    bool empty() const { return _albums.size() <= 1; }
+    bool empty() const { return _albums.size() <= 1 && _albums[0]->getSongs()->empty(); }
 
     friend class DialogEditLibrary;
+
+    enum ChangeState { NOCHANGE, CHANGE, ADD, REMOVE };
 
 private:
 

@@ -10,8 +10,8 @@ Library::Library(QWidget *parent) :
     SetupPlaylist();
 }
 
-Library::Library(const Library& other)
-    :_playlist(other._playlist)
+Library::Library(const Library& other):
+    _playlist(other._playlist)
 {
     this->_parent = other._parent;
     this->_albums = other._albums;
@@ -224,6 +224,10 @@ void Library::AddMedia(Album *album) {
 
 void Library::RemoveMedia(Album *album)
 {
+    if (album->getTitle() == '-') {
+        qDebug() << "Trying to remove default album for songs without an album, which is not possible";
+        return;
+    }
 
     if(!_database.open()) {
         qDebug() << "in Library::RemoveMedia : " << _database.lastError();
@@ -278,6 +282,7 @@ void Library::RemoveMedia(Song *song)
     QVector<Song>* song_vec = album_ptr->getSongs();
     const int index_of_song = song_vec->indexOf(*song);
     song_vec->removeAt(index_of_song);
+
 }
 
 void Library::infoDatabaseAddress() const
