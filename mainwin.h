@@ -87,7 +87,7 @@ private slots:
 
     void on_ButtonBackward_clicked();
 
-    void on_EndOfSong();
+    void on_Media_change(QMediaPlayer::MediaStatus);
 
     void on_Library_change(Album* album, Library::ChangeState state);
 
@@ -118,6 +118,8 @@ private:
 
     QSignalMapper* _icon_signal_mapper;
 
+
+    Song* _current_song = nullptr;
 
     QWidget* _cache_dropAreaContent = nullptr;
 

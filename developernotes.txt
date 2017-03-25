@@ -15,3 +15,5 @@
 ## Muliple-album issue when adding more songs of a same album ***
 ## Updating library layout after library configuration *****
 ## Delete the :PLAY: sign on a song after song end or another is selected
+
+## REIMPLEMENT the album widgets - every album holds its widgets ****

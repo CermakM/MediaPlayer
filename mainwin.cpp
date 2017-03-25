@@ -99,7 +99,8 @@ void MainWin::ConnectSignals()
     // Connect Signals and slots
     connect(_media_player, &QMediaPlayer::positionChanged, this, &MainWin::on_PositionChange);
     connect(_media_player, &QMediaPlayer::durationChanged, this, &MainWin::on_DurationChange);
-    connect(_playlist->MediaPlaylist(), SIGNAL(currentIndexChanged(int)), this, SLOT(on_EndOfSong()));
+//    connect(_playlist->MediaPlaylist(), SIGNAL(currentIndexChanged(int)), this, SLOT(on_Media_change()));
+    connect(_media_player, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)), this, SLOT(on_Media_change(QMediaPlayer::MediaStatus)));
 
     // Shortcuts
     QShortcut* shortcutAddAlbum = new QShortcut(QKeySequence("Ctrl+A"), this);
@@ -123,15 +124,40 @@ void MainWin::ConnectSignals()
     connect(_icon_signal_mapper, SIGNAL(mapped(QWidget*)), this, SLOT(on_Icon_click(QWidget*)));
 }
 
-void MainWin::on_EndOfSong() {
+void MainWin::on_Media_change(QMediaPlayer::MediaStatus state) {
 
-    if (_playlist->isEmpty()) {
-        return;
-    }
-
-    Song* song = _playlist->CurrentMedia();
+    Song* song = nullptr;
+    if (_current_song != nullptr)
+        song = _current_song;
+    else song = _playlist->CurrentMedia();
 
     if (song == nullptr) return;
+
+    song->isPlaying(false);
+
+    iWidget* current_widget = nullptr;
+    QVector<iWidget*> current_widget_vector;
+    if (_temporary_window_entered)
+        current_widget_vector = _temporary_icon_widgets;
+    else
+        current_widget_vector = _icon_widgets;
+
+    for (iWidget* const widget : current_widget_vector) {
+        if (widget->getTitle() == song->getTitle()) {
+            current_widget = widget;
+            break;
+        }
+    }
+
+    if(current_widget == nullptr) return;
+
+    if (state == QMediaPlayer::EndOfMedia || state == QMediaPlayer::LoadingMedia) {
+        current_widget->isPlaying(false);
+    }
+    else if (state == QMediaPlayer::BufferedMedia ) {
+        current_widget->isPlaying(true);
+        _current_song = song;
+    }
 
     ui->CurrentAlbumLine->setText(song->getAlbumTitle());
     ui->CurrentSongLine->setText(song->getTitle());
@@ -140,6 +166,7 @@ void MainWin::on_EndOfSong() {
 
 void MainWin::on_EditPlaylistOver(Album* album, Library::ChangeState change) {
 
+    (void*) album;
     if (change)
         UpdatePlaylist();
 
@@ -345,10 +372,11 @@ void MainWin::on_Icon_doubleClick(QWidget *target)
             _media_player->stop();
             _media_player->setMedia(QMediaContent(QUrl::fromLocalFile(icon->getPath())));
             Song* song_to_play = _library.getSongByTitle(icon->getTitle());
-            ui->CurrentAlbumLine->setText(song_to_play->getAlbumTitle());
-            ui->CurrentSongLine->setText(song_to_play->getTitle());
+//            ui->CurrentAlbumLine->setText(song_to_play->getAlbumTitle());
+//            ui->CurrentSongLine->setText(song_to_play->getTitle());
+            _current_song = song_to_play;
             _media_player->play();
-            icon->isPlaying(true);
+//            icon->isPlaying(true);
         }
         else if (icon->getType() == Type::T_ALBUM) {
             // Open the Album folder

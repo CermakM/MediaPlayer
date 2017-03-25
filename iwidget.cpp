@@ -37,7 +37,6 @@ iWidget::~iWidget()
     delete _icon;
     delete _icon_title_editor;
     delete _event_timer;
-    delete _is_playing;
 }
 
 void iWidget::setTitle(const QString &new_title)
