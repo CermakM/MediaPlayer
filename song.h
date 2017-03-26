@@ -38,7 +38,7 @@ public:
 
     bool* isPlaying() { return &_is_playing; }
 
-    bool isPlaying(bool const& state) { return _is_playing = state; }
+    bool isPlaying(bool state) { return _is_playing = state; }
 
     bool is_in_playlist = false;
 

@@ -24,6 +24,14 @@ public:
 
     void setLibrary(Library* const library) { _library = library; }
 
+    void pushChild(iWidget* const child);
+
+    void removeChild(iWidget* const child);
+
+    iWidget* getChild(iWidget* const child);
+
+    QVector<iWidget*> * getChildWidgets();
+
     inline void setTitle(QString const& new_title);
 
     inline QLineEdit* getTitleEditor() const { return _icon_title_editor; }
@@ -52,7 +60,7 @@ public:
 
     bool hasHeightForWidth() const;
 
-    bool isPlaying() const { return _is_playing; }
+    bool isPlaying() const { return *_is_playing; }
 
     bool isPlaying(bool state) { emit state_changed(state); return *_is_playing = state;}
 
@@ -76,11 +84,12 @@ private slots:
     void on_state_change(bool state) { _label_play->setVisible(state); }
 
 private:
+    QVector<iWidget*> _children;
     Library* _library;
-    QTimer* _event_timer;
-    Icon* _icon;
+    QTimer*  _event_timer;
+    Icon*    _icon;
+    QLabel*  _label_play;
     QLineEdit* _icon_title_editor;
-    QLabel* _label_play;
 
     bool* _is_playing = nullptr;
     bool  _is_selected = false;

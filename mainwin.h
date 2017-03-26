@@ -49,9 +49,9 @@ protected:
 
     void CreateDropArea();
 
-    void CreateAlbumContentArea(Album* const target_album, QWidget* drop_area_container);
+    void CreateAlbumContentArea(iWidget * const target_widget, QWidget* drop_area_container);
 
-    void CreateWidget(void* const media, Type type);
+    iWidget *CreateWidget(void* const media, Type type);
 
     void CreateNewRow(QBoxLayout *drop_layout, QBoxLayout **drop_row);
 
@@ -62,6 +62,10 @@ private slots:
     void on_VolumeSlider_valueChanged(int value);
 
     void on_ProgressSlider_sliderMoved(int position);
+
+    void on_ProgressSlider_FastForward();
+
+    void on_ProgressSlider_FastBackward();
 
     void on_PositionChange( qint64 position );
 
@@ -110,7 +114,7 @@ private:
 
     Playlist* _playlist;
 
-    Library _library;
+    Library   _library;
 
     QVector<iWidget*> _icon_widgets;
 
@@ -119,15 +123,17 @@ private:
     QSignalMapper* _icon_signal_mapper;
 
 
-    Song* _current_song = nullptr;
+    Song*    _current_song = nullptr;
+
+    iWidget* _current_song_widget   = nullptr;
+
+    iWidget* _current_album_widget  = nullptr;
 
     QWidget* _cache_dropAreaContent = nullptr;
 
-    QVector<iWidget*> _temporary_icon_widgets;
+    QSignalMapper* _temporary_signal_mapper = nullptr;
 
-    QSignalMapper* _temporary_signal_mapper;
-
-    bool _temporary_window_entered = false;
+    bool _temporary_window_entered  = false;
 };
 
 #endif // MAINWIN_H

@@ -63,7 +63,12 @@ void MainWin::CreateDropArea()
             }
         }
         else {
-            CreateWidget(album, T_ALBUM);
+            iWidget* album_widget = CreateWidget(album, T_ALBUM);
+            for (Song& song : *(album->getSongs())) {
+                iWidget* child_widget = new iWidget(new Icon(&song), &_library);
+                child_widget->getIcon()->setParent(child_widget);
+                album_widget->pushChild(child_widget);
+            }
         }
     }
 
@@ -71,7 +76,7 @@ void MainWin::CreateDropArea()
 }
 
 
-void MainWin::CreateWidget(void* const media, Type type) {
+iWidget* MainWin::CreateWidget(void* const media, Type type) {
 
     iWidget* new_widget = nullptr;
     if ( type == T_ALBUM )
@@ -91,6 +96,8 @@ void MainWin::CreateWidget(void* const media, Type type) {
     _icon_signal_mapper->setMapping(new_widget, new_widget);
     connect(new_widget, SIGNAL(clicked()), _icon_signal_mapper, SLOT(map()));
     connect(new_widget, SIGNAL(double_clicked(QWidget*)), this, SLOT(on_Icon_doubleClick(QWidget*)));
+
+    return new_widget;
 }
 
 void MainWin::ConnectSignals()
@@ -99,7 +106,6 @@ void MainWin::ConnectSignals()
     // Connect Signals and slots
     connect(_media_player, &QMediaPlayer::positionChanged, this, &MainWin::on_PositionChange);
     connect(_media_player, &QMediaPlayer::durationChanged, this, &MainWin::on_DurationChange);
-//    connect(_playlist->MediaPlaylist(), SIGNAL(currentIndexChanged(int)), this, SLOT(on_Media_change()));
     connect(_media_player, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)), this, SLOT(on_Media_change(QMediaPlayer::MediaStatus)));
 
     // Shortcuts
@@ -107,10 +113,12 @@ void MainWin::ConnectSignals()
     QShortcut* shortcutAddSongs = new QShortcut(QKeySequence("Ctrl+S"), this);
     QShortcut* shortcutEditPlaylist = new QShortcut(QKeySequence("Ctrl+P"), this);
     QShortcut* shortcutEditLibrary = new QShortcut(QKeySequence("Ctrl+L"), this);
-    QShortcut* shortcutPlayButton = new QShortcut(QKeySequence("P"), this);
+    QShortcut* shortcutPlayButton = new QShortcut(QKeySequence("K"), this);
     QShortcut* shortcutStopButton = new QShortcut(QKeySequence("S"), this);
     QShortcut* shortcutForwardButton = new QShortcut(QKeySequence(Qt::Key_Right), this);
     QShortcut* shortcutBackwardButton = new QShortcut(QKeySequence(Qt::Key_Left), this);
+    QShortcut* shortcutPositionForward = new QShortcut(QKeySequence(Qt::Key_L), this);
+    QShortcut* shortcutPositionBackward = new QShortcut(QKeySequence(Qt::Key_J), this);
     QShortcut* shortcutDeselect = new QShortcut(QKeySequence(Qt::Key_Escape), this);
 
     connect(shortcutAddAlbum, SIGNAL(activated()), this, SLOT(on_actionAddNewAlbum_triggered()));
@@ -119,6 +127,10 @@ void MainWin::ConnectSignals()
     connect(shortcutEditLibrary, SIGNAL(activated()), this, SLOT(on_actionEditLibrary_triggered()));
     connect(shortcutPlayButton, SIGNAL(activated()), this, SLOT(on_ButtonPlay_clicked()));
     connect(shortcutStopButton, SIGNAL(activated()), this, SLOT(on_ButtonStop_clicked()));
+    connect(shortcutForwardButton, SIGNAL(activated()), this, SLOT(on_ButtonForward_clicked()));
+    connect(shortcutBackwardButton, SIGNAL(activated()), this, SLOT(on_ButtonBackward_clicked()));
+    connect(shortcutPositionForward, SIGNAL(activated()), this, SLOT(on_ProgressSlider_FastForward()));
+    connect(shortcutPositionBackward, SIGNAL(activated()), this, SLOT(on_ProgressSlider_FastBackward()));
     connect(shortcutDeselect, SIGNAL(activated()), this, SLOT(on_Icon_deselect()));
 
     connect(_icon_signal_mapper, SIGNAL(mapped(QWidget*)), this, SLOT(on_Icon_click(QWidget*)));
@@ -126,37 +138,56 @@ void MainWin::ConnectSignals()
 
 void MainWin::on_Media_change(QMediaPlayer::MediaStatus state) {
 
-    Song* song = nullptr;
-    if (_current_song != nullptr)
-        song = _current_song;
-    else song = _playlist->CurrentMedia();
+    Song* song = _playlist->CurrentMedia();
 
     if (song == nullptr) return;
 
     song->isPlaying(false);
 
-    iWidget* current_widget = nullptr;
-    QVector<iWidget*> current_widget_vector;
-    if (_temporary_window_entered)
-        current_widget_vector = _temporary_icon_widgets;
-    else
-        current_widget_vector = _icon_widgets;
+    qDebug() << "Media change:";
 
-    for (iWidget* const widget : current_widget_vector) {
-        if (widget->getTitle() == song->getTitle()) {
-            current_widget = widget;
-            break;
+    if (state == QMediaPlayer::LoadingMedia) {
+        iWidget* current_widget = nullptr;
+        for (iWidget* const widget : _icon_widgets) {
+            if (widget->getTitle() == song->getTitle()) {
+                _current_song_widget = widget;
+                break;
+            }
+            else {
+                for (iWidget* const child_widget : *(widget->getChildWidgets())) {
+                    if (child_widget->getTitle() == song->getTitle()) {
+                        current_widget = child_widget;
+                        break;
+                    }
+                }
+            }
+            // Break the cycle if widget is found - saves some time
+            if (current_widget != nullptr) break;
         }
-    }
+        if(current_widget == nullptr) return;
 
-    if(current_widget == nullptr) return;
-
-    if (state == QMediaPlayer::EndOfMedia || state == QMediaPlayer::LoadingMedia) {
-        current_widget->isPlaying(false);
-    }
-    else if (state == QMediaPlayer::BufferedMedia ) {
-        current_widget->isPlaying(true);
+        _current_song_widget = current_widget;
         _current_song = song;
+
+        _current_song_widget->isPlaying(false);
+
+        qDebug() << "\t... Changing media " + _current_song_widget->getTitle();
+    }
+    else if (state == QMediaPlayer::EndOfMedia) {
+        _current_song_widget->isPlaying(false);
+        qDebug() << "\t... End of media or stopped media " + _current_song_widget->getTitle();
+    }
+    else if (state == QMediaPlayer::BufferedMedia || state == QMediaPlayer::LoadedMedia) {
+        _current_song_widget->isPlaying(true);
+        _current_song = song;
+        qDebug() << "\t... Loaded media " + _current_song_widget->getTitle();
+    }
+
+    else {
+
+        ui->CurrentAlbumLine->setText("-");
+        ui->CurrentSongLine->setText("End of Playlist .. Press PLAY to repeat");
+        return;
     }
 
     ui->CurrentAlbumLine->setText(song->getAlbumTitle());
@@ -198,6 +229,16 @@ void MainWin::on_VolumeSlider_valueChanged(int value)
 void MainWin::on_ProgressSlider_sliderMoved(int position)
 {
     _media_player->setPosition(position);
+}
+
+void MainWin::on_ProgressSlider_FastForward()
+{
+    _media_player->setPosition(_media_player->position() + 5000);
+}
+
+void MainWin::on_ProgressSlider_FastBackward()
+{
+    _media_player->setPosition(_media_player->position() - 5000);
 }
 
 
@@ -338,11 +379,13 @@ void MainWin::on_Library_change(Album* album, Library::ChangeState state)
 
 void MainWin::on_ButtonForward_clicked()
 {
+    _current_song_widget->isPlaying(false);
     if (_media_player->playlist()) _media_player->playlist()->next();
 }
 
 void MainWin::on_ButtonBackward_clicked()
 {
+    _current_song_widget->isPlaying(false);
     if (_media_player->playlist()) _media_player->playlist()->previous();
 }
 
@@ -365,31 +408,32 @@ void MainWin::on_Icon_click(QWidget *target)
 void MainWin::on_Icon_doubleClick(QWidget *target)
 {  
         on_Icon_deselect();
+        _current_song_widget->isPlaying(false);
 
-        iWidget* icon = dynamic_cast<iWidget*>(target);
+        iWidget* target_icon = dynamic_cast<iWidget*>(target);
 
-        if (icon->getType() == Type::T_SONG) {
+        if (target_icon->getType() == Type::T_SONG) {
             _media_player->stop();
-            _media_player->setMedia(QMediaContent(QUrl::fromLocalFile(icon->getPath())));
-            Song* song_to_play = _library.getSongByTitle(icon->getTitle());
-//            ui->CurrentAlbumLine->setText(song_to_play->getAlbumTitle());
-//            ui->CurrentSongLine->setText(song_to_play->getTitle());
+            Song* song_to_play = _library.getSongByTitle(target_icon->getTitle());
+            // Add a sample song to play (remove after it ends)
+            _playlist->PlaySample(song_to_play);
+            _current_song_widget = target_icon;
             _current_song = song_to_play;
             _media_player->play();
-//            icon->isPlaying(true);
         }
-        else if (icon->getType() == Type::T_ALBUM) {
+        else if (target_icon->getType() == Type::T_ALBUM) {
             // Open the Album folder
             _cache_dropAreaContent = ui->dropArea->takeWidget();
             QWidget* temp_dropAreaContent = new QWidget(ui->dropArea) ;
-            Album* target_album = _library.getAlbumByTitle(icon->getTitle());
 
-            CreateAlbumContentArea(target_album, temp_dropAreaContent);
+            CreateAlbumContentArea(target_icon, temp_dropAreaContent);
 
             connect(_temporary_signal_mapper, SIGNAL(mapped(QWidget*)), this, SLOT(on_Icon_click(QWidget*)));
 
             ui->dropArea->setWidget(temp_dropAreaContent);
-            ui->TitleLibrary->setText(icon->getTitle());
+            ui->TitleLibrary->setText(target_icon->getTitle());
+
+            _current_album_widget = target_icon;
             _temporary_window_entered = true;
         }
 }
@@ -406,9 +450,11 @@ void MainWin::on_Icon_deselect()
     QVector<iWidget*>().swap(_selected_icons);
 }
 
-void MainWin::CreateAlbumContentArea(Album* const target_album, QWidget* drop_area_container)
+void MainWin::CreateAlbumContentArea(iWidget* const target_widget, QWidget* drop_area_container)
 {
     ui->default_placeholder->setVisible(false);
+
+    _current_album_widget = target_widget;
 
     if (_library.empty()) {
         ui->default_placeholder->setVisible(true);
@@ -422,12 +468,9 @@ void MainWin::CreateAlbumContentArea(Album* const target_album, QWidget* drop_ar
 
     _temporary_signal_mapper = new QSignalMapper(this);
 
-    for (Song& song : *(target_album->getSongs()) ) {
-        iWidget* song_icon = new iWidget(new Icon(&song), &_library, drop_area_container);
-        song_icon->getIcon()->setParent(song_icon);
+    for (iWidget* const song_icon : *(target_widget->getChildWidgets()) ) {
+        song_icon->setParent(ui->dropArea);
         drop_area_container->layout()->addWidget(song_icon);
-        _temporary_icon_widgets.push_back(song_icon);
-
         _temporary_signal_mapper->setMapping(song_icon, song_icon);
         connect(song_icon, SIGNAL(clicked()), _temporary_signal_mapper, SLOT(map()));
         connect(song_icon, SIGNAL(double_clicked(QWidget*)), this, SLOT(on_Icon_doubleClick(QWidget*)));
@@ -464,19 +507,20 @@ void MainWin::on_ButtonHome_clicked()
         return;
 
     on_Icon_deselect();
-    while( !_temporary_icon_widgets.empty()) {
-        iWidget* widget_to_delete = _temporary_icon_widgets.front();
-        _temporary_icon_widgets.removeFirst();
-        delete widget_to_delete;
+
+    for (iWidget* const child_widget : *(_current_album_widget->getChildWidgets())) {
+        child_widget->setParent(0);
     }
+
     ui->dropArea->setWidget(_cache_dropAreaContent);
 
-    QVector<iWidget*>().swap(_temporary_icon_widgets);
+//    QVector<iWidget*>().swap(_temporary_icon_widgets);
 
     delete _temporary_signal_mapper;
     _temporary_signal_mapper = nullptr;
 
     _temporary_window_entered = false;
+    _current_album_widget = nullptr;
     _cache_dropAreaContent = nullptr;
 
     ui->TitleLibrary->setText("MY LIBRARY");

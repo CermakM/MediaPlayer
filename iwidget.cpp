@@ -52,7 +52,6 @@ void iWidget::DefaultAdjustement() {
 
     _label_play->setPixmap((new QPixmap(":/icons/icon_play"))->scaled(32,32, Qt::KeepAspectRatio));
     _label_play->setFixedSize(32,32);
-    _label_play->move(this->width() - 1.8* _label_play->width(), 0);
     _label_play->raise();
     _label_play->setVisible(*_is_playing);
 
@@ -77,6 +76,26 @@ void iWidget::DefaultAdjustement() {
     QSize icon_size = _icon->size();
     this->setBaseSize(icon_size + QSize(icon_size.width(), icon_size.height()));
     this->setFixedSize(this->baseSize());
+}
+
+void iWidget::pushChild(iWidget * const child)
+{
+    _children.push_back(child);
+}
+
+void iWidget::removeChild(iWidget * const child)
+{
+    _children.removeAt(_children.indexOf(child));
+}
+
+iWidget *iWidget::getChild(iWidget * const child)
+{
+    return _children.at(_children.indexOf(child));
+}
+
+QVector<iWidget *> * iWidget::getChildWidgets()
+{
+    return &_children;
 }
 
 QSize iWidget::sizeHint()
