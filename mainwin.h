@@ -51,7 +51,7 @@ protected:
 
     void CreateAlbumContentArea(iWidget * const target_widget, QWidget* drop_area_container);
 
-    iWidget *CreateWidget(void* const media, Type type);
+    iWidget *CreateWidget(void* const media, Type type, int index = -1);
 
     void CreateNewRow(QBoxLayout *drop_layout, QBoxLayout **drop_row);
 

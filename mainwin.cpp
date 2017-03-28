@@ -68,7 +68,7 @@ void MainWin::CreateDropArea()
 }
 
 
-iWidget* MainWin::CreateWidget(void* const media, Type type) {
+iWidget* MainWin::CreateWidget(void* const media, Type type, int index) {
 
     iWidget* new_widget = nullptr;
     if ( type == T_ALBUM ) {
@@ -88,9 +88,16 @@ iWidget* MainWin::CreateWidget(void* const media, Type type) {
     }
 
     new_widget->getIcon()->setParent(new_widget);
-    _icon_widgets.push_back(new_widget);
+    if (index < 0) {
+        _icon_widgets.push_back(new_widget);
+        ui->dropAreaContent->layout()->addWidget(new_widget);
+    }
+    else {
+        _icon_widgets.insert(index, new_widget);
+        dynamic_cast<FlowLayout*>(ui->dropAreaContent->layout() )->addWidget(new_widget, index);
+    }
 
-    ui->dropAreaContent->layout()->addWidget(new_widget);
+
 
     _icon_signal_mapper->setMapping(new_widget, new_widget);
     connect(new_widget, SIGNAL(clicked()), _icon_signal_mapper, SLOT(map()));
@@ -363,7 +370,15 @@ void MainWin::on_Library_change(Album* album, Library::ChangeState state)
         return;
     }
     if (state == Library::ADD) {
-        CreateWidget(album, Type::T_ALBUM);
+        int index_of_new_widget = 0;
+        for (int i = 1; i < _icon_widgets.size(); i++) {
+            if (_icon_widgets.at(i)->getTitle().at(i) > _icon_widgets.at(i - 1)->getTitle().at(0) &&
+                _icon_widgets.at(i)->getType() == T_ALBUM) {
+                index_of_new_widget = i;
+                break;
+            }
+        }
+        CreateWidget(album, Type::T_ALBUM, index_of_new_widget);
         return;
     }
     if (state == Library::REMOVE) {

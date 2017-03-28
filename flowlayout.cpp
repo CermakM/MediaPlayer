@@ -29,6 +29,17 @@ void FlowLayout::addItem(QLayoutItem * item)
     _itemList.append(item);
 }
 
+void FlowLayout::addItem(QLayoutItem *item, int index)
+{
+    _itemList.insert(index, item);
+}
+
+void FlowLayout::addWidget(QWidget *w, int index)
+{
+    addChildWidget(w);
+    addItem(QLayoutPrivate::Create, index);
+}
+
 int FlowLayout::count() const
 {
     return _itemList.size();
