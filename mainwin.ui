@@ -35,13 +35,22 @@
       <property name="acceptDrops">
        <bool>true</bool>
       </property>
+      <property name="toolTip">
+       <string>Drag here your favourite  Albums &amp; Songs</string>
+      </property>
+      <property name="toolTipDuration">
+       <number>1000</number>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Sunken</enum>
+      </property>
       <property name="widgetResizable">
        <bool>true</bool>
       </property>
       <property name="alignment">
        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
       </property>
-      <widget class="QWidget" name="dropAreaContent">
+      <widget class="DragArea" name="dropAreaContent">
        <property name="geometry">
         <rect>
          <x>0</x>
@@ -49,6 +58,12 @@
          <width>654</width>
          <height>272</height>
         </rect>
+       </property>
+       <property name="mouseTracking">
+        <bool>true</bool>
+       </property>
+       <property name="acceptDrops">
+        <bool>true</bool>
        </property>
        <widget class="QLineEdit" name="default_placeholder">
         <property name="enabled">
@@ -259,7 +274,7 @@
        <enum>QFrame::StyledPanel</enum>
       </property>
       <property name="frameShadow">
-       <enum>QFrame::Raised</enum>
+       <enum>QFrame::Sunken</enum>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
@@ -442,6 +457,14 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>DragArea</class>
+   <extends>QWidget</extends>
+   <header>dragarea.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

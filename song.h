@@ -40,7 +40,9 @@ public:
 
     bool isPlaying(bool state) { return _is_playing = state; }
 
-    bool is_in_playlist = false;
+    bool* isInPlaylist() { return &_is_in_playlist; }
+
+    bool isInPlaylist(bool state) { return _is_in_playlist = state; }
 
     friend bool operator== (const Song& s1, const Song& s2);
 
@@ -54,6 +56,7 @@ private:
     int _year;
 
     bool _is_playing = false;
+    bool _is_in_playlist = false;
 };
 
 Q_DECLARE_METATYPE(Song)

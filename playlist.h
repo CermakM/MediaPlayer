@@ -51,7 +51,6 @@ public:
 
     Song* operator[] (int i);
 
-
 private:
 
     QVector<Song*>  _playlist;

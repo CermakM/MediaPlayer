@@ -45,8 +45,6 @@ Icon::Icon(Song *media, QWidget *parent) :
 
     _pixmap = new QPixmap(":/icons/icon_song");
 
-    _in_playlist = song_ptr->is_in_playlist;
-
     _path_to_media = song_ptr->getPath();
 
     _album_title = song_ptr->getAlbumTitle();

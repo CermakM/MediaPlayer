@@ -50,7 +50,7 @@ bool Playlist::AddMedia(Album* album) {
             qDebug() << "Playlist::AddMedia(Album*)... Song is already in playlist \ninterrupting...";
             break;
         }
-        song.is_in_playlist = true;
+        song.isInPlaylist(true);
         _playlist.push_back(&song);
     }
 
@@ -82,7 +82,7 @@ bool Playlist::AddMedia(Song* song) {
         qDebug() << "Playlist::AddMedia(Song*)'... Song is already in playlist \ninterrupting...";
         return false;
     }
-    song->is_in_playlist = true;
+    song->isInPlaylist(true);
     _playlist.push_back(song);
 
     return true;
@@ -138,14 +138,13 @@ bool Playlist::RemoveMedia(Album* album) {
     for (int i = 0; i < _playlist.size(); ) {
         Song* song = _playlist[i];
         if (song->getAlbumTitle() == album_title) {
-            song->is_in_playlist = false;
+            song->isInPlaylist(false);
             _playlist.removeAt(i);
             qDebug() << "Song " << song->getTitle() << " erased";
             was_removed = true;
         }
         else i++;
     }
-
     return was_removed;
 }
 
@@ -171,7 +170,7 @@ bool Playlist::RemoveMedia(Song* song) {
 
     _database->close();
 
-    song->is_in_playlist = false;
+    song->isInPlaylist(false);
     bool was_removed = _playlist.removeOne(song);
 
     if (was_removed) qDebug() << "Song " << song->getTitle() << " erased";

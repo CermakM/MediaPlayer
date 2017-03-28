@@ -40,7 +40,7 @@ void DialogAddAlbum::on_buttonBox_accepted()
 
     if(_addToPlaylist) {
         for (Song& song : *(newAlbum->getSongs())) {
-            song.is_in_playlist = true;
+            song.isInPlaylist(true);
         }
     }
     if (ui->TitleSelect->isModified()) {

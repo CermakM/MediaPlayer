@@ -8,6 +8,7 @@
 #include "playlist.h"
 #include "library.h"
 #include "iwidget.h"
+#include "dragarea.h"
 #include "flowlayout.h"
 
 #include <QDir>
@@ -49,7 +50,7 @@ protected:
 
     void CreateDropArea();
 
-    void CreateAlbumContentArea(iWidget * const target_widget, QWidget* drop_area_container);
+    void CreateAlbumContentArea(iWidget * const target_widget, DragArea* drop_area_container);
 
     iWidget *CreateWidget(void* const media, Type type, int index = -1);
 
@@ -91,7 +92,9 @@ private slots:
 
     void on_ButtonBackward_clicked();
 
-    void on_Media_change(QMediaPlayer::MediaStatus);
+    void on_Media_drop(const QMimeData*);
+
+    void on_Media_change(QMediaPlayer::MediaStatus state);
 
     void on_Library_change(Album* album, Library::ChangeState state);
 

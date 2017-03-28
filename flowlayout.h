@@ -16,10 +16,6 @@ public:
 
     void addItem(QLayoutItem *item) override;
 
-    void addItem(QLayoutItem *item, int index);
-
-    void addWidget(QWidget *w, int index);
-
     int count() const override;
 
     QLayoutItem* itemAt(int index) const override;

@@ -30,17 +30,25 @@ public:
     Library(const Library& other);
     ~Library();
 
+    enum ChangeState { ERROR = -1, NOCHANGE = 0, CHANGE, ADD, REMOVE };
+
     void setDatabaseFileName(const QString& fname);
 
     static void CopyDatabaseFile(const QString &original_fname, const QString &new_fname);
 
-    void AddMedia(Album* album);
+    ChangeState AddMedia(Album* album);
+
+    ChangeState AddMedia(Song* song);
+
+    ChangeState AddMedia(const QVector<Song *> &song_vector);
 
     void RemoveMedia(Album* album);
 
     void RemoveMedia(Song* song);
 
     void infoDatabaseAddress() const;
+
+    void putInDatabase(QSqlQuery &query, Album* const album, Song &song);
 
     QString getDatabaseFName() const {return _database_fname; }
 
@@ -52,19 +60,21 @@ public:
 
     Album* getAlbumByTitle(const QString & title);
 
+    Album* at(const int& i) { return _albums[i]; }
+
     Playlist* getPlaylist() { return &_playlist; }
 
     int CountAlbums() const { return _albums.size(); }
 
-    bool isSong(const QString& path);
+    static bool isSong(const QString& path);
 
-    bool isAlbum(const QString& path);
+    static bool isAlbum(const QString& path);
 
     bool empty() const { return _albums.size() <= 1 && _albums[0]->getSongs()->empty(); }
 
     friend class DialogEditLibrary;
 
-    enum ChangeState { NOCHANGE, CHANGE, ADD, REMOVE };
+    bool playlist_updated = false;
 
 private:
 

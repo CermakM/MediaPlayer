@@ -41,7 +41,7 @@ Song::Song(const QString& title, const QString& path, const QString& interpret, 
     _interpret = interpret;
     _album_title = album;
     _year = year;
-    is_in_playlist = inPlaylist;
+    _is_in_playlist = inPlaylist;
 
     _parent = nullptr;
 }

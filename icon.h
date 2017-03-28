@@ -57,7 +57,6 @@ private:
     QPixmap* _pixmap;
     Type _type;
 
-    bool _in_playlist = false;
     bool _clicked = false;
 
     QSize _size = QSize(50, 50);
