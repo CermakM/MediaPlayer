@@ -97,6 +97,10 @@ private slots:
 
     void on_Icon_deselect();
 
+    void on_Icon_remove();
+
+    void on_Icon_AddToPlaylist();
+
     void on_Icon_click(QWidget* target);
 
     void on_Icon_doubleClick(QWidget* target);
@@ -106,6 +110,8 @@ private slots:
     void on_ButtonRemove_clicked();
 
     void on_ButtonHome_clicked();
+
+    void on_pushButton_clicked();
 
 private:
     Ui::MainWin *ui;

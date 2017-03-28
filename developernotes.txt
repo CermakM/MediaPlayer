@@ -1,11 +1,8 @@
 # Developer notes
 
-## Allow dragging albums & songs into main widget ***
-## Create library edit widget ****
-## Create forw / backward buttons - edit icons of the buttons *
+## Allow dragging albums & songs into main widget ****
 ## Rate songs and albums (stars / hearts... ) *
 ## Favourite playlists *
-## Finish shortcuts and arrow-controled slider *
 
 ## Editable icon names - changes the file name as well! **
 ## Adjust SQL to delete files with " ' " properly **
@@ -13,7 +10,3 @@
 
 ## What to do when album or song can not be found? **
 ## Muliple-album issue when adding more songs of a same album ***
-## Updating library layout after library configuration *****
-## Delete the :PLAY: sign on a song after song end or another is selected
-
-## REIMPLEMENT the album widgets - every album holds its widgets ****

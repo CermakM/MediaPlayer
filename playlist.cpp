@@ -207,5 +207,5 @@ void Playlist::Update() {
 
 Song* Playlist::operator[](int i)
 {
-    return (i >= 0 && i < _playlist.size()) ? _playlist[i] : _playlist[0];
+    return (i >= 0 && i < _playlist.size()) ? _playlist[i] : nullptr;
 }

@@ -82,6 +82,7 @@ void DialogEditLibrary::UpdateTree(bool changed)
     ui->AlbumsTree->clear();
     ui->SongsTree->clear();
 
+    // It's faster to redraw the whole tree
     CreateTree(_pseudo_library->getAlbums());
 
     _change = true;
