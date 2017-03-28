@@ -5,7 +5,6 @@
 #-------------------------------------------------
 
 QT       += core gui \
-            core-private \
             multimedia \
             sql \
 

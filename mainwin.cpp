@@ -94,7 +94,7 @@ iWidget* MainWin::CreateWidget(void* const media, Type type, int index) {
     }
     else {
         _icon_widgets.insert(index, new_widget);
-        dynamic_cast<FlowLayout*>(ui->dropAreaContent->layout() )->addWidget(new_widget, index);
+        dynamic_cast<FlowLayout*>(ui->dropAreaContent->layout() )->addWidget(new_widget);
     }
 
 
