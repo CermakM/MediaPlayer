@@ -7,5 +7,3 @@
 ## Work on a better layout.... *
 
 ## What to do when album or song can not be found? **
-## Muliple-album issue when adding more songs of a same album *****
-## DUPLICITY *************
