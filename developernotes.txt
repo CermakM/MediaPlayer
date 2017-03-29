@@ -3,7 +3,6 @@
 ## Rate songs and albums (stars / hearts... ) *
 ## Favourite playlists *
 
-## Editable icon names - changes the file name as well! **
 ## Adjust SQL to delete files with " ' " properly **
 ## Work on a better layout.... *
 

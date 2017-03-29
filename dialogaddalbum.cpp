@@ -36,24 +36,32 @@ void DialogAddAlbum::on_buttonBox_accepted()
         return; // no change has happened
     }
 
-    Album* newAlbum = new Album(pathToAdd);
+    Library::ChangeState change_state;
+    Album temp_album = Album(pathToAdd);
+    Album* album = _library->getAlbumByTitle(temp_album.getTitle());
 
+    if (album != nullptr) {
+        qDebug() << "Album is already in playlist";
+    }
+    else {
+        album = new Album(temp_album);
+    }
     if(_addToPlaylist) {
-        for (Song& song : *(newAlbum->getSongs())) {
+        for (Song& song : *(album->getSongs())) {
             song.isInPlaylist(true);
         }
     }
     if (ui->TitleSelect->isModified()) {
         QString title = ui->TitleSelect->text();
-        newAlbum->setTitle(title);
+        album->setTitle(title);
     }
 
-    _library->AddMedia(newAlbum);
+    change_state = _library->AddMedia(album);
 
     qInfo("The new album has been added");
 
-    emit change(newAlbum, Library::ADD);
-    emit change(true);
+    emit change(album, change_state);
+    emit change(bool(change_state));
 }
 
 void DialogAddAlbum::on_BrowseButton_clicked()

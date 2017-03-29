@@ -201,8 +201,11 @@ Library::ChangeState Library::AddMedia(Album *album) {
     _database.close();
 
     // If there are duplicite songs, filter them
-    if ( _albums.contains(album)) {
+    if ( _albums.contains(album) ) {
         Album* current_album = _albums[_albums.indexOf(album)];
+        if (songs_to_add.empty())
+            return Library::NOCHANGE;
+
         for (Song& song : songs_to_add) {
             current_album->PushSong(song);
         }
@@ -275,6 +278,7 @@ QMap<Album*, Library::ChangeState> Library::AddMedia(QVector<Song*> const& song_
             if (!map_changes.contains(album))
                 map_changes[album] = Library::CHANGE;
         }
+        else map_changes[nullptr] = Library::NOCHANGE;
     }
 
     return map_changes;
@@ -403,4 +407,17 @@ bool Library::isAlbum(const QString & path)
     if(entry_info.empty()) return false;
 
     return true;
+}
+
+bool Library::contains(Album * const album)
+{
+    QVector<Album*>::iterator it = _albums.begin();
+
+    while (it != _albums.end()) {
+        if ((*it)->getTitle() == album->getTitle() && (*it)->getInterpret() == album->getInterpret()) {
+            return true;
+        }
+        ++it;
+    }
+    return false;
 }

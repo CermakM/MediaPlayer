@@ -21,6 +21,8 @@ public:
 
     Album(const QString& path);
 
+    Album(const Album &other);
+
     QVector<Song>* getSongs() { return &_songs; }
 
     QFileInfoList* getIcons() {return &_icons; }
@@ -51,7 +53,9 @@ public:
 
     QIcon* CurrentIcon();
 
-    friend bool operator == (const Album& a1, const Album& a2);
+    bool operator==(const Album& other);
+
+    bool operator==(Album* const other);
 
 private:
 

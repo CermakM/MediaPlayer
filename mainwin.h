@@ -54,8 +54,6 @@ protected:
 
     iWidget *CreateWidget(void* const media, Type type, int index = -1);
 
-    void CreateNewRow(QBoxLayout *drop_layout, QBoxLayout **drop_row);
-
     void ConnectSignals();
 
 private slots:

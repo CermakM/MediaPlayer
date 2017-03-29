@@ -382,7 +382,7 @@
     <string>Add Album</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+A</string>
+    <string>Ctrl+Shift+A</string>
    </property>
   </action>
   <action name="actionEditPlaylist">
@@ -390,7 +390,7 @@
     <string>Edit Playlist</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+P</string>
+    <string>Ctrl+Shift+P</string>
    </property>
   </action>
   <action name="actionSearch">
@@ -411,7 +411,7 @@
     <string>Add Songs</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+S</string>
+    <string>Ctrl+Shift+S</string>
    </property>
   </action>
   <action name="actionAddURL">
@@ -429,7 +429,7 @@
     <string>Edit Library</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+L</string>
+    <string>Ctrl+Shift+L</string>
    </property>
   </action>
   <action name="actionAbout">

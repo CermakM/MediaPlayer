@@ -70,6 +70,8 @@ public:
 
     static bool isAlbum(const QString& path);
 
+    bool contains(Album* const album);
+
     bool empty() const { return _albums.size() <= 1 && _albums[0]->getSongs()->empty(); }
 
     friend class DialogEditLibrary;

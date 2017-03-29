@@ -116,10 +116,10 @@ void MainWin::ConnectSignals()
     connect(_media_player, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)), this, SLOT(on_Media_change(QMediaPlayer::MediaStatus)));
 
     // Shortcuts
-    QShortcut* shortcutAddAlbum = new QShortcut(QKeySequence("Ctrl+A"), this);
-    QShortcut* shortcutAddSongs = new QShortcut(QKeySequence("Ctrl+S"), this);
-    QShortcut* shortcutEditPlaylist = new QShortcut(QKeySequence("Ctrl+P"), this);
-    QShortcut* shortcutEditLibrary = new QShortcut(QKeySequence("Ctrl+L"), this);
+    QShortcut* shortcutAddAlbum = new QShortcut(QKeySequence("Ctrl+Shift+A"), this);
+    QShortcut* shortcutAddSongs = new QShortcut(QKeySequence("Ctrl+Shift+S"), this);
+    QShortcut* shortcutEditPlaylist = new QShortcut(QKeySequence("Ctrl+Shift+P"), this);
+    QShortcut* shortcutEditLibrary = new QShortcut(QKeySequence("Ctrl+Shift+L"), this);
     QShortcut* shortcutPlayButton = new QShortcut(QKeySequence("K"), this);
     QShortcut* shortcutStopButton = new QShortcut(QKeySequence("S"), this);
     QShortcut* shortcutForwardButton = new QShortcut(QKeySequence(Qt::Key_Right), this);
@@ -349,7 +349,7 @@ void MainWin::on_Library_change(Album* album, Library::ChangeState state)
             qDebug() << "in MainWin::on_Library_change: Widget: " + album->getTitle() + " has been deleted";
             _icon_widgets.removeOne(widget_to_change);
         }
-        iWidget* new_widget = new iWidget(new Icon(static_cast<Album*>(album)), &_library, ui->dropArea);
+        iWidget* new_widget = new iWidget(new Icon(album), &_library, ui->dropAreaContent);
         new_widget->getIcon()->setParent(new_widget);
         _icon_widgets.push_back(new_widget);
 
@@ -400,21 +400,33 @@ void MainWin::on_ButtonBackward_clicked()
 void MainWin::on_Media_drop(const QMimeData* mime_data)
 {
     QList<QUrl> url_list = mime_data->urls();
-
+    Library::ChangeState  library_status;
     for (QUrl const& url : url_list) {
         if (Library::isAlbum(url.toLocalFile())) {
-            Album* album = new Album(url.toLocalFile());
-            Library::ChangeState library_status = _library.AddMedia(album);
-            if ( library_status == Library::CHANGE) {
+            Album temp_album(url.toLocalFile());
+            // Checks if the album already exists in library and return pointer
+            Album* album = _library.getAlbumByTitle(temp_album.getTitle());
+            if (!album)
+                album = new Album(temp_album);
+
+            library_status = _library.AddMedia(album);
+            if (Library::CHANGE == library_status) {
                 on_Library_change(album, Library::CHANGE);
             }
-            else if ( library_status == Library::ADD ) {
+            else if (Library::ADD == library_status) {
                 on_Library_change(album, Library::ADD);
+            }
+            else if (Library::NOCHANGE == library_status ) {
+                qDebug() << "Album is already in library";
             }
         }
         else if (Library::isSong(url.toLocalFile())) {
-            if (_library.AddMedia(new Song(url.toLocalFile())) == Library::CHANGE) {
+            library_status = _library.AddMedia(new Song(url.toLocalFile()));
+            if (Library::CHANGE == library_status) {
                 on_Library_change(_library.at(0), Library::CHANGE);
+            }
+            else if ( Library::NOCHANGE == library_status) {
+                qDebug() << "Song is already in library";
             }
         }
         else {
