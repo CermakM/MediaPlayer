@@ -1,6 +1,5 @@
 # Developer notes
 
-## Allow dragging albums & songs into main widget ****
 ## Rate songs and albums (stars / hearts... ) *
 ## Favourite playlists *
 
@@ -10,3 +9,4 @@
 
 ## What to do when album or song can not be found? **
 ## Muliple-album issue when adding more songs of a same album *****
+## DUPLICITY *************

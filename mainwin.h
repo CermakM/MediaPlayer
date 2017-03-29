@@ -116,6 +116,8 @@ private slots:
 
     void on_pushButton_clicked();
 
+    void on_ButtonRefresh_clicked();
+
 private:
     Ui::MainWin *ui;
 

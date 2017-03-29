@@ -28,16 +28,17 @@ void MainWin::UpdatePlaylist() {
 
     ui->CurrentSongLine->clear();
     ui->CurrentAlbumLine->clear();
-
     _media_player->stop();
-
     _playlist->Update();
 
     qDebug() << "Actual media player status: " << _playlist->Size();
 
-    _playlist->setCurrentIndex(0);
-
     _media_player->setPlaylist(_playlist->MediaPlaylist());
+
+    if (!_playlist->empty()) {
+        ui->CurrentSongLine->setText(_playlist->CurrentMedia()->getTitle());
+        ui->CurrentAlbumLine->setText(_playlist->CurrentMedia()->getAlbumTitle());
+    }
 }
 
 
@@ -210,8 +211,6 @@ void MainWin::on_EditPlaylistOver(Album* album, Library::ChangeState change) {
     (void*) album;
     if (change)
         UpdatePlaylist();
-
-    if (_library.empty()) ui->default_placeholder->setVisible(true);
 }
 
 void MainWin::on_EditPlaylistOver(bool change)
@@ -321,21 +320,17 @@ void MainWin::on_Library_change(Album* album, Library::ChangeState state)
     if (!_library.empty()) ui->default_placeholder->hide();
 
     iWidget* widget_to_change = nullptr;
-    int widget_index = 0;
     if (state == Library::CHANGE) {
         if (album->getTitle() == '-') {
-            int widget_count = album->CountSongs();
             QVector<Song>* album_songs = album->getSongs();
-            while (widget_count && widget_index < _icon_widgets.size()) {
-                widget_to_change = _icon_widgets.at(widget_index);
+            for (iWidget* const widget : _icon_widgets) {
+                widget_to_change = widget;
                 if (widget_to_change->getAlbumTitle() == '-') {
                     ui->dropAreaContent->layout()->removeWidget(widget_to_change);
-                    _icon_widgets.removeAt(widget_index);
+                    _icon_widgets.removeOne(widget);
                     delete widget_to_change;
                     widget_to_change = nullptr;
-                    widget_count--;
                 }
-                else widget_index++;
             }
             for (Song& song : *album_songs){
                 CreateWidget(&song, T_SONG);
@@ -348,16 +343,12 @@ void MainWin::on_Library_change(Album* album, Library::ChangeState state)
                     widget_to_change = widget;
                     break;
                 }
-                widget_index++;
-                }
+            }
         }
-        if (!widget_to_change) {
-            qDebug() << "in MainWin::on_Library_change: No remaining widgets to change " + album->getTitle();
-            return;
+        if (widget_to_change) {
+            qDebug() << "in MainWin::on_Library_change: Widget: " + album->getTitle() + " has been deleted";
+            _icon_widgets.removeOne(widget_to_change);
         }
-
-        _icon_widgets.removeAt(widget_index);
-
         iWidget* new_widget = new iWidget(new Icon(static_cast<Album*>(album)), &_library, ui->dropArea);
         new_widget->getIcon()->setParent(new_widget);
         _icon_widgets.push_back(new_widget);
@@ -385,11 +376,10 @@ void MainWin::on_Library_change(Album* album, Library::ChangeState state)
         for (iWidget* const widget : _icon_widgets) {
             if ( widget->getTitle() == album->getTitle()) {
                 ui->dropAreaContent->layout()->removeWidget(widget);
-                _icon_widgets.removeAt(widget_index);
+                _icon_widgets.removeOne(widget);
                 delete widget;
                 return;
             }
-            widget_index++;
         }
         qDebug() << "in MainWin::on_Library_change: Could not find icon of " + album->getTitle() + " to be removed";
     }
@@ -534,6 +524,8 @@ void MainWin::on_Icon_remove()
         else {
             _library.RemoveMedia(_library.getSongByTitle(icon->getTitle()));
         }
+
+        _icon_widgets.removeOne(icon);
         _selected_icons.removeFirst();
         delete icon;
     }
@@ -599,4 +591,29 @@ void MainWin::on_ButtonHome_clicked()
 void MainWin::on_pushButton_clicked()
 {
     on_Icon_AddToPlaylist();
+}
+
+void MainWin::on_ButtonRefresh_clicked()
+{
+    while (!_icon_widgets.empty())
+        delete _icon_widgets.takeFirst();
+
+    _selected_icons.clear();
+    QVector<iWidget*>().swap(_selected_icons);
+
+    // Default placeholder will not be deleted
+    ui->dropAreaContent->layout()->removeWidget(ui->default_placeholder);
+    ui->default_placeholder->setParent(ui->dropArea);
+
+    delete ui->dropAreaContent->layout();
+    delete ui->dropArea->takeWidget();
+    delete _icon_signal_mapper;
+
+    ui->dropAreaContent = new DragArea(ui->dropArea);
+    CreateDropArea();
+
+    connect(_icon_signal_mapper, SIGNAL(mapped(QWidget*)), this, SLOT(on_Icon_click(QWidget*)));
+    connect(ui->dropAreaContent, SIGNAL(dropped(const QMimeData*)), this, SLOT(on_Media_drop(const QMimeData*)));
+
+    UpdatePlaylist();
 }

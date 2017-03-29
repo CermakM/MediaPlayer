@@ -40,7 +40,7 @@ public:
 
     ChangeState AddMedia(Song* song);
 
-    ChangeState AddMedia(const QVector<Song *> &song_vector);
+    QMap<Album *, ChangeState> AddMedia(const QVector<Song *> &song_vector);
 
     void RemoveMedia(Album* album);
 

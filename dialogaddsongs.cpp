@@ -51,5 +51,11 @@ void DialogAddSongs::on_RemoveButton_clicked()
 
 void DialogAddSongs::on_buttonBox_accepted()
 {
-    _library->AddMedia(_song_vector);
+    QMap<Album*, Library::ChangeState> map_changes = _library->AddMedia(_song_vector);
+
+    for ( QMap<Album*, Library::ChangeState>::iterator it = map_changes.begin(); it != map_changes.end(); it++ ) {
+        emit change(it.key(), it.value());
+    }
+
+    if (!map_changes.empty()) emit change(true);
 }

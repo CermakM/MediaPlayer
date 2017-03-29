@@ -237,11 +237,12 @@ Library::ChangeState Library::AddMedia(Song *song)
 {
     QVector<Song*> temp_vector { song };
 
-    return AddMedia(temp_vector);
+    return AddMedia(temp_vector).begin().value();
 }
 
-Library::ChangeState Library::AddMedia(QVector<Song*> const& song_vector)
+QMap<Album*, Library::ChangeState> Library::AddMedia(QVector<Song*> const& song_vector)
 {
+    QMap<Album*, Library::ChangeState> map_changes;
     for(Song* const song : song_vector) {
         Album* album = getAlbumByTitle(song->getAlbumTitle());
         if (album == nullptr) {
@@ -249,8 +250,8 @@ Library::ChangeState Library::AddMedia(QVector<Song*> const& song_vector)
             album->PushSong(*song);
             album->setInterpret(song->getInterpret());
             album->setTitle(song->getAlbumTitle());
-            AddMedia(album);
-            return Library::ADD;
+            if (!map_changes.contains(album))
+                map_changes[album] = AddMedia(album);
         }
         else if (!album->contains(*song)){
             album->PushSong(*song);
@@ -260,7 +261,6 @@ Library::ChangeState Library::AddMedia(QVector<Song*> const& song_vector)
             if ( !_database.open()) {
                 qDebug() << "in Library::AddMedia(QVector<Song*> const&): Database "
                             "has not been opened " << _database.lastError();
-                return ERROR;
             }
 
             QSqlQuery query(_database);
@@ -269,15 +269,15 @@ Library::ChangeState Library::AddMedia(QVector<Song*> const& song_vector)
 
             if(!query.exec()) {
                 qDebug() << "Query not executed successfully" << query.lastError();
-                return ERROR;
             }
 
             _database.close();
-            return Library::CHANGE;
+            if (!map_changes.contains(album))
+                map_changes[album] = Library::CHANGE;
         }
     }
 
-    return NOCHANGE;
+    return map_changes;
 }
 
 void Library::RemoveMedia(Album *album)
@@ -286,6 +286,8 @@ void Library::RemoveMedia(Album *album)
         qDebug() << "Trying to remove default album for songs without an album, which is not possible";
         return;
     }
+
+    _playlist.RemoveMedia(album);
 
     if(!_database.open()) {
         qDebug() << "in Library::RemoveMedia : " << _database.lastError();
@@ -305,21 +307,17 @@ void Library::RemoveMedia(Album *album)
     }
 
     _database.close();
-    _playlist.RemoveMedia(album);
     _albums.removeAt(_albums.indexOf(album));
 }
 
 void Library::RemoveMedia(Song *song)
 {
-    if(!_database.open()) {
-        qDebug() << "in Library::RemoveMedia : " << _database.lastError();
-        return;
-    }
-
     if(!song) {
         qDebug() << "Error in Library::RemoveMieda(Song*) : could not find a corresponding media for null";
         return;
     }
+
+    _playlist.RemoveMedia(song);
 
     Album* album_ptr= song->getAlbum();
 
@@ -327,7 +325,10 @@ void Library::RemoveMedia(Song *song)
         qDebug() << "Laughing: every song has to have an album... enjoy the segmentation fault!";
     }
 
-    const QString title = album_ptr->getTitle();
+    if(!_database.open()) {
+        qDebug() << "in Library::RemoveMedia : " << _database.lastError();
+        return;
+    }
 
     QSqlQuery query(_database);
     if (!query.exec("DELETE FROM '"+album_ptr->getTitle()+"' where title='"+song->getTitle()+"'")) {
@@ -337,7 +338,6 @@ void Library::RemoveMedia(Song *song)
 
     _database.close();
 
-    _playlist.RemoveMedia(song);
     QVector<Song>* song_vec = album_ptr->getSongs();
     const int index_of_song = song_vec->indexOf(*song);
     song_vec->removeAt(index_of_song);

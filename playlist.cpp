@@ -202,6 +202,8 @@ void Playlist::Update() {
     for(Song* const song : _playlist) {
         _media_playlist->addMedia(QMediaContent(QUrl::fromLocalFile(song->getPath())));
     }
+
+    if (!empty()) setCurrentIndex(0);
 }
 
 Song* Playlist::operator[](int i)
