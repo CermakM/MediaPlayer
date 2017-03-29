@@ -1,12 +1,9 @@
 # Developer notes
 
-## Allow dragging albums & songs into main widget ****
 ## Rate songs and albums (stars / hearts... ) *
 ## Favourite playlists *
 
-## Editable icon names - changes the file name as well! **
 ## Adjust SQL to delete files with " ' " properly **
 ## Work on a better layout.... *
 
 ## What to do when album or song can not be found? **
-## Muliple-album issue when adding more songs of a same album ***

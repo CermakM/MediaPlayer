@@ -34,7 +34,7 @@ private:
 
     Library* _library;
 
-    QVector<Song> _song_vector;
+    QVector<Song*> _song_vector;
 };
 
 #endif // DIALOGADDSONGS_H

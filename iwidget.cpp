@@ -8,6 +8,7 @@ iWidget::iWidget(QWidget* parent) :
     _event_timer = new QTimer(this);
     _icon_title_editor = new QLineEdit("Unknown", this);
     _is_playing = new bool(false);
+    _is_in_playlist = new bool(false);
 
     DefaultAdjustement();
 }
@@ -19,8 +20,11 @@ iWidget::iWidget(Icon *icon, Library* const library, QWidget *parent) :
     _label_play = new QLabel(_icon);
     _event_timer = new QTimer(this);
     _library = library;
-    if (icon->getType() == Type::T_SONG)
-        _is_playing = _library->getSongByTitle(icon->getTitle())->isPlaying();
+    if (icon->getType() == Type::T_SONG) {
+        Song* song = _library->getSongByTitle(icon->getTitle());
+        _is_playing = song->isPlaying();
+        _is_in_playlist = song->isInPlaylist();
+    }
 
     else _is_playing = new bool(false);
 
@@ -33,6 +37,15 @@ iWidget::iWidget(Icon *icon, Library* const library, QWidget *parent) :
 
 iWidget::~iWidget()
 {
+    if (this->_is_in_playlist) {
+        qDebug() << "I was in playlist: " << this->getTitle();
+        _library->playlist_updated = true;
+    }
+
+    while(!_children.empty()) {
+        delete _children.takeFirst();
+    }
+
     delete _label_play;
     delete _icon;
     delete _icon_title_editor;

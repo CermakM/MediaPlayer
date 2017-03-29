@@ -114,7 +114,7 @@ void Library::SetupPlaylist()
 {
     for (Album* const album : _albums) {
         for(Song& song : *(album->getSongs()))
-            if (song.is_in_playlist) _playlist.AddMedia(&song);
+            if (*song.isInPlaylist()) _playlist.AddMedia(&song);
     }
 
 }
@@ -152,11 +152,11 @@ bool Library::hide_temp_database_win()
     return true;
 }
 
-void Library::AddMedia(Album *album) {
+Library::ChangeState Library::AddMedia(Album *album) {
 
     if(!_database.open()) {
         qDebug() << "Database has not been opened: " << _database.lastError();
-        return;
+        return ERROR;
     }
 
     QSqlQuery query(_database);
@@ -174,27 +174,22 @@ void Library::AddMedia(Album *album) {
 
     if(!query.prepare(create_statement)) {
         qDebug() << "Query not prepared successfully" << query.lastError();
-        return;
+        return ERROR;
     }
 
     if(!query.exec()) {
         qDebug() << "Query not executed successfully" << query.lastError();
-        return;
+        return ERROR;
     }
 
     QVector<Song> songs_to_add;
     for (Song& song : *(album->getSongs())) {
 
-        if (song.is_in_playlist) _playlist.AddMedia(&song);
+        if (*song.isInPlaylist()) _playlist.AddMedia(&song);
 
-        query.prepare("INSERT INTO '"+album->getTitle()+"' (title, interpret, album, year, inPlaylist, path) "
-                                                         "VALUES (:title, :interpret, :album, :year, :inPlaylist, :path)");
-        query.bindValue(":title", song.getTitle());
-        query.bindValue(":interpret", song.getInterpret());
-        query.bindValue(":album", song.getAlbumTitle());
-        query.bindValue(":year", song.getYear());
-        query.bindValue(":inPlaylist", song.is_in_playlist);
-        query.bindValue(":path", song.getPath());
+        QSqlQuery query(_database);
+
+        putInDatabase(query, album, song);
 
         // Query is not executed if a song is already in the album
         if (!query.exec()) {
@@ -206,20 +201,87 @@ void Library::AddMedia(Album *album) {
     _database.close();
 
     // If there are duplicite songs, filter them
-    if ( album->CountSongs() - songs_to_add.size()) {
+    if ( _albums.contains(album) ) {
         Album* current_album = _albums[_albums.indexOf(album)];
-        for (const Song& song : songs_to_add) {
+        if (songs_to_add.empty())
+            return Library::NOCHANGE;
+
+        for (Song& song : songs_to_add) {
             current_album->PushSong(song);
         }
+        return Library::CHANGE;
     }
     else if (album->getTitle() == "-") {
         for (Song& song : *(album->getSongs()))
             // Untitled songs stored on 0. position of albums
             _albums[0]->PushSong(song);
+        return Library::CHANGE;
     }
     else {
         _albums.push_back(album);
+        return Library::ADD;
     }
+}
+
+void Library::putInDatabase(QSqlQuery& query, Album* const album, Song& song)
+{
+    query.prepare("INSERT INTO '"+album->getTitle()+"' (title, interpret, album, year, inPlaylist, path) "
+                                                     "VALUES (:title, :interpret, :album, :year, :inPlaylist, :path)");
+    query.bindValue(":title", song.getTitle());
+    query.bindValue(":interpret", song.getInterpret());
+    query.bindValue(":album", song.getAlbumTitle());
+    query.bindValue(":year", song.getYear());
+    query.bindValue(":inPlaylist", *song.isInPlaylist());
+    query.bindValue(":path", song.getPath());
+}
+
+
+Library::ChangeState Library::AddMedia(Song *song)
+{
+    QVector<Song*> temp_vector { song };
+
+    return AddMedia(temp_vector).begin().value();
+}
+
+QMap<Album*, Library::ChangeState> Library::AddMedia(QVector<Song*> const& song_vector)
+{
+    QMap<Album*, Library::ChangeState> map_changes;
+    for(Song* const song : song_vector) {
+        Album* album = getAlbumByTitle(song->getAlbumTitle());
+        if (album == nullptr) {
+            Album* album = new Album();
+            album->PushSong(*song);
+            album->setInterpret(song->getInterpret());
+            album->setTitle(song->getAlbumTitle());
+            if (!map_changes.contains(album))
+                map_changes[album] = AddMedia(album);
+        }
+        else if (!album->contains(*song)){
+            album->PushSong(*song);
+            album->setInterpret(song->getInterpret());
+            album->setTitle(song->getAlbumTitle());
+
+            if ( !_database.open()) {
+                qDebug() << "in Library::AddMedia(QVector<Song*> const&): Database "
+                            "has not been opened " << _database.lastError();
+            }
+
+            QSqlQuery query(_database);
+
+            putInDatabase(query, album, *song);
+
+            if(!query.exec()) {
+                qDebug() << "Query not executed successfully" << query.lastError();
+            }
+
+            _database.close();
+            if (!map_changes.contains(album))
+                map_changes[album] = Library::CHANGE;
+        }
+        else map_changes[nullptr] = Library::NOCHANGE;
+    }
+
+    return map_changes;
 }
 
 void Library::RemoveMedia(Album *album)
@@ -228,6 +290,8 @@ void Library::RemoveMedia(Album *album)
         qDebug() << "Trying to remove default album for songs without an album, which is not possible";
         return;
     }
+
+    _playlist.RemoveMedia(album);
 
     if(!_database.open()) {
         qDebug() << "in Library::RemoveMedia : " << _database.lastError();
@@ -247,21 +311,17 @@ void Library::RemoveMedia(Album *album)
     }
 
     _database.close();
-
     _albums.removeAt(_albums.indexOf(album));
 }
 
 void Library::RemoveMedia(Song *song)
 {
-    if(!_database.open()) {
-        qDebug() << "in Library::RemoveMedia : " << _database.lastError();
-        return;
-    }
-
     if(!song) {
         qDebug() << "Error in Library::RemoveMieda(Song*) : could not find a corresponding media for null";
         return;
     }
+
+    _playlist.RemoveMedia(song);
 
     Album* album_ptr= song->getAlbum();
 
@@ -269,7 +329,10 @@ void Library::RemoveMedia(Song *song)
         qDebug() << "Laughing: every song has to have an album... enjoy the segmentation fault!";
     }
 
-    const QString title = album_ptr->getTitle();
+    if(!_database.open()) {
+        qDebug() << "in Library::RemoveMedia : " << _database.lastError();
+        return;
+    }
 
     QSqlQuery query(_database);
     if (!query.exec("DELETE FROM '"+album_ptr->getTitle()+"' where title='"+song->getTitle()+"'")) {
@@ -290,7 +353,6 @@ void Library::infoDatabaseAddress() const
     qDebug() << "\tDatabase stored in library: " << _database << " on adress " << &_database;
     qDebug() << "\tDatabase address stored in playlist: " << *_playlist.DatabaseAddress() << " on adress " << _playlist.DatabaseAddress();
 }
-
 
 Song* Library::getSongByTitle(const QString & title)
 {
@@ -319,21 +381,18 @@ Album* Library::getAlbumByTitle(const QString & title)
     return album_ptr;
 }
 
-
 bool Library::isSong(const QString & path)
 {
     QFileInfo fi(path);
 
     if (fi.isFile()) {
         QString suffix = fi.suffix();
-        qDebug() << suffix;
-        if (suffix == ".mp3")
+        if (suffix == "mp3")
             return true;
     }
 
     return false;
 }
-
 
 bool Library::isAlbum(const QString & path)
 {
@@ -350,3 +409,15 @@ bool Library::isAlbum(const QString & path)
     return true;
 }
 
+bool Library::contains(Album * const album)
+{
+    QVector<Album*>::iterator it = _albums.begin();
+
+    while (it != _albums.end()) {
+        if ((*it)->getTitle() == album->getTitle() && (*it)->getInterpret() == album->getInterpret()) {
+            return true;
+        }
+        ++it;
+    }
+    return false;
+}

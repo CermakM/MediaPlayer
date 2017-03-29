@@ -11,7 +11,6 @@ Album::Album() {
 
 Album::~Album() {
     qDebug() << "Calling destructor for album";
-    delete this;
 }
 
 Album::Album(QVector<Song>& songs)
@@ -65,6 +64,16 @@ Album::Album(const QString &path) {
 
     else
         qDebug() << " in Album::Album : Empty list of songs provided";
+}
+
+Album::Album(Album const& other)
+{
+    _path = other._path;
+    _title = other._title;
+    _interpret = other._interpret;
+    _songs = other._songs;
+    _icons = other._icons;
+    _current_icon = other._current_icon;
 }
 
 void Album::setIcon(QIcon &icon)
@@ -123,7 +132,12 @@ QIcon *Album::CurrentIcon()
     return _current_icon.isNull() ? nullptr : &_current_icon;
 }
 
-bool operator ==(const Album &a1, const Album &a2)
+bool Album::operator==(Album * const other)
 {
-    return a1.getTitle() == a2.getTitle() && a1.getInterpret() == a2.getInterpret();
+    return other->getTitle() == this->_title && other->getInterpret() == this->_interpret;
+}
+
+bool Album::operator==(const Album &other)
+{
+    return other.getTitle() == this->_title && other.getInterpret() == this->_interpret;
 }

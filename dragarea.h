@@ -2,7 +2,12 @@
 #define DRAGAREA_H
 
 #include <QWidget>
+#include <QDebug>
 #include <QMimeData>
+#include <QDragEnterEvent>
+#include <QDragMoveEvent>
+#include <QDragLeaveEvent>
+#include <QDropEvent>
 
 class DragArea : public QWidget
 {
@@ -10,18 +15,19 @@ class DragArea : public QWidget
 
 public:
     DragArea(QWidget* parent = 0);
+    ~DragArea();
 
 public slots:
     void clear();
 
 signals:
-    void changed(const QMimeData *mimeData = 0);
+    void dropped(const QMimeData* mime_data = 0);
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
-    void dragMoveEvent(QDragMoveEvent *event) override;
-    void dragLeaveEvent(QDragLeaveEvent *event) override;
+    void dragMoveEvent(QDragMoveEvent* event) override;
     void dropEvent(QDropEvent *event) override;
+    void dragLeaveEvent(QDragLeaveEvent *event) override;
 
 private:
     QString _default_message;

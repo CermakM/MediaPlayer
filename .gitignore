@@ -1,7 +1,8 @@
 # Files to ignore
-developernotes.txt
-Musician.pro.user.*
-Media/media.sqlite
+*.txt
+Musician.pro.user*
+
 
 # Folders to ignore
 Assets/
+Media/

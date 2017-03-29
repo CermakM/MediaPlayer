@@ -78,7 +78,6 @@ signals:
 
     void state_changed(bool state);
 
-
 private slots:
 
     void on_state_change(bool state) { _label_play->setVisible(state); }
@@ -92,6 +91,7 @@ private:
     QLineEdit* _icon_title_editor;
 
     bool* _is_playing = nullptr;
+    bool* _is_in_playlist = nullptr;
     bool  _is_selected = false;
 };
 

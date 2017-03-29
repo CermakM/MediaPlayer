@@ -43,14 +43,13 @@ public:
 
     void Clear();
 
-    bool isEmpty() const { return _playlist.isEmpty(); }
+    bool empty() const { return _playlist.isEmpty(); }
 
     void Update();
 
     int Size() const { return _playlist.size(); }
 
     Song* operator[] (int i);
-
 
 private:
 
