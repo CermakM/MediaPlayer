@@ -36,6 +36,8 @@ public:
 
    inline QString getAlbumTitle() const { return _album_title; }
 
+   inline QString getInterpret() const { return _interpret; }
+
    inline QString getPath() const { return _path_to_media; }
 
    inline Type getType() const { return _type; }
@@ -54,6 +56,7 @@ private:
     QString _path_to_media;
     QString _title;
     QString _album_title;
+    QString _interpret;
     QPixmap* _pixmap;
     Type _type;
 

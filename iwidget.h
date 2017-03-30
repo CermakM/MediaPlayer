@@ -32,13 +32,19 @@ public:
 
     QVector<iWidget*> * getChildWidgets();
 
+    void setAlbumWidget(iWidget* album_widget) { _album_widget = album_widget; }
+
     inline void setTitle(QString const& new_title);
+
+    inline iWidget* getAlbumWidget() const { return _album_widget; }
 
     inline QLineEdit* getTitleEditor() const { return _icon_title_editor; }
 
     inline QString getTitle() const { return _icon_title_editor->text(); }
 
     inline QString getAlbumTitle() const { return _icon->getAlbumTitle(); }
+
+    inline QString getInterpret() const { return _icon->getInterpret(); }
 
     inline Icon* getIcon() { return _icon; }
 
@@ -72,6 +78,8 @@ signals:
 
     void clicked();
 
+    void right_clicked(QWidget*);
+
     void double_clicked(QWidget*);
 
     void released();
@@ -84,10 +92,12 @@ private slots:
 
 private:
     QVector<iWidget*> _children;
+    iWidget* _album_widget;
     Library* _library;
     QTimer*  _event_timer;
     Icon*    _icon;
     QLabel*  _label_play;
+    QPixmap* _label_play_pixmap;
     QLineEdit* _icon_title_editor;
 
     bool* _is_playing = nullptr;

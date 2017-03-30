@@ -7,5 +7,8 @@
         <file alias="icon_song">Assets/icon_song.png</file>
         <file alias="icon_empty_folder">Assets/icon_empty_folder.png</file>
         <file alias="icon_play">Assets/icon_play.png</file>
+        <file alias="icon_stop">Assets/icon_stop.png</file>
+        <file alias="icon_home">Assets/icon_home.png</file>
+        <file alias="icon_refresh">Assets/icon_refresh.png</file>
     </qresource>
 </RCC>

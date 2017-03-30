@@ -11,6 +11,7 @@ Icon::Icon(QWidget* parent) :
 
     _path_to_media = "Unspecified";
     _title = "Unknown";
+    _interpret = "Unknown";
 
     CreateLabel(_pixmap);
 }
@@ -20,18 +21,18 @@ Icon::Icon (Album *media, QWidget *parent) :
 {
     _title = media->getTitle();
     _type = T_ALBUM;
-    Album* album_ptr = media;
 
-    if(album_ptr->CurrentIcon()) {
-        QString file_path = album_ptr->getIcons()->front().absoluteFilePath();
+    if(media->CurrentIcon()) {
+        QString file_path = media->getIcons()->front().absoluteFilePath();
         _pixmap = new QPixmap(file_path);
     }
     else {
         _pixmap = new QPixmap(":/icons/icon_album");
     }
 
-    _path_to_media = album_ptr->getPath();
     _album_title = _title;
+    _interpret = media->getInterpret();
+    _path_to_media = media->getPath();
 
     CreateLabel(_pixmap);
 }

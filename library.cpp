@@ -21,6 +21,10 @@ Library::Library(const Library& other):
 Library::~Library()
 {
     qInfo() << "Library::~Library destructor called" ;
+    _playlist.Clear();
+    while(!_albums.empty()) {
+        delete _albums.takeFirst();
+    }
 }
 
 void Library::setDatabaseFileName(const QString &fname)
@@ -311,7 +315,7 @@ void Library::RemoveMedia(Album *album)
     }
 
     _database.close();
-    _albums.removeAt(_albums.indexOf(album));
+   delete _albums.takeAt(_albums.indexOf(album));
 }
 
 void Library::RemoveMedia(Song *song)
@@ -343,8 +347,7 @@ void Library::RemoveMedia(Song *song)
     _database.close();
 
     QVector<Song>* song_vec = album_ptr->getSongs();
-    const int index_of_song = song_vec->indexOf(*song);
-    song_vec->removeAt(index_of_song);
+    song_vec->removeOne(*song);
 
 }
 

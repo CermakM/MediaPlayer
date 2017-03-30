@@ -190,8 +190,6 @@ Song* Playlist::CurrentMedia() {
 void Playlist::Clear() {
 
     _playlist.clear();
-
-    _media_playlist->clear();
 }
 
 
@@ -203,7 +201,7 @@ void Playlist::Update() {
         _media_playlist->addMedia(QMediaContent(QUrl::fromLocalFile(song->getPath())));
     }
 
-    if (!empty()) setCurrentIndex(0);
+    if (!this->empty()) setCurrentIndex(0);
 }
 
 Song* Playlist::operator[](int i)

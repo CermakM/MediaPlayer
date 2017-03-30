@@ -19,6 +19,7 @@ MainWin::MainWin(QWidget *parent) :
 
 MainWin::~MainWin()
 {
+    qDebug() << "MainWin destructor called";
     delete ui;
 }
 
@@ -102,6 +103,7 @@ iWidget* MainWin::CreateWidget(void* const media, Type type, int index) {
 
     _icon_signal_mapper->setMapping(new_widget, new_widget);
     connect(new_widget, SIGNAL(clicked()), _icon_signal_mapper, SLOT(map()));
+    connect(new_widget, SIGNAL(right_clicked(QWidget*)), this, SLOT(on_Icon_rightClick(QWidget*)));
     connect(new_widget, SIGNAL(double_clicked(QWidget*)), this, SLOT(on_Icon_doubleClick(QWidget*)));
 
     return new_widget;
@@ -140,7 +142,7 @@ void MainWin::ConnectSignals()
     connect(shortcutPositionForward, SIGNAL(activated()), this, SLOT(on_ProgressSlider_FastForward()));
     connect(shortcutPositionBackward, SIGNAL(activated()), this, SLOT(on_ProgressSlider_FastBackward()));
     connect(shortcutDeselect, SIGNAL(activated()), this, SLOT(on_Icon_deselect()));
-    connect(shortcutDelete, SIGNAL(activated()), this, SLOT(on_Icon_remove()));
+    connect(shortcutDelete, SIGNAL(activated()), this, SLOT(on_Icon_removeSelected()));
 
 
     connect(_icon_signal_mapper, SIGNAL(mapped(QWidget*)), this, SLOT(on_Icon_click(QWidget*)));
@@ -160,7 +162,7 @@ void MainWin::on_Media_change(QMediaPlayer::MediaStatus status) {
     if (status == QMediaPlayer::LoadingMedia) {
         iWidget* current_widget = nullptr;
         for (iWidget* const widget : _icon_widgets) {
-            if (widget->getTitle() == song->getTitle()) {
+            if (widget->getTitle() == song->getTitle() && widget->getType() == T_SONG) {
                 _current_song_widget = widget;
                 break;
             }
@@ -387,13 +389,13 @@ void MainWin::on_Library_change(Album* album, Library::ChangeState state)
 
 void MainWin::on_ButtonForward_clicked()
 {
-    _current_song_widget->isPlaying(false);
+    if(_current_song_widget) _current_song_widget->isPlaying(false);
     if (_media_player->playlist()) _media_player->playlist()->next();
 }
 
 void MainWin::on_ButtonBackward_clicked()
 {
-    _current_song_widget->isPlaying(false);
+    if(_current_song_widget) _current_song_widget->isPlaying(false);
     if (_media_player->playlist()) _media_player->playlist()->previous();
 }
 
@@ -436,7 +438,7 @@ void MainWin::on_Media_drop(const QMimeData* mime_data)
 }
 
 void MainWin::on_Icon_click(QWidget *target)
-{
+{   
     iWidget* d_target = dynamic_cast<iWidget*>(target);
 
     if( d_target->isSelected()) return;
@@ -449,6 +451,26 @@ void MainWin::on_Icon_click(QWidget *target)
 
     d_target->isSelected(true);
     _selected_icons.push_back(d_target);
+}
+
+void MainWin::on_Icon_rightClick(QWidget *target)
+{
+    iWidget* d_target = dynamic_cast<iWidget*>(target);
+    on_Icon_deselect();
+    on_Icon_click(d_target);
+
+    QMenu test_menu(this);
+    test_menu.addAction("Remove selected", this, SLOT(on_Icon_removeSelected()));
+    test_menu.exec(QCursor::pos());
+
+//    iWidgetMenu icon_widget_menu(nullptr, nullptr);
+
+//    connect(&icon_widget_menu, SIGNAL(action_Play_triggered()), this, SLOT(on_Icon_doubleClick()));
+//    connect(&icon_widget_menu, SIGNAL(action_Playlist_triggered()), this, SLOT(on_Icon_AddToPlaylist()));
+//    connect(&icon_widget_menu, SIGNAL(action_Remove_triggered()), this, SLOT(on_Icon_removeSelected()));
+//    connect(&icon_widget_menu, SIGNAL(action_Properties_triggered()), this, SLOT(on_actionProperties_triggered()));
+
+//    icon_widget_menu.exec(QCursor::pos());
 }
 
 void MainWin::on_Icon_doubleClick(QWidget *target)
@@ -478,11 +500,23 @@ void MainWin::on_Icon_doubleClick(QWidget *target)
             connect(_temporary_signal_mapper, SIGNAL(mapped(QWidget*)), this, SLOT(on_Icon_click(QWidget*)));
 
             ui->dropArea->setWidget(temp_dropAreaContent);
-            ui->TitleLibrary->setText(target_icon->getTitle());
+            ui->TitleLibrary->setText(target_icon->getInterpret() + "  -  " + target_icon->getAlbumTitle());
 
             _current_album_widget = target_icon;
             _temporary_window_entered = true;
         }
+}
+
+void MainWin::on_Icon_doubleClick()
+{
+    if (!_selected_icons.empty())
+        on_Icon_doubleClick(_selected_icons.first());
+}
+
+void MainWin::on_actionProperties_triggered()
+{
+    if (!_selected_icons.empty())
+        qDebug() << "Properties of: " << _selected_icons.front()->getTitle();
 }
 
 void MainWin::CreateAlbumContentArea(iWidget* const target_widget, DragArea *drop_area_container)
@@ -507,6 +541,7 @@ void MainWin::CreateAlbumContentArea(iWidget* const target_widget, DragArea *dro
         drop_area_container->layout()->addWidget(song_icon);
         _temporary_signal_mapper->setMapping(song_icon, song_icon);
         connect(song_icon, SIGNAL(clicked()), _temporary_signal_mapper, SLOT(map()));
+        connect(song_icon, SIGNAL(right_clicked(QWidget*)), this, SLOT(on_Icon_rightClick(QWidget*)));
         connect(song_icon, SIGNAL(double_clicked(QWidget*)), this, SLOT(on_Icon_doubleClick(QWidget*)));
     }
 }
@@ -522,7 +557,7 @@ void MainWin::on_Icon_deselect()
     QVector<iWidget*>().swap(_selected_icons);
 }
 
-void MainWin::on_Icon_remove()
+void MainWin::on_Icon_removeSelected()
 {
     if (_selected_icons.empty()) return;
 
@@ -530,14 +565,18 @@ void MainWin::on_Icon_remove()
         iWidget* icon = _selected_icons.front();
 
         ui->dropAreaContent->layout()->removeWidget(icon);
+        if (icon->getAlbumWidget())
+            icon->getAlbumWidget()->removeChild(icon);
+        _icon_widgets.removeOne(icon);
+
         if (icon->getType() == Type::T_ALBUM) {
             _library.RemoveMedia(_library.getAlbumByTitle(icon->getTitle()));
         }
         else {
             _library.RemoveMedia(_library.getSongByTitle(icon->getTitle()));
+
         }
 
-        _icon_widgets.removeOne(icon);
         _selected_icons.removeFirst();
         delete icon;
     }
@@ -572,7 +611,7 @@ void MainWin::on_ButtonDeselect_clicked()
 
 void MainWin::on_ButtonRemove_clicked()
 {
-    on_Icon_remove();
+    on_Icon_removeSelected();
 }
 
 void MainWin::on_ButtonHome_clicked()

@@ -10,6 +10,7 @@
 #include "iwidget.h"
 #include "dragarea.h"
 #include "flowlayout.h"
+#include "iwidgetmenu.h"
 
 #include <QDir>
 #include <QFile>
@@ -49,97 +50,69 @@ protected:
     void UpdatePlaylist();
 
     void CreateDropArea();
-
-    void CreateAlbumContentArea(iWidget * const target_widget, DragArea* drop_area_container);
-
     iWidget *CreateWidget(void* const media, Type type, int index = -1);
+    void CreateAlbumContentArea(iWidget * const target_widget, DragArea* drop_area_container);
 
     void ConnectSignals();
 
 private slots:
 
     void on_VolumeSlider_valueChanged(int value);
-
     void on_ProgressSlider_sliderMoved(int position);
-
     void on_ProgressSlider_FastForward();
-
     void on_ProgressSlider_FastBackward();
-
     void on_PositionChange( qint64 position );
-
     void on_DurationChange( qint64 position );
 
     void on_ButtonPlay_clicked();
-
     void on_ButtonStop_clicked();
+    void on_ButtonForward_clicked();
+    void on_ButtonBackward_clicked();
+    void on_ButtonDeselect_clicked();
+    void on_ButtonRemove_clicked();
+    void on_ButtonHome_clicked();
+    void on_pushButton_clicked();
+    void on_ButtonRefresh_clicked();
 
     void on_actionAddNewAlbum_triggered();
-
     void on_actionAddNewSongs_triggered();
-
     void on_actionEditPlaylist_triggered();
-
     void on_actionEditLibrary_triggered();
 
     void on_EditPlaylistOver(Album*, Library::ChangeState);
-
     void on_EditPlaylistOver(bool);
 
-    void on_ButtonForward_clicked();
-
-    void on_ButtonBackward_clicked();
-
     void on_Media_drop(const QMimeData*);
-
     void on_Media_change(QMediaPlayer::MediaStatus state);
-
     void on_Library_change(Album* album, Library::ChangeState state);
 
     void on_Icon_deselect();
-
-    void on_Icon_remove();
-
+    void on_Icon_removeSelected();
     void on_Icon_AddToPlaylist();
-
     void on_Icon_click(QWidget* target);
-
+    void on_Icon_rightClick(QWidget* target);
     void on_Icon_doubleClick(QWidget* target);
+    /*
+     * Reimplemented for signal receiving
+     */
+    void on_Icon_doubleClick();
 
-    void on_ButtonDeselect_clicked();
-
-    void on_ButtonRemove_clicked();
-
-    void on_ButtonHome_clicked();
-
-    void on_pushButton_clicked();
-
-    void on_ButtonRefresh_clicked();
+    void on_actionProperties_triggered();
 
 private:
     Ui::MainWin *ui;
-
     QMediaPlayer* _media_player;
-
     Playlist* _playlist;
-
     Library   _library;
 
     QVector<iWidget*> _icon_widgets;
-
     QVector<iWidget*> _selected_icons;
-
     QSignalMapper* _icon_signal_mapper;
 
-
     Song*    _current_song = nullptr;
-
     iWidget* _current_song_widget   = nullptr;
-
     iWidget* _current_album_widget  = nullptr;
-
     QWidget* _cache_dropAreaContent = nullptr;
-
     QSignalMapper* _temporary_signal_mapper = nullptr;
 
     bool _temporary_window_entered  = false;
