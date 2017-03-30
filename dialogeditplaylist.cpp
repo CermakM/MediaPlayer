@@ -48,7 +48,7 @@ void DialogEditPlaylist::LoadLibrary() {
             // Add the child item
             topItm->addChild(childItm);
 
-            if(temp_song.is_in_playlist) topPlistItm ->addChild(childItm->clone());
+            if(*temp_song.isInPlaylist()) topPlistItm ->addChild(childItm->clone());
         }
 
         if(topPlistItm->childCount()) ui->treePlaylist->addTopLevelItem(topPlistItm);
@@ -133,5 +133,5 @@ void DialogEditPlaylist::on_buttonBox_accepted()
         delete itm;
     }
 
-    emit Change(true);
+    emit change(true);
 }

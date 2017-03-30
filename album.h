@@ -21,6 +21,8 @@ public:
 
     Album(const QString& path);
 
+    Album(const Album &other);
+
     QVector<Song>* getSongs() { return &_songs; }
 
     QFileInfoList* getIcons() {return &_icons; }
@@ -43,7 +45,7 @@ public:
 
     QString getInterpret() const { return _interpret; }
 
-    void PushSong(const Song& song) { _songs.push_back(song); }
+    void PushSong(Song& song) { song.setParent(this); _songs.push_back(song); }
 
     int  CountSongs() const {return _songs.size(); }
 
@@ -51,7 +53,9 @@ public:
 
     QIcon* CurrentIcon();
 
-    friend bool operator == (const Album& a1, const Album& a2);
+    bool operator==(const Album& other);
+
+    bool operator==(Album* const other);
 
 private:
 

@@ -34,6 +34,10 @@ public:
 
    inline QString getTitle() const { return _title; }
 
+   inline QString getAlbumTitle() const { return _album_title; }
+
+   inline QString getInterpret() const { return _interpret; }
+
    inline QString getPath() const { return _path_to_media; }
 
    inline Type getType() const { return _type; }
@@ -51,10 +55,11 @@ public slots:
 private:
     QString _path_to_media;
     QString _title;
+    QString _album_title;
+    QString _interpret;
     QPixmap* _pixmap;
     Type _type;
 
-    bool _in_playlist = false;
     bool _clicked = false;
 
     QSize _size = QSize(50, 50);

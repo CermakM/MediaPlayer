@@ -43,7 +43,8 @@ SOURCES += \
     mainwin.cpp \
     playlist.cpp \
     song.cpp \
-    flowlayout.cpp
+    flowlayout.cpp \
+    iwidgetmenu.cpp
 
 HEADERS  += \
     album.h \
@@ -59,7 +60,8 @@ HEADERS  += \
     playlist.h \
     probe.h \
     song.h \
-    flowlayout.h
+    flowlayout.h \
+    iwidgetmenu.h
 
 RESOURCES += \
     resource.qrc

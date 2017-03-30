@@ -50,14 +50,14 @@ bool Playlist::AddMedia(Album* album) {
             qDebug() << "Playlist::AddMedia(Album*)... Song is already in playlist \ninterrupting...";
             break;
         }
-        song.is_in_playlist = true;
+        song.isInPlaylist(true);
         _playlist.push_back(&song);
     }
 
     return true;
 }
 
-bool Playlist::AddMedia(Song* _song) {
+bool Playlist::AddMedia(Song* song) {
 
     if( !_database->open()) {
         qDebug() << "Playlist::AddMedia(Song*) : While opening database :" << _database->lastError();
@@ -65,9 +65,9 @@ bool Playlist::AddMedia(Song* _song) {
     }
 
     QSqlQuery query(*_database);
-    QString album_title = _song->getAlbumTitle();
+    QString album_title = song->getAlbumTitle();
     QString query_string = QString("UPDATE \"%1\" SET inPlaylist = 1 WHERE title = \"%2\"")
-                           .arg(album_title).arg(_song->getTitle());
+                           .arg(album_title).arg(song->getTitle());
 
     query.prepare(query_string);
 
@@ -78,14 +78,39 @@ bool Playlist::AddMedia(Song* _song) {
 
     _database->close();
 
-    if (_playlist.contains(_song)) {
+    if (_playlist.contains(song)) {
         qDebug() << "Playlist::AddMedia(Song*)'... Song is already in playlist \ninterrupting...";
         return false;
     }
-    _song->is_in_playlist = true;
-    _playlist.push_back(_song);
+    song->isInPlaylist(true);
+    _playlist.push_back(song);
 
     return true;
+}
+
+void Playlist::PlaySample(Song* song)
+{
+    if (_playlist.contains(song)) {
+        _media_playlist->setCurrentIndex(_playlist.indexOf(song));
+        return;
+    }
+
+    _cache_index = _media_playlist->currentIndex();
+    _sample_song_index = _playlist.size();
+    _playlist.push_back(song);
+    _media_playlist->addMedia(QMediaContent(QUrl::fromLocalFile(song->getPath())));
+    _media_playlist->setCurrentIndex(_sample_song_index);
+}
+
+void Playlist::RemoveSample()
+{
+    if (_sample_song_index < 0) {
+        qDebug() << "in Playlist::RemoveSample: Sample media has not been set up";
+        return;
+    }
+    _playlist.removeAt(_sample_song_index);
+    _media_playlist->removeMedia(_sample_song_index);
+    _media_playlist->setCurrentIndex(_cache_index);
 }
 
 bool Playlist::RemoveMedia(Album* album) {
@@ -113,14 +138,13 @@ bool Playlist::RemoveMedia(Album* album) {
     for (int i = 0; i < _playlist.size(); ) {
         Song* song = _playlist[i];
         if (song->getAlbumTitle() == album_title) {
-            song->is_in_playlist = false;
+            song->isInPlaylist(false);
             _playlist.removeAt(i);
             qDebug() << "Song " << song->getTitle() << " erased";
             was_removed = true;
         }
         else i++;
     }
-
     return was_removed;
 }
 
@@ -146,7 +170,7 @@ bool Playlist::RemoveMedia(Song* song) {
 
     _database->close();
 
-    song->is_in_playlist = false;
+    song->isInPlaylist(false);
     bool was_removed = _playlist.removeOne(song);
 
     if (was_removed) qDebug() << "Song " << song->getTitle() << " erased";
@@ -166,8 +190,6 @@ Song* Playlist::CurrentMedia() {
 void Playlist::Clear() {
 
     _playlist.clear();
-
-    _media_playlist->clear();
 }
 
 
@@ -178,9 +200,11 @@ void Playlist::Update() {
     for(Song* const song : _playlist) {
         _media_playlist->addMedia(QMediaContent(QUrl::fromLocalFile(song->getPath())));
     }
+
+    if (!this->empty()) setCurrentIndex(0);
 }
 
-Song *Playlist::operator[](int i)
+Song* Playlist::operator[](int i)
 {
     return (i >= 0 && i < _playlist.size()) ? _playlist[i] : nullptr;
 }

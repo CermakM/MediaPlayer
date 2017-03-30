@@ -46,6 +46,11 @@ void DialogEditLibrary::CreateTreeItem(Album* const album, QTreeWidgetItem* cons
     QTreeWidgetItem* album_item = tree_album_item;
     QTreeWidgetItem* song_item  = nullptr;
 
+    if (album->getSongs()->empty()) {
+        qDebug() << "in DialogEditLibrary::CreateTreeItem: Empty album has been provided";
+        return;
+    }
+
     if (album->getTitle() != "-" && !album_item) {
         album_item = new QTreeWidgetItem(ui->AlbumsTree);
         album_item->setText(0, album->getTitle());
@@ -77,6 +82,7 @@ void DialogEditLibrary::UpdateTree(bool changed)
     ui->AlbumsTree->clear();
     ui->SongsTree->clear();
 
+    // It's faster to redraw the whole tree
     CreateTree(_pseudo_library->getAlbums());
 
     _change = true;
@@ -87,7 +93,7 @@ void DialogEditLibrary::on_AddAlbumsButton_clicked()
     // Create empty library without loading the database to make user changes easier
     // In preview mode no changes will be written into database
     DialogAddAlbum AlbumBrowser(_pseudo_library, this);
-    connect(&AlbumBrowser, SIGNAL(Change(bool)), this, SLOT(UpdateTree(bool)));
+    connect(&AlbumBrowser, SIGNAL(change(bool)), this, SLOT(UpdateTree(bool)));
     AlbumBrowser.setWindowTitle("Add your Album");
     AlbumBrowser.setModal(true);
     AlbumBrowser.exec();
@@ -98,7 +104,7 @@ void DialogEditLibrary::on_AddSongsButton_clicked()
     // Create empty library without loading the database to make user changes easier
     // In preview mode no changes will be written into database
     DialogAddSongs SongsBrowser(_pseudo_library, this);
-    connect(&SongsBrowser, SIGNAL(Change(bool)), this, SLOT(UpdateTree(bool)));
+    connect(&SongsBrowser, SIGNAL(change(bool)), this, SLOT(UpdateTree(bool)));
     SongsBrowser.setWindowTitle("Add your Songs");
     SongsBrowser.setModal(true);
     SongsBrowser.exec();
@@ -128,7 +134,6 @@ void DialogEditLibrary::on_RemoveButton_clicked()
 
 void DialogEditLibrary::on_buttonBox_accepted()
 {
-
     QString working_dir = QDir::currentPath();
     QDir::setCurrent(working_dir + "/Media");
     QFile ftoRemove;

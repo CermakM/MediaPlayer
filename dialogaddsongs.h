@@ -19,7 +19,8 @@ public:
     ~DialogAddSongs();
 
 signals:
-    void Change(bool);
+    void change(Album*, Library::ChangeState);
+    void change(bool);
 
 private slots:
     void on_BrowseButton_clicked();
@@ -33,7 +34,7 @@ private:
 
     Library* _library;
 
-    QVector<Song> _song_vector;
+    QVector<Song*> _song_vector;
 };
 
 #endif // DIALOGADDSONGS_H

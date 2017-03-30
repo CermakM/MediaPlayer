@@ -19,7 +19,11 @@ public:
 
     bool AddMedia(Album* album);
 
-    bool AddMedia(Song*);
+    bool AddMedia(Song*song);
+
+    void PlaySample(Song* song);
+
+    void RemoveSample();
 
     bool RemoveMedia(Album* album);
 
@@ -39,7 +43,7 @@ public:
 
     void Clear();
 
-    bool isEmpty() const { return _playlist.isEmpty(); }
+    bool empty() const { return _playlist.isEmpty(); }
 
     void Update();
 
@@ -47,13 +51,15 @@ public:
 
     Song* operator[] (int i);
 
-
 private:
 
     QVector<Song*>  _playlist;
 
     QMediaPlaylist* _media_playlist;
     QSqlDatabase*   _database;
+
+    int _cache_index = 0;
+    int _sample_song_index = -1;
 };
 
 #endif // PLAYLIST_H
