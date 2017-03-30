@@ -88,7 +88,7 @@ bool Playlist::AddMedia(Song* song) {
     return true;
 }
 
-void Playlist::PlaySample(Song* song)
+void Playlist::AddSample(Song* song)
 {
     if (_playlist.contains(song)) {
         _media_playlist->setCurrentIndex(_playlist.indexOf(song));

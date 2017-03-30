@@ -103,7 +103,7 @@ iWidget* MainWin::CreateWidget(void* const media, Type type, int index) {
 
     _icon_signal_mapper->setMapping(new_widget, new_widget);
     connect(new_widget, SIGNAL(clicked()), _icon_signal_mapper, SLOT(map()));
-    connect(new_widget, SIGNAL(right_clicked(QWidget*)), this, SLOT(on_Icon_rightClick(QWidget*)));
+    connect(new_widget, SIGNAL(right_clicked(iWidget*)), this, SLOT(on_Icon_rightClick(iWidget*)));
     connect(new_widget, SIGNAL(double_clicked(QWidget*)), this, SLOT(on_Icon_doubleClick(QWidget*)));
 
     return new_widget;
@@ -149,11 +149,43 @@ void MainWin::ConnectSignals()
     connect(ui->dropAreaContent, SIGNAL(dropped(const QMimeData*)), this, SLOT(on_Media_drop(const QMimeData*)));
 }
 
+void MainWin::mousePressEvent(QMouseEvent *event)
+{
+    if (Qt::RightButton == event->buttons()) {
+
+        iWidgetMenu icon_widget_menu(this);
+
+        icon_widget_menu.addAction("Play", this, SLOT(on_Icon_Play()));
+
+        // Check if there is a song among selected widgets
+        bool contains_song = false;
+        for (iWidget* icon : _selected_icons ) {
+            if (Type::T_SONG == icon->getTitle()) {
+                contains_song = true;
+                break;
+            }
+        }
+        if (!contains_song) icon_widget_menu.addAction("Peak", this, SLOT(on_Icon_doubleClick()));
+        icon_widget_menu.addAction("Add to Playlist", this, SLOT(on_Icon_AddToPlaylist()));
+        icon_widget_menu.addAction("Remove from Playlist", this, SLOT(on_Icon_RemoveFromPlaylist()));
+        icon_widget_menu.addAction("Remove", this, SLOT(on_Icon_removeSelected()));
+        icon_widget_menu.addAction("Properties", this, SLOT(on_Icon_Properties()));
+
+        icon_widget_menu.exec(QCursor::pos());
+    }
+}
+
 void MainWin::on_Media_change(QMediaPlayer::MediaStatus status) {
 
     Song* song = _playlist->CurrentMedia();
 
-    if (song == nullptr) return;
+    if (song == nullptr && !_playlist->empty()) {
+        ui->CurrentAlbumLine->setText("-");
+        ui->CurrentSongLine->setText("End of Playlist .. Press PLAY to repeat");
+        return;
+    }
+    if (song == nullptr)
+        return;
 
     song->isPlaying(false);
 
@@ -197,7 +229,6 @@ void MainWin::on_Media_change(QMediaPlayer::MediaStatus status) {
     }
 
     else {
-
         ui->CurrentAlbumLine->setText("-");
         ui->CurrentSongLine->setText("End of Playlist .. Press PLAY to repeat");
         return;
@@ -453,24 +484,11 @@ void MainWin::on_Icon_click(QWidget *target)
     _selected_icons.push_back(d_target);
 }
 
-void MainWin::on_Icon_rightClick(QWidget *target)
+void MainWin::on_Icon_rightClick(iWidget *target)
 {
-    iWidget* d_target = dynamic_cast<iWidget*>(target);
     on_Icon_deselect();
-    on_Icon_click(d_target);
-
-    QMenu test_menu(this);
-    test_menu.addAction("Remove selected", this, SLOT(on_Icon_removeSelected()));
-    test_menu.exec(QCursor::pos());
-
-//    iWidgetMenu icon_widget_menu(nullptr, nullptr);
-
-//    connect(&icon_widget_menu, SIGNAL(action_Play_triggered()), this, SLOT(on_Icon_doubleClick()));
-//    connect(&icon_widget_menu, SIGNAL(action_Playlist_triggered()), this, SLOT(on_Icon_AddToPlaylist()));
-//    connect(&icon_widget_menu, SIGNAL(action_Remove_triggered()), this, SLOT(on_Icon_removeSelected()));
-//    connect(&icon_widget_menu, SIGNAL(action_Properties_triggered()), this, SLOT(on_actionProperties_triggered()));
-
-//    icon_widget_menu.exec(QCursor::pos());
+    on_Icon_click(target);
+    CreateWidgetMenu(target);
 }
 
 void MainWin::on_Icon_doubleClick(QWidget *target)
@@ -484,7 +502,7 @@ void MainWin::on_Icon_doubleClick(QWidget *target)
             if (_current_song_widget) _current_song_widget->isPlaying(false);
             Song* song_to_play = _library.getSongByTitle(target_icon->getTitle());
             // Add a sample song to play (remove after it ends)
-            _playlist->PlaySample(song_to_play);
+            _playlist->AddSample(song_to_play);
             _current_song_widget = target_icon;
             _current_song = song_to_play;
             _media_player->play();
@@ -513,10 +531,30 @@ void MainWin::on_Icon_doubleClick()
         on_Icon_doubleClick(_selected_icons.first());
 }
 
-void MainWin::on_actionProperties_triggered()
+void MainWin::on_Icon_Properties()
 {
     if (!_selected_icons.empty())
         qDebug() << "Properties of: " << _selected_icons.front()->getTitle();
+}
+
+void MainWin::on_Icon_Play()
+{
+    if ( _selected_icons.empty() )
+        return;
+
+    for ( iWidget* icon : _selected_icons) {
+        if ( Type::T_ALBUM == icon->getType()) {
+            for (iWidget* child : *icon->getChildWidgets()) {
+                Song* song = _library.getSongByTitle(child->getTitle());
+                if (!song) _playlist->AddSample(song);
+            }
+            _media_player->play();
+        }
+        else if (Type::T_SONG == icon->getType()) {
+            _playlist->AddSample(_library.getSongByTitle(icon->getTitle()));
+            _media_player->play();
+        }
+    }
 }
 
 void MainWin::CreateAlbumContentArea(iWidget* const target_widget, DragArea *drop_area_container)
@@ -541,9 +579,25 @@ void MainWin::CreateAlbumContentArea(iWidget* const target_widget, DragArea *dro
         drop_area_container->layout()->addWidget(song_icon);
         _temporary_signal_mapper->setMapping(song_icon, song_icon);
         connect(song_icon, SIGNAL(clicked()), _temporary_signal_mapper, SLOT(map()));
-        connect(song_icon, SIGNAL(right_clicked(QWidget*)), this, SLOT(on_Icon_rightClick(QWidget*)));
+        connect(song_icon, SIGNAL(right_clicked(iWidget*)), this, SLOT(on_Icon_rightClick(iWidget*)));
         connect(song_icon, SIGNAL(double_clicked(QWidget*)), this, SLOT(on_Icon_doubleClick(QWidget*)));
     }
+}
+
+void MainWin::CreateWidgetMenu(iWidget * const target)
+{
+    iWidgetMenu icon_widget_menu(this);
+
+    icon_widget_menu.addAction("Play", this, SLOT(on_Icon_doubleClick()));
+    if (Type::T_ALBUM == target->getTitle()) {
+        icon_widget_menu.addAction("Peak", this, SLOT(on_Icon_doubleClick()));
+    }
+    icon_widget_menu.addAction("Add to Playlist", this, SLOT(on_Icon_AddToPlaylist()));
+    icon_widget_menu.addAction("Remove from Playlist", this, SLOT(on_Icon_RemoveFromPlaylist()));
+    icon_widget_menu.addAction("Remove", this, SLOT(on_Icon_removeSelected()));
+    icon_widget_menu.addAction("Properties", this, SLOT(on_Icon_Properties()));
+
+    icon_widget_menu.exec(QCursor::pos());
 }
 
 void MainWin::on_Icon_deselect()
@@ -578,7 +632,7 @@ void MainWin::on_Icon_removeSelected()
         }
 
         _selected_icons.removeFirst();
-        delete icon;
+        icon->deleteLater();
     }
 
     QVector<iWidget*>().swap(_selected_icons);
@@ -597,6 +651,23 @@ void MainWin::on_Icon_AddToPlaylist()
         }
         else {
             _playlist->AddMedia(_library.getSongByTitle(icon->getTitle()));
+        }
+    }
+
+    on_EditPlaylistOver(true);
+}
+
+void MainWin::on_Icon_RemoveFromPlaylist()
+{
+    if (_selected_icons.empty()) return;
+
+    for (iWidget* const icon : _selected_icons) {
+
+        if (icon->getType() == Type::T_ALBUM) {
+            _playlist->RemoveMedia(_library.getAlbumByTitle(icon->getTitle()));
+        }
+        else {
+            _playlist->RemoveMedia(_library.getSongByTitle(icon->getTitle()));
         }
     }
 

@@ -13,17 +13,11 @@ public:
     /* Creates a contextual menu for the widget target
      * @param target context widget
      */
-    explicit iWidgetMenu(iWidget* target, QWidget* parent = 0);
+    explicit iWidgetMenu(QWidget* parent = 0);
     ~iWidgetMenu();
 
 protected:
-    void setPosition(QPoint& point);
-
-signals:
-    void action_Play_triggered();
-    void action_Playlist_triggered();
-    void action_Remove_triggered();
-    void action_Properties_triggered();
+    void setPosition(QPoint& point);   
 };
 
 #endif // IWIDGETMENU_H

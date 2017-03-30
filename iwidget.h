@@ -11,6 +11,8 @@
 #include <QLineEdit>
 #include <QTimer>
 
+class MainWin;
+
 class iWidget : public QWidget
 {
     Q_OBJECT
@@ -60,10 +62,6 @@ public:
 
     void mousePressEvent(QMouseEvent* ev);
 
-    void mouseReleaseEvent(QMouseEvent* ev);
-
-//    void mouseDoubleClickEvent(QMouseEvent* ev);
-
     bool hasHeightForWidth() const;
 
     bool isPlaying() const { return *_is_playing; }
@@ -78,11 +76,9 @@ signals:
 
     void clicked();
 
-    void right_clicked(QWidget*);
+    void right_clicked(iWidget*);
 
     void double_clicked(QWidget*);
-
-    void released();
 
     void state_changed(bool state);
 

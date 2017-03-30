@@ -74,6 +74,10 @@ Album::Album(Album const& other)
     _songs = other._songs;
     _icons = other._icons;
     _current_icon = other._current_icon;
+
+    for (Song& song : _songs) {
+        song.setParent(this);
+    }
 }
 
 void Album::setIcon(QIcon &icon)
@@ -127,7 +131,7 @@ void Album::setTitle(const QString &title)
      }
 }
 
-QIcon *Album::CurrentIcon()
+QIcon* Album::CurrentIcon()
 {
     return _current_icon.isNull() ? nullptr : &_current_icon;
 }

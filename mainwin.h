@@ -52,8 +52,15 @@ protected:
     void CreateDropArea();
     iWidget *CreateWidget(void* const media, Type type, int index = -1);
     void CreateAlbumContentArea(iWidget * const target_widget, DragArea* drop_area_container);
+    void CreateWidgetMenu(iWidget * const target);
 
     void ConnectSignals();
+
+    /*
+     * This function only process right-button clicks
+     * Left-button clicks are processed by widgets itselves
+     */
+    void mousePressEvent(QMouseEvent *event) override;
 
 private slots:
 
@@ -89,15 +96,16 @@ private slots:
     void on_Icon_deselect();
     void on_Icon_removeSelected();
     void on_Icon_AddToPlaylist();
+    void on_Icon_RemoveFromPlaylist();
     void on_Icon_click(QWidget* target);
-    void on_Icon_rightClick(QWidget* target);
+    void on_Icon_rightClick(iWidget *target);
     void on_Icon_doubleClick(QWidget* target);
     /*
      * Reimplemented for signal receiving
      */
-    void on_Icon_doubleClick();
-
-    void on_actionProperties_triggered();
+    void on_Icon_doubleClick();    
+    void on_Icon_Properties();
+    void on_Icon_Play();
 
 private:
     Ui::MainWin *ui;

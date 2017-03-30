@@ -142,21 +142,16 @@ bool iWidget::operator ==(Album * const album)
 void iWidget::mousePressEvent(QMouseEvent *ev)
 {
     (void) ev;
+    if (ev->button() == Qt::RightButton) {
+        emit right_clicked(this);
+        return;
+    }
     if (!_event_timer->isActive()) {
-        if (ev->button() == Qt::RightButton) {
-            emit right_clicked(this);
-            return;
-        }
+        // Filter right click - MainWin will take care of that
         emit clicked();
         _event_timer->start();
     }
     else emit double_clicked(this);
-}
-
-void iWidget::mouseReleaseEvent(QMouseEvent *ev)
-{
-    (void) ev;
-    emit released();
 }
 
 bool iWidget::hasHeightForWidth() const

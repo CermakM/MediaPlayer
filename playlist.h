@@ -21,7 +21,7 @@ public:
 
     bool AddMedia(Song*song);
 
-    void PlaySample(Song* song);
+    void AddSample(Song* song);
 
     void RemoveSample();
 
