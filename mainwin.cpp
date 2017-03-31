@@ -15,12 +15,25 @@ MainWin::MainWin(QWidget *parent) :
     ConnectSignals();
 
     UpdatePlaylist();
+
+    _default_action = new CustomActionRecent("No recently played songs", this);
+    _default_action->setDisabled(true);
+    ui->menuRecent->addAction(_default_action);
+    ui->menuRecent->setDefaultAction(_default_action);
 }
 
 MainWin::~MainWin()
 {
-    qDebug() << "MainWin destructor called";
+    delete _default_action;
+    while (!_recent_actions.empty()) {
+        delete _recent_actions.takeFirst();
+    }
     delete ui;
+}
+
+void MainWin::CreateGraphicalLayout()
+{
+
 }
 
 void MainWin::UpdatePlaylist() {
@@ -118,6 +131,7 @@ void MainWin::ConnectSignals()
     connect(_media_player, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)), this, SLOT(on_Media_change(QMediaPlayer::MediaStatus)));
 
     // Shortcuts
+    QShortcut* shortcutHelp = new QShortcut(QKeySequence(Qt::Key_F1), this);
     QShortcut* shortcutAddAlbum = new QShortcut(QKeySequence("Ctrl+Shift+A"), this);
     QShortcut* shortcutAddSongs = new QShortcut(QKeySequence("Ctrl+Shift+S"), this);
     QShortcut* shortcutEditPlaylist = new QShortcut(QKeySequence("Ctrl+Shift+P"), this);
@@ -130,7 +144,9 @@ void MainWin::ConnectSignals()
     QShortcut* shortcutPositionBackward = new QShortcut(QKeySequence(Qt::Key_J), this);
     QShortcut* shortcutDeselect = new QShortcut(QKeySequence(Qt::Key_Escape), this);
     QShortcut* shortcutDelete = new QShortcut(QKeySequence(Qt::Key_Delete), this);
+    QShortcut* shortcutHome = new QShortcut(QKeySequence(Qt::Key_Backspace), this);
 
+    connect(shortcutHelp, SIGNAL(activated()), this, SLOT(on_actionAbout_triggered()));
     connect(shortcutAddAlbum, SIGNAL(activated()), this, SLOT(on_actionAddNewAlbum_triggered()));
     connect(shortcutAddSongs, SIGNAL(activated()), this, SLOT(on_actionAddNewSongs_triggered()));
     connect(shortcutEditPlaylist, SIGNAL(activated()), this, SLOT(on_actionEditPlaylist_triggered()));
@@ -143,15 +159,46 @@ void MainWin::ConnectSignals()
     connect(shortcutPositionBackward, SIGNAL(activated()), this, SLOT(on_ProgressSlider_FastBackward()));
     connect(shortcutDeselect, SIGNAL(activated()), this, SLOT(on_Icon_deselect()));
     connect(shortcutDelete, SIGNAL(activated()), this, SLOT(on_Icon_removeSelected()));
+    connect(shortcutHome, SIGNAL(activated()), this, SLOT(on_ButtonHome_clicked()));
 
 
     connect(_icon_signal_mapper, SIGNAL(mapped(QWidget*)), this, SLOT(on_Icon_click(QWidget*)));
     connect(ui->dropAreaContent, SIGNAL(dropped(const QMimeData*)), this, SLOT(on_Media_drop(const QMimeData*)));
 }
 
+void MainWin::AddRecentSong(iWidget* const target)
+{
+    // Works as a stack of size DEFAULT_RECENT_COUNT
+    ui->menuRecent->defaultAction()->setVisible(false);
+    CustomActionRecent* action = new CustomActionRecent(target, this);
+
+    for (auto const& c_action : _recent_actions) {
+        if ( c_action->text() == action->text()) {
+            delete action;
+            return;
+        }
+    }
+
+    connect(action, SIGNAL(triggered(iWidget*)), this, SLOT(on_actionRecent_triggered(iWidget*)));
+
+   if ( !_recent_actions.empty()) {
+       for (CustomActionRecent* const current_action : _recent_actions) {
+            ui->menuRecent->removeAction(current_action);
+       }
+       if (_recent_actions.size() == DEFAULT_RECENT_COUNT) {
+           delete _recent_actions.takeLast();
+       }
+   }
+
+   _recent_actions.push_front(action);
+   for (CustomActionRecent* const current_action : _recent_actions) {
+        ui->menuRecent->addAction(current_action);
+   }
+}
+
 void MainWin::mousePressEvent(QMouseEvent *event)
 {
-    if (Qt::RightButton == event->buttons()) {
+    if (Qt::RightButton == event->buttons() && !_selected_icons.empty()) {
 
         iWidgetMenu icon_widget_menu(this);
 
@@ -169,7 +216,8 @@ void MainWin::mousePressEvent(QMouseEvent *event)
         icon_widget_menu.addAction("Add to Playlist", this, SLOT(on_Icon_AddToPlaylist()));
         icon_widget_menu.addAction("Remove from Playlist", this, SLOT(on_Icon_RemoveFromPlaylist()));
         icon_widget_menu.addAction("Remove", this, SLOT(on_Icon_removeSelected()));
-        icon_widget_menu.addAction("Properties", this, SLOT(on_Icon_Properties()));
+        /// TODO:
+        /// icon_widget_menu.addAction("Properties", this, SLOT(on_Icon_Properties()));
 
         icon_widget_menu.exec(QCursor::pos());
     }
@@ -497,6 +545,10 @@ void MainWin::on_Icon_doubleClick(QWidget *target)
             _current_song_widget = target_icon;
             _current_song = song_to_play;
             _media_player->play();
+
+            // Add the song widget to recents
+            AddRecentSong(target_icon);
+
         }
         else if (target_icon->getType() == Type::T_ALBUM) {
             // Open the Album folder
@@ -659,6 +711,7 @@ void MainWin::on_Icon_RemoveFromPlaylist()
         }
         else {
             _playlist->RemoveMedia(_library.getSongByTitle(icon->getTitle()));
+            if (_current_song_widget && _current_song_widget == icon) _current_song_widget->isPlaying(false);
         }
     }
 
@@ -689,8 +742,6 @@ void MainWin::on_ButtonHome_clicked()
 
     ui->dropArea->setWidget(_cache_dropAreaContent);
 
-//    QVector<iWidget*>().swap(_temporary_icon_widgets);
-
     delete _temporary_signal_mapper;
     _temporary_signal_mapper = nullptr;
 
@@ -708,6 +759,12 @@ void MainWin::on_pushButton_clicked()
 
 void MainWin::on_ButtonRefresh_clicked()
 {
+    if (_current_song_widget) {
+        _current_song_widget->isPlaying(false);
+        _current_song_widget = nullptr;
+    }
+    _current_album_widget = nullptr;
+
     while (!_icon_widgets.empty())
         delete _icon_widgets.takeFirst();
 
@@ -728,5 +785,19 @@ void MainWin::on_ButtonRefresh_clicked()
     connect(_icon_signal_mapper, SIGNAL(mapped(QWidget*)), this, SLOT(on_Icon_click(QWidget*)));
     connect(ui->dropAreaContent, SIGNAL(dropped(const QMimeData*)), this, SLOT(on_Media_drop(const QMimeData*)));
 
+    _playlist->RemoveAllSamples();
+
     UpdatePlaylist();
+}
+
+void MainWin::on_actionAbout_triggered()
+{
+    DialogAbout dialog_about;
+    dialog_about.setModal(true);
+    dialog_about.exec();
+}
+
+void MainWin::on_actionRecent_triggered(iWidget *target)
+{
+    on_Icon_doubleClick(target);
 }

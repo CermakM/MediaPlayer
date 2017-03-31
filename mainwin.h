@@ -11,6 +11,8 @@
 #include "dragarea.h"
 #include "flowlayout.h"
 #include "iwidgetmenu.h"
+#include "dialogabout.h"
+#include "customactionrecent.h"
 
 #include <QDir>
 #include <QFile>
@@ -46,14 +48,16 @@ public:
 
 protected:
 
-    void UpdatePlaylist();
-
+    void CreateGraphicalLayout();
     void CreateDropArea();
     iWidget *CreateWidget(void* const media, Type type, int index = -1);
     void CreateAlbumContentArea(iWidget * const target_widget, DragArea* drop_area_container);
     void CreateWidgetMenu(iWidget * const target);
 
     void ConnectSignals();
+    void UpdatePlaylist();
+
+    void AddRecentSong(iWidget * const target);
 
     /*
      * This function only process right-button clicks
@@ -106,6 +110,9 @@ private slots:
     void on_Icon_Properties();
     void on_Icon_Play();
 
+    void on_actionAbout_triggered();
+    void on_actionRecent_triggered(iWidget*);
+
 private:
     Ui::MainWin *ui;
     QMediaPlayer* _media_player;
@@ -121,6 +128,11 @@ private:
     iWidget* _current_album_widget  = nullptr;
     QWidget* _cache_dropAreaContent = nullptr;
     QSignalMapper* _temporary_signal_mapper = nullptr;
+
+    // There will be 3 songs stored in recents
+    const ushort DEFAULT_RECENT_COUNT = 3;
+    CustomActionRecent* _default_action;
+    QList<CustomActionRecent*>  _recent_actions;
 
     bool _temporary_window_entered  = false;
 };

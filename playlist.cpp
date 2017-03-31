@@ -96,20 +96,37 @@ void Playlist::AddSample(Song* song)
     }
 
     _cache_index = _media_playlist->currentIndex();
-    _sample_song_index = _playlist.size();
+    _sample_song_indexes.push_back(_playlist.size());
     _playlist.push_back(song);
     _media_playlist->addMedia(QMediaContent(QUrl::fromLocalFile(song->getPath())));
-    _media_playlist->setCurrentIndex(_sample_song_index);
+    _media_playlist->setCurrentIndex(_sample_song_indexes.last());
 }
 
-void Playlist::RemoveSample()
+void Playlist::RemoveSample(Song * const song)
 {
-    if (_sample_song_index < 0) {
+    if (_sample_song_indexes.empty()) {
         qDebug() << "in Playlist::RemoveSample: Sample media has not been set up";
         return;
     }
-    _playlist.removeAt(_sample_song_index);
-    _media_playlist->removeMedia(_sample_song_index);
+
+    const uint index = _playlist.indexOf(song);
+    _sample_song_indexes.removeOne(index);
+    _media_playlist->removeMedia(index);
+    _playlist.removeAt(index);
+
+    _media_playlist->setCurrentIndex(_cache_index);
+}
+
+void Playlist::RemoveAllSamples()
+{
+    if (_sample_song_indexes.empty()) {
+        qDebug() << "in Playlist::RemoveSample: Sample media has not been set up";
+        return;
+    }
+    for (auto const& index: _sample_song_indexes) {
+        _playlist.removeAt(index);
+        _media_playlist->removeMedia(index);
+    }
     _media_playlist->setCurrentIndex(_cache_index);
 }
 

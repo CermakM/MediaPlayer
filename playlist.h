@@ -23,7 +23,9 @@ public:
 
     void AddSample(Song* song);
 
-    void RemoveSample();
+    void RemoveSample(Song* const song);
+
+    void RemoveAllSamples();
 
     bool RemoveMedia(Album* album);
 
@@ -59,7 +61,7 @@ private:
     QSqlDatabase*   _database;
 
     int _cache_index = 0;
-    int _sample_song_index = -1;
+    QVector<int> _sample_song_indexes;
 };
 
 #endif // PLAYLIST_H

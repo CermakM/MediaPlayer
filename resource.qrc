@@ -10,5 +10,6 @@
         <file alias="icon_stop">Assets/icon_stop.png</file>
         <file alias="icon_home">Assets/icon_home.png</file>
         <file alias="icon_refresh">Assets/icon_refresh.png</file>
+        <file alias="icon_logo">Assets/icon_logo.png</file>
     </qresource>
 </RCC>

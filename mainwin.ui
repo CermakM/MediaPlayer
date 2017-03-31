@@ -19,6 +19,10 @@
   <property name="windowTitle">
    <string>MainWin</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="resource.qrc">
+    <normaloff>:/icons/icon_logo</normaloff>:/icons/icon_logo</iconset>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_2">
     <item row="0" column="0">
@@ -377,8 +381,16 @@
     <property name="title">
      <string>Filter</string>
     </property>
+    <widget class="QMenu" name="menuFilters">
+     <property name="title">
+      <string>Filters</string>
+     </property>
+     <addaction name="actionAlbums_Only"/>
+     <addaction name="actionSongs_Only"/>
+     <addaction name="actionAll"/>
+    </widget>
     <addaction name="actionSearch"/>
-    <addaction name="actionFilters"/>
+    <addaction name="menuFilters"/>
    </widget>
    <widget class="QMenu" name="menuMusic">
     <property name="title">
@@ -393,8 +405,13 @@
      <addaction name="actionRandomSong"/>
      <addaction name="actionMixUp"/>
     </widget>
+    <widget class="QMenu" name="menuRecent">
+     <property name="title">
+      <string>Recent</string>
+     </property>
+    </widget>
     <addaction name="menuPlay"/>
-    <addaction name="actionRecent"/>
+    <addaction name="menuRecent"/>
    </widget>
    <widget class="QMenu" name="menuYouTube">
     <property name="title">
@@ -445,10 +462,8 @@
    <property name="text">
     <string>Search</string>
    </property>
-  </action>
-  <action name="actionFilters">
-   <property name="text">
-    <string>Filters</string>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
    </property>
   </action>
   <action name="actionAddNewSongs">
@@ -484,10 +499,8 @@
    <property name="text">
     <string>About</string>
    </property>
-  </action>
-  <action name="actionRecent">
-   <property name="text">
-    <string>Recent</string>
+   <property name="shortcut">
+    <string>F1</string>
    </property>
   </action>
   <action name="actionNextAlbum">
@@ -508,6 +521,35 @@
   <action name="actionMixUp">
    <property name="text">
     <string>Mix Up</string>
+   </property>
+  </action>
+  <action name="actionAlbums_Only">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Albums</string>
+   </property>
+  </action>
+  <action name="actionSongs_Only">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Songs</string>
+   </property>
+  </action>
+  <action name="actionAll">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show All</string>
+   </property>
+  </action>
+  <action name="actionNo_recent_songs">
+   <property name="text">
+    <string>No recent songs</string>
    </property>
   </action>
  </widget>
