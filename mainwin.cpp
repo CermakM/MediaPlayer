@@ -160,7 +160,7 @@ void MainWin::mousePressEvent(QMouseEvent *event)
         // Check if there is a song among selected widgets
         bool contains_song = false;
         for (iWidget* icon : _selected_icons ) {
-            if (Type::T_SONG == icon->getTitle()) {
+            if (Type::T_SONG == icon->getType()) {
                 contains_song = true;
                 break;
             }
@@ -172,6 +172,9 @@ void MainWin::mousePressEvent(QMouseEvent *event)
         icon_widget_menu.addAction("Properties", this, SLOT(on_Icon_Properties()));
 
         icon_widget_menu.exec(QCursor::pos());
+    }
+    else {
+        on_Icon_deselect();
     }
 }
 
@@ -467,10 +470,6 @@ void MainWin::on_Icon_click(QWidget *target)
     if( d_target->isSelected()) return;
 
     d_target->getIcon()->setStyleSheet("background: #cccccc");
-
-    QLineEdit* icon_title_editor = d_target->getTitleEditor();
-
-    icon_title_editor->setFont(QFont("Tahoma", 11, QFont::Bold));
 
     d_target->isSelected(true);
     _selected_icons.push_back(d_target);

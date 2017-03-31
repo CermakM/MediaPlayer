@@ -3,6 +3,7 @@
 
 #include "icon.h"
 #include "library.h"
+#include "scrolltext.h"
 
 #include <QWidget>
 #include <QBoxLayout>
@@ -42,7 +43,7 @@ public:
 
     inline iWidget* getAlbumWidget() const { return _album_widget; }
 
-    inline QLineEdit* getTitleEditor() const { return _icon_title_editor; }
+    inline ScrollText* getTitleEditor() const { return _icon_title_editor; }
 
     inline QString getTitle() const { return _icon_title_editor->text(); }
 
@@ -72,7 +73,7 @@ public:
 
     bool isSelected() const { return _is_selected; }
 
-    bool isSelected(bool state) { return  _is_selected = state; }
+    bool isSelected(bool state);
 
 signals:
 
@@ -92,11 +93,13 @@ private:
     QVector<iWidget*> _children;
     iWidget* _album_widget;
     Library* _library;
-    QTimer*  _event_timer;
+    QTimer*  _event_click_timer;
     Icon*    _icon;
     QLabel*  _label_play;
     QPixmap* _label_play_pixmap;
-    QLineEdit* _icon_title_editor;
+    ScrollText* _icon_title_editor;
+
+    int _cursor_pos;
 
     bool* _is_playing = nullptr;
     bool* _is_in_playlist = nullptr;

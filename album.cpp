@@ -10,7 +10,7 @@ Album::Album() {
 }
 
 Album::~Album() {
-    qDebug() << "Calling destructor for album" + this->_title;
+    qDebug() << "Calling destructor for album " + this->_title;
 }
 
 Album::Album(QVector<Song>& songs)

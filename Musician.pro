@@ -44,7 +44,8 @@ SOURCES += \
     playlist.cpp \
     song.cpp \
     flowlayout.cpp \
-    iwidgetmenu.cpp
+    iwidgetmenu.cpp \
+    scrolltext.cpp
 
 HEADERS  += \
     album.h \
@@ -61,7 +62,8 @@ HEADERS  += \
     probe.h \
     song.h \
     flowlayout.h \
-    iwidgetmenu.h
+    iwidgetmenu.h \
+    scrolltext.h
 
 RESOURCES += \
     resource.qrc

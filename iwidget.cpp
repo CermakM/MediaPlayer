@@ -42,7 +42,7 @@ iWidget::~iWidget()
     delete _label_play;
     delete _icon;
     delete _icon_title_editor;
-    delete _event_timer;
+    delete _event_click_timer;
 }
 
 void iWidget::setTitle(const QString &new_title)
@@ -55,13 +55,6 @@ void iWidget::DefaultAdjustement() {
     _icon->setStyleSheet("background: transparent;");
 
     _label_play->setVisible(*_is_playing);
-
-    _icon_title_editor->setFont(QFont("Tahoma", 12, QFont::Normal));
-    _icon_title_editor->setStyleSheet("background: transparent");
-    _icon_title_editor->setFrame(false);
-    _icon_title_editor->setReadOnly(true);
-    _icon_title_editor->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
-    _icon_title_editor->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 }
 
 void iWidget::SetProperties()
@@ -72,9 +65,9 @@ void iWidget::SetProperties()
     _label_play->setFixedSize(32,32);
     _label_play->raise();
 
-    _event_timer = new QTimer(this);
-    _event_timer->setSingleShot(true);
-    _event_timer->setInterval(200);
+    _event_click_timer = new QTimer(this);
+    _event_click_timer->setSingleShot(true);
+    _event_click_timer->setInterval(200);
 
     if (_icon->getType() == Type::T_SONG) {
         Song* song = _library->getSongByTitle(_icon->getTitle());
@@ -87,10 +80,9 @@ void iWidget::SetProperties()
         _is_in_playlist = new bool(false);
     }
 
-    QString icon_title = _icon->getTitle();
-    _icon_title_editor = new QLineEdit(icon_title, this);
-    _icon_title_editor->setStyleSheet("border-radius: 15px; ");
-
+    _icon_title_editor = new ScrollText(this);
+    _icon_title_editor->setText(_icon->getTitle());
+    _icon_title_editor->setStyleSheet("border: 1px black;");
     _icon->setBuddy(_icon_title_editor);
 
     this->setLayout(new QGridLayout(this));
@@ -150,10 +142,10 @@ void iWidget::mousePressEvent(QMouseEvent *ev)
         emit right_clicked(this);
         return;
     }
-    if (!_event_timer->isActive()) {
+    if (!_event_click_timer->isActive()) {
         // Filter right click - MainWin will take care of that
         emit clicked();
-        _event_timer->start();
+        _event_click_timer->start();
     }
     else emit double_clicked(this);
 }
@@ -161,4 +153,10 @@ void iWidget::mousePressEvent(QMouseEvent *ev)
 bool iWidget::hasHeightForWidth() const
 {
     return true;
+}
+
+bool iWidget::isSelected(bool state)
+{
+    _icon_title_editor->setTextFlow(state);
+    return _is_selected = state;
 }

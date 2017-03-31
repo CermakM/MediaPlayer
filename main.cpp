@@ -3,7 +3,7 @@
   * main.cpp
   *
   * @author Marek Cermak
-  * @version 1.0 30.12.2016
+  * @version 1.0b 31.3.2017
 */
 
 #include "mainwin.h"
