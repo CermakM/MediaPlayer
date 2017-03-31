@@ -50,9 +50,11 @@ void Library::LoadDatabase()
         return;
     }
 
-    QStringList tableList = _database.tables();
+    QStringList table_list = _database.tables();
 
-    if (tableList.empty()) {
+    table_list.sort();
+
+    if (table_list.empty()) {
         // Push a default Untitled(-) album at the beginning of the database
         QSqlQuery query(_database);
 
@@ -74,14 +76,14 @@ void Library::LoadDatabase()
             return;
         }
 
-        tableList = _database.tables();
+        table_list = _database.tables();
     }
 
-    for (QString& table : tableList) {
+    for (QString& table : table_list) {
 
         QSqlQuery query(_database);
 
-        query.exec("SELECT * FROM '"+table+"'");
+        query.exec("SELECT * FROM '"+table+"' ORDER BY title" );
 
         QString path, title, interpret, album;
         int year;

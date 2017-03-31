@@ -13,6 +13,7 @@
 #include <QTextStream>
 #include <QDir>
 #include <QMessageBox>
+#include <QStringList>
 
 #include <cstdio>
 #include <fstream>
