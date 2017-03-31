@@ -24,6 +24,8 @@ public:
 
     void DefaultAdjustement();
 
+    void SetProperties();
+
     void setLibrary(Library* const library) { _library = library; }
 
     void pushChild(iWidget* const child);

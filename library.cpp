@@ -222,7 +222,17 @@ Library::ChangeState Library::AddMedia(Album *album) {
         return Library::CHANGE;
     }
     else {
-        _albums.push_back(album);
+        // Search for the index to put album to
+        int album_index = 0;
+        for (int i = 0; i < _albums.size(); i ++) {
+            Album* const temp_album = _albums.at(i);
+            // If the first one is further in alphabet
+            if (temp_album->getTitle().compare(album->getTitle()) > 0) {
+                break;
+            }
+            ++album_index;
+        }
+        _albums.insert(album_index, album);
         return Library::ADD;
     }
 }

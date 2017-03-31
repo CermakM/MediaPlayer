@@ -61,11 +61,11 @@ void MainWin::CreateDropArea()
         if ( album->getTitle() != "-") {
             CreateWidget(album, T_ALBUM);
         }
-        else  {
-            for (Song& song : *(album->getSongs())) {
-                CreateWidget(&song, T_SONG);
-            }
-        }
+    }
+    // Songs widgets are created last
+    Album* const album = _library.getAlbums()->first();
+    for (Song& song : *(album->getSongs())) {
+        CreateWidget(&song, T_SONG);
     }
 
     ui->dropArea->setWidget(ui->dropAreaContent);
@@ -394,16 +394,8 @@ void MainWin::on_Library_change(Album* album, Library::ChangeState state)
         return;
     }
     if (state == Library::ADD) {
-        int index_of_new_widget = 0;
-        for (int i = 1; i < _icon_widgets.size(); i++) {
-            if (_icon_widgets.at(i)->getTitle().at(i) > _icon_widgets.at(i - 1)->getTitle().at(0) &&
-                _icon_widgets.at(i)->getType() == T_ALBUM) {
-                index_of_new_widget = i;
-                break;
-            }
-        }
-        CreateWidget(album, Type::T_ALBUM, index_of_new_widget);
-        return;
+        CreateWidget(album, Type::T_ALBUM);
+        on_ButtonRefresh_clicked();
     }
     if (state == Library::REMOVE) {
         for (iWidget* const widget : _icon_widgets) {

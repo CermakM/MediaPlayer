@@ -4,12 +4,10 @@ iWidget::iWidget(QWidget* parent) :
     QWidget(parent)
 {
     _icon = new Icon();
-    _label_play = new QLabel(_icon);
-    _event_timer = new QTimer(this);
-    _icon_title_editor = new QLineEdit("Unknown", this);
-    _is_playing = new bool(false);
-    _is_in_playlist = new bool(false);
+    _library = nullptr;
+    _album_widget = nullptr;
 
+    SetProperties();
     DefaultAdjustement();
 }
 
@@ -20,43 +18,7 @@ iWidget::iWidget(Icon *icon, Library* const library, QWidget *parent) :
     _library = library;
     _album_widget = nullptr;
 
-    _event_timer = new QTimer(this);
-    _event_timer->setSingleShot(true);
-    _event_timer->setInterval(200);
-
-    _label_play = new QLabel(_icon);
-    _label_play_pixmap = new QPixmap(":/icons/icon_play");
-    _label_play->setPixmap(_label_play_pixmap->scaled(32,32, Qt::KeepAspectRatio));
-    _label_play->setFixedSize(32,32);
-    _label_play->raise();
-
-    if (icon->getType() == Type::T_SONG) {
-        Song* song = _library->getSongByTitle(icon->getTitle());
-        _is_playing = song->isPlaying();
-        _is_in_playlist = song->isInPlaylist();
-    }
-
-    else {
-        _is_playing = new bool(false);
-        _is_in_playlist = new bool(false);
-    }
-
-    QString icon_title = icon->getTitle();
-    _icon_title_editor = new QLineEdit(icon_title, this);
-    _icon_title_editor->setStyleSheet("border-radius: 15px; ");
-
-    _icon->setBuddy(_icon_title_editor);
-
-    this->setLayout(new QGridLayout(this));
-    connect(this, SIGNAL(state_changed(bool)), this, SLOT(on_state_change(bool)));
-
-    this->layout()->addWidget(_icon);
-    this->layout()->addWidget(_icon_title_editor);
-    this->setBaseSize(_icon->size() + QSize(icon->size().width(), icon->size().height()));
-    this->setFixedSize(this->baseSize());
-    this->setContentsMargins(4,4,4,4);
-    this->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-
+    SetProperties();
     DefaultAdjustement();
 }
 
@@ -100,6 +62,48 @@ void iWidget::DefaultAdjustement() {
     _icon_title_editor->setReadOnly(true);
     _icon_title_editor->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
     _icon_title_editor->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+}
+
+void iWidget::SetProperties()
+{
+    _label_play = new QLabel(_icon);
+    _label_play_pixmap = new QPixmap(":/icons/icon_play");
+    _label_play->setPixmap(_label_play_pixmap->scaled(32,32, Qt::KeepAspectRatio));
+    _label_play->setFixedSize(32,32);
+    _label_play->raise();
+
+    _event_timer = new QTimer(this);
+    _event_timer->setSingleShot(true);
+    _event_timer->setInterval(200);
+
+    if (_icon->getType() == Type::T_SONG) {
+        Song* song = _library->getSongByTitle(_icon->getTitle());
+        _is_playing = song->isPlaying();
+        _is_in_playlist = song->isInPlaylist();
+    }
+
+    else {
+        _is_playing = new bool(false);
+        _is_in_playlist = new bool(false);
+    }
+
+    QString icon_title = _icon->getTitle();
+    _icon_title_editor = new QLineEdit(icon_title, this);
+    _icon_title_editor->setStyleSheet("border-radius: 15px; ");
+
+    _icon->setBuddy(_icon_title_editor);
+
+    this->setLayout(new QGridLayout(this));
+    connect(this, SIGNAL(state_changed(bool)), this, SLOT(on_state_change(bool)));
+
+    this->layout()->addWidget(_icon);
+    this->layout()->addWidget(_icon_title_editor);
+    this->setBaseSize(_icon->size() + QSize(_icon->size().width(), _icon->size().height()));
+    this->setFixedSize(this->baseSize());
+    this->setContentsMargins(4,4,4,4);
+    this->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+
+    DefaultAdjustement();
 }
 
 void iWidget::pushChild(iWidget * const child)

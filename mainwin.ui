@@ -246,7 +246,7 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="0" colspan="5">
+    <item row="1" column="0" colspan="4">
      <widget class="QScrollArea" name="dropArea">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
@@ -280,8 +280,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>760</width>
-         <height>257</height>
+         <width>754</width>
+         <height>263</height>
         </rect>
        </property>
        <property name="mouseTracking">
@@ -352,7 +352,7 @@
      <x>0</x>
      <y>0</y>
      <width>780</width>
-     <height>22</height>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFilter">

@@ -27,7 +27,6 @@
 #include <QVector>
 #include <QScrollArea>
 
-
 #include <vector>
 #include <fstream>
 
