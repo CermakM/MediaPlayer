@@ -48,7 +48,7 @@ public:
 
 protected:
 
-    void CreateGraphicalLayout();
+    void CreateGraphicals();
     void CreateDropArea();
     iWidget *CreateWidget(void* const media, Type type, int index = -1);
     void CreateAlbumContentArea(iWidget * const target_widget, DragArea* drop_area_container);
@@ -109,6 +109,7 @@ private slots:
     void on_Icon_doubleClick();    
     void on_Icon_Properties();
     void on_Icon_Play();
+    void on_Icon_rectangularSelection(QRect&);
 
     void on_actionAbout_triggered();
     void on_actionRecent_triggered(iWidget*);
@@ -133,6 +134,9 @@ private:
     const ushort DEFAULT_RECENT_COUNT = 3;
     CustomActionRecent* _default_action;
     QList<CustomActionRecent*>  _recent_actions;
+
+    // Rectangular painter features
+    QRect   _rect_selection;
 
     bool _temporary_window_entered  = false;
 };

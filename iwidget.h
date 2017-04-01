@@ -11,6 +11,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QTimer>
+#include <QGraphicsColorizeEffect>
 
 class MainWin;
 
@@ -98,6 +99,8 @@ private:
     QLabel*  _label_play;
     QPixmap* _label_play_pixmap;
     ScrollText* _icon_title_editor;
+
+    QGraphicsColorizeEffect* _graphic_effect;
 
     int _cursor_pos;
 

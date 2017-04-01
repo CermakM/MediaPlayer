@@ -9,17 +9,16 @@ MainWin::MainWin(QWidget *parent) :
     ui->setupUi(this);
     _media_player = new QMediaPlayer(this);
     _playlist = _library.getPlaylist();
+    _default_action = new CustomActionRecent("No recently played songs", this);
+    _default_action->setDisabled(true);
+    ui->menuRecent->addAction(_default_action);
+    ui->menuRecent->setDefaultAction(_default_action);
 
     CreateDropArea();
 
     ConnectSignals();
 
     UpdatePlaylist();
-
-    _default_action = new CustomActionRecent("No recently played songs", this);
-    _default_action->setDisabled(true);
-    ui->menuRecent->addAction(_default_action);
-    ui->menuRecent->setDefaultAction(_default_action);
 }
 
 MainWin::~MainWin()
@@ -31,9 +30,9 @@ MainWin::~MainWin()
     delete ui;
 }
 
-void MainWin::CreateGraphicalLayout()
+void MainWin::CreateGraphicals()
 {
-
+    // TODO: Create at least a background you dumbass...
 }
 
 void MainWin::UpdatePlaylist() {
@@ -82,6 +81,7 @@ void MainWin::CreateDropArea()
     }
 
     ui->dropArea->setWidget(ui->dropAreaContent);
+    connect(ui->dropAreaContent, SIGNAL(selected(QRect&)), this, SLOT(on_Icon_rectangularSelection(QRect&)));
 }
 
 
@@ -216,8 +216,8 @@ void MainWin::mousePressEvent(QMouseEvent *event)
         icon_widget_menu.addAction("Add to Playlist", this, SLOT(on_Icon_AddToPlaylist()));
         icon_widget_menu.addAction("Remove from Playlist", this, SLOT(on_Icon_RemoveFromPlaylist()));
         icon_widget_menu.addAction("Remove", this, SLOT(on_Icon_removeSelected()));
-        /// TODO:
-        /// icon_widget_menu.addAction("Properties", this, SLOT(on_Icon_Properties()));
+        // TODO:
+        // icon_widget_menu.addAction("Properties", this, SLOT(on_Icon_Properties()));
 
         icon_widget_menu.exec(QCursor::pos());
     }
@@ -517,8 +517,6 @@ void MainWin::on_Icon_click(QWidget *target)
 
     if( d_target->isSelected()) return;
 
-    d_target->getIcon()->setStyleSheet("background: #cccccc");
-
     d_target->isSelected(true);
     _selected_icons.push_back(d_target);
 }
@@ -600,6 +598,23 @@ void MainWin::on_Icon_Play()
     }
 }
 
+void MainWin::on_Icon_rectangularSelection(QRect& rect)
+{
+    QVector<iWidget*> widgets;
+    if (_temporary_window_entered)
+        widgets = *_current_album_widget->getChildWidgets();
+    else
+        widgets = _icon_widgets;
+    for (iWidget* const widget : widgets) {
+//        QRect widget_rect = widget->rect();
+//        widget_rect.moveTopLeft(widget->pos());
+        QPoint widget_center = widget->pos() + QPoint(widget->width() /2, widget->height() /2);
+        if ( /*rect.intersects(widget_rect) */ rect.contains(widget_center)) {
+            on_Icon_click(widget);
+        }
+    }
+}
+
 void MainWin::CreateAlbumContentArea(iWidget* const target_widget, DragArea *drop_area_container)
 {
     ui->default_placeholder->setVisible(false);
@@ -625,6 +640,8 @@ void MainWin::CreateAlbumContentArea(iWidget* const target_widget, DragArea *dro
         connect(song_icon, SIGNAL(right_clicked(iWidget*)), this, SLOT(on_Icon_rightClick(iWidget*)));
         connect(song_icon, SIGNAL(double_clicked(QWidget*)), this, SLOT(on_Icon_doubleClick(QWidget*)));
     }
+
+    connect(drop_area_container, SIGNAL(selected(QRect&)), this, SLOT(on_Icon_rectangularSelection(QRect&)));
 }
 
 void MainWin::CreateWidgetMenu(iWidget * const target)
@@ -646,7 +663,6 @@ void MainWin::CreateWidgetMenu(iWidget * const target)
 void MainWin::on_Icon_deselect()
 {
     for (iWidget* icon : _selected_icons ) {
-        icon->DefaultAdjustement();
         icon->isSelected(false);
     }
 

@@ -24,6 +24,9 @@
     <normaloff>:/icons/icon_logo</normaloff>:/icons/icon_logo</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
+   <property name="autoFillBackground">
+    <bool>true</bool>
+   </property>
    <layout class="QGridLayout" name="gridLayout_2">
     <item row="0" column="0">
      <widget class="QPushButton" name="ButtonHome">

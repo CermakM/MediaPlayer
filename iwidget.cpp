@@ -51,12 +51,6 @@ void iWidget::setTitle(const QString &new_title)
     _icon_title_editor->setText(_icon->getTitle());
 }
 
-void iWidget::DefaultAdjustement() {
-    _icon->setStyleSheet("background: transparent;");
-
-    _label_play->setVisible(*_is_playing);
-}
-
 void iWidget::SetProperties()
 {
     _label_play = new QLabel(_icon);
@@ -95,7 +89,16 @@ void iWidget::SetProperties()
     this->setContentsMargins(4,4,4,4);
     this->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
+
+
     DefaultAdjustement();
+}
+
+void iWidget::DefaultAdjustement() {
+
+    _label_play->setVisible(*_is_playing);
+
+    _icon->setGraphicsEffect(nullptr);
 }
 
 void iWidget::pushChild(iWidget * const child)
@@ -157,6 +160,13 @@ bool iWidget::hasHeightForWidth() const
 
 bool iWidget::isSelected(bool state)
 {
+    if (state) {
+        _graphic_effect = new QGraphicsColorizeEffect(_icon);
+        _graphic_effect->setColor(QColor(255, 80, 0, 255));
+        _icon->setGraphicsEffect(_graphic_effect);
+    }
+    else DefaultAdjustement();
+
     _icon_title_editor->setTextFlow(state);
     return _is_selected = state;
 }
