@@ -22,7 +22,7 @@ MainWin::MainWin(QWidget *parent) :
 
     UpdatePlaylist();
 
-//    on_ButtonRefresh_clicked();
+    _cache_dropAreaContent = ui->dropArea->widget();
 }
 
 MainWin::~MainWin()
@@ -621,7 +621,7 @@ void MainWin::on_Icon_doubleClick(QWidget *target)
         }
         else if (target_icon->getType() == Type::T_ALBUM) {
             // Open the Album folder
-            _cache_dropAreaContent = ui->dropArea->takeWidget();
+            ui->dropArea->takeWidget();
             DragArea* temp_dropAreaContent = new DragArea();
             temp_dropAreaContent->setAcceptDrops(false);
 
@@ -773,7 +773,7 @@ void MainWin::on_ButtonRemove_clicked()
 
 void MainWin::on_ButtonHome_clicked()
 {
-    if (_cache_dropAreaContent == nullptr)
+    if (_cache_dropAreaContent == nullptr && !_temporary_window_entered)
         return;
 
     on_Icon_deselect();
@@ -789,7 +789,6 @@ void MainWin::on_ButtonHome_clicked()
 
     _temporary_window_entered = false;
     _current_album_widget = nullptr;
-    _cache_dropAreaContent = nullptr;
 
     ui->TitleLibrary->setText("MY LIBRARY");
 }
