@@ -5,13 +5,15 @@
 #include "dialogeditplaylist.h"
 #include "dialogaddsongs.h"
 #include "dialogeditlibrary.h"
+#include "dialogabout.h"
+#include "dialogshortcutcs.h"
+
 #include "playlist.h"
 #include "library.h"
 #include "iwidget.h"
 #include "dragarea.h"
 #include "flowlayout.h"
 #include "iwidgetmenu.h"
-#include "dialogabout.h"
 #include "customactionrecent.h"
 
 #include <QDir>
@@ -53,6 +55,9 @@ protected:
     iWidget *CreateWidget(void* const media, Type type, int index = -1);
     void CreateWidgetMenu(iWidget * const target);
     void CreateAlbumContentArea(iWidget * const target_widget, DragArea* drop_area_container);
+
+    void ShowAlbums(bool on);
+    void ShowSongs(bool on);
 
     void ConnectSignals();
     void UpdatePlaylist();
@@ -108,7 +113,17 @@ private slots:
     void on_Icon_rectangularSelection(QRect&);
 
     void on_actionAbout_triggered();
+    void on_actionShortcuts_triggered();
     void on_actionRecent_triggered(iWidget*);
+    void on_actionShowAlbums_triggered(bool checked);
+    void on_actionShowSongs_triggered(bool checked);
+    void on_actionShowAll_triggered(bool checked);
+
+    /*
+     *  This function controls the status tip - if all widgets are hidden
+     */
+    void on_actionShowAll_change();
+
     /*
      * This function only process right-button clicks
      * Left-button clicks are processed by widgets itselves
@@ -116,6 +131,7 @@ private slots:
     void on_DragArea_pressEvent(QMouseEvent *event);
 
 private:
+
     Ui::MainWin *ui;
     QMediaPlayer* _media_player;
     Playlist* _playlist;
@@ -137,7 +153,6 @@ private:
     QList<CustomActionRecent*>  _recent_actions;
 
     // Rectangular painter features
-
     QRect   _rect_selection;
 
     bool _temporary_window_entered  = false;

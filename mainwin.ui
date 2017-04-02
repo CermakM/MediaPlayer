@@ -415,9 +415,9 @@
      <property name="title">
       <string>Filters</string>
      </property>
-     <addaction name="actionAlbums_Only"/>
-     <addaction name="actionSongs_Only"/>
-     <addaction name="actionAll"/>
+     <addaction name="actionShowAlbums"/>
+     <addaction name="actionShowSongs"/>
+     <addaction name="actionShowAll"/>
     </widget>
     <addaction name="actionSearch"/>
     <addaction name="menuFilters"/>
@@ -553,24 +553,33 @@
     <string>Mix Up</string>
    </property>
   </action>
-  <action name="actionAlbums_Only">
+  <action name="actionShowAlbums">
    <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
     <bool>true</bool>
    </property>
    <property name="text">
     <string>Show Albums</string>
    </property>
   </action>
-  <action name="actionSongs_Only">
+  <action name="actionShowSongs">
    <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
     <bool>true</bool>
    </property>
    <property name="text">
     <string>Show Songs</string>
    </property>
   </action>
-  <action name="actionAll">
+  <action name="actionShowAll">
    <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
     <bool>true</bool>
    </property>
    <property name="text">

@@ -60,7 +60,7 @@ void MainWin::UpdatePlaylist() {
 
 void MainWin::CreateDropArea()
 {
-    delete ui->dropAreaContent;
+    delete ui->dropArea->takeWidget();
     _icon_signal_mapper = new QSignalMapper(this);
     ui->dropAreaContent = new DragArea();
 
@@ -177,6 +177,24 @@ void MainWin::CreateAlbumContentArea(iWidget* const target_widget, DragArea *dro
     connect(drop_area_container, SIGNAL(clicked(QMouseEvent*)), this, SLOT(on_DragArea_pressEvent(QMouseEvent*)));
 }
 
+void MainWin::ShowAlbums(bool on)
+{
+    for (iWidget* const icon : _icon_widgets) {
+        if (Type::T_ALBUM == icon->getType()) {
+            icon->setVisible(on);
+        }
+    }
+}
+
+void MainWin::ShowSongs(bool on)
+{
+    for (iWidget* const icon : _icon_widgets) {
+        if (Type::T_SONG == icon->getType()) {
+            icon->setVisible(on);
+        }
+    }
+}
+
 
 void MainWin::ConnectSignals()
 {
@@ -186,8 +204,10 @@ void MainWin::ConnectSignals()
     connect(_media_player, &QMediaPlayer::durationChanged, this, &MainWin::on_DurationChange);
     connect(_media_player, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)), this, SLOT(on_Media_change(QMediaPlayer::MediaStatus)));
 
+    connect(ui->actionShowAll, SIGNAL(changed()), this, SLOT(on_actionShowAll_change()));
+
     // Shortcuts
-    QShortcut* shortcutHelp = new QShortcut(QKeySequence(Qt::Key_F1), this);
+    QShortcut* shortcutAbout = new QShortcut(QKeySequence(Qt::Key_F1), this);
     QShortcut* shortcutAddAlbum = new QShortcut(QKeySequence("Ctrl+Shift+A"), this);
     QShortcut* shortcutAddSongs = new QShortcut(QKeySequence("Ctrl+Shift+S"), this);
     QShortcut* shortcutEditPlaylist = new QShortcut(QKeySequence("Ctrl+Shift+P"), this);
@@ -202,7 +222,7 @@ void MainWin::ConnectSignals()
     QShortcut* shortcutDelete = new QShortcut(QKeySequence(Qt::Key_Delete), this);
     QShortcut* shortcutHome = new QShortcut(QKeySequence(Qt::Key_Backspace), this);
 
-    connect(shortcutHelp, SIGNAL(activated()), this, SLOT(on_actionAbout_triggered()));
+    connect(shortcutAbout, SIGNAL(activated()), this, SLOT(on_actionAbout_triggered()));
     connect(shortcutAddAlbum, SIGNAL(activated()), this, SLOT(on_actionAddNewAlbum_triggered()));
     connect(shortcutAddSongs, SIGNAL(activated()), this, SLOT(on_actionAddNewSongs_triggered()));
     connect(shortcutEditPlaylist, SIGNAL(activated()), this, SLOT(on_actionEditPlaylist_triggered()));
@@ -775,7 +795,6 @@ void MainWin::on_ButtonRefresh_clicked()
     QVector<iWidget*>().swap(_selected_icons);
 
     delete ui->dropAreaContent->layout();
-    delete ui->dropArea->takeWidget();
     delete _icon_signal_mapper;
 
     CreateDropArea();
@@ -790,9 +809,18 @@ void MainWin::on_ButtonRefresh_clicked()
 
 void MainWin::on_actionAbout_triggered()
 {
-    DialogAbout dialog_about;
+    DialogAbout dialog_about(this);
     dialog_about.setModal(true);
+
     dialog_about.exec();
+}
+
+void MainWin::on_actionShortcuts_triggered()
+{
+    DialogShortcutcs dialog_shortcuts(this);
+    dialog_shortcuts.setModal(true);
+
+    dialog_shortcuts.exec();
 }
 
 void MainWin::on_actionRecent_triggered(iWidget *target)
@@ -828,4 +856,35 @@ void MainWin::on_DragArea_pressEvent(QMouseEvent *event)
     else {
         on_Icon_deselect();
     }
+}
+
+void MainWin::on_actionShowAll_triggered(bool checked)
+{
+   on_actionShowAlbums_triggered(checked);
+   on_actionShowSongs_triggered(checked);
+}
+
+void MainWin::on_actionShowAll_change()
+{
+    on_ButtonHome_clicked();
+    if (!ui->actionShowAll->isChecked()) {
+        ui->statusBar->showMessage("Warning:    some filters are turned off - some widget might be hidden!");
+    }
+    else
+        ui->statusBar->clearMessage();
+}
+
+void MainWin::on_actionShowAlbums_triggered(bool checked)
+{
+
+    ui->actionShowAlbums->setChecked(checked);
+    ShowAlbums(checked);
+    if (ui->actionShowSongs->isChecked()) ui->actionShowAll->setChecked(checked);
+}
+
+void MainWin::on_actionShowSongs_triggered(bool checked)
+{
+    ui->actionShowSongs->setChecked(checked);
+    ShowSongs(checked);
+    if (ui->actionShowAlbums->isChecked()) ui->actionShowAll->setChecked(checked);
 }

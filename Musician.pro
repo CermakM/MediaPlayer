@@ -47,7 +47,8 @@ SOURCES += \
     iwidgetmenu.cpp \
     scrolltext.cpp \
     dialogabout.cpp \
-    customactionrecent.cpp
+    customactionrecent.cpp \
+    dialogshortcutcs.cpp
 
 HEADERS  += \
     album.h \
@@ -67,7 +68,8 @@ HEADERS  += \
     iwidgetmenu.h \
     scrolltext.h \
     dialogabout.h \
-    customactionrecent.h
+    customactionrecent.h \
+    dialogshortcutcs.h
 
 RESOURCES += \
     resource.qrc
@@ -78,7 +80,8 @@ FORMS += \
     dialogeditlibrary.ui \
     dialogeditplaylist.ui \
     mainwin.ui \
-    dialogabout.ui
+    dialogabout.ui \
+    dialogshortcutcs.ui
 
 DISTFILES += \
     Musician.pro.user \

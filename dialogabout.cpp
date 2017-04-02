@@ -13,7 +13,7 @@ DialogAbout::~DialogAbout()
     delete ui;
 }
 
-void DialogAbout::on_pushButton_clicked()
+void DialogAbout::on_ButtonClose_clicked()
 {
     this->close();
 }
