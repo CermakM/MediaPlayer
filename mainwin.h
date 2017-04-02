@@ -7,6 +7,7 @@
 #include "dialogeditlibrary.h"
 #include "dialogabout.h"
 #include "dialogshortcutcs.h"
+#include "dialogsearch.h"
 
 #include "playlist.h"
 #include "library.h"
@@ -112,6 +113,7 @@ private slots:
     void on_Icon_Properties();
     void on_Icon_Play();
     void on_Icon_rectangularSelection(QRect&);
+    void on_Icon_search(iWidget*);
 
     /*
      * This function only process right-button clicks

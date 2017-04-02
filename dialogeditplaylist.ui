@@ -73,6 +73,9 @@
            <property name="acceptDrops">
             <bool>true</bool>
            </property>
+           <property name="alternatingRowColors">
+            <bool>true</bool>
+           </property>
            <property name="sortingEnabled">
             <bool>true</bool>
            </property>
@@ -189,6 +192,9 @@
          </item>
          <item>
           <widget class="QTreeWidget" name="treeAlbum">
+           <property name="alternatingRowColors">
+            <bool>true</bool>
+           </property>
            <property name="sortingEnabled">
             <bool>true</bool>
            </property>

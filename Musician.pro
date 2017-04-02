@@ -48,7 +48,8 @@ SOURCES += \
     scrolltext.cpp \
     dialogabout.cpp \
     customactionrecent.cpp \
-    dialogshortcutcs.cpp
+    dialogshortcutcs.cpp \
+    dialogsearch.cpp
 
 HEADERS  += \
     album.h \
@@ -69,7 +70,8 @@ HEADERS  += \
     scrolltext.h \
     dialogabout.h \
     customactionrecent.h \
-    dialogshortcutcs.h
+    dialogshortcutcs.h \
+    dialogsearch.h
 
 RESOURCES += \
     resource.qrc
@@ -81,7 +83,8 @@ FORMS += \
     dialogeditplaylist.ui \
     mainwin.ui \
     dialogabout.ui \
-    dialogshortcutcs.ui
+    dialogshortcutcs.ui \
+    dialogsearch.ui
 
 DISTFILES += \
     Musician.pro.user \

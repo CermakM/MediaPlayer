@@ -213,6 +213,7 @@ void MainWin::ConnectSignals()
     QShortcut* shortcutAddSongs = new QShortcut(QKeySequence("Ctrl+Shift+S"), this);
     QShortcut* shortcutEditPlaylist = new QShortcut(QKeySequence("Ctrl+Shift+P"), this);
     QShortcut* shortcutEditLibrary = new QShortcut(QKeySequence("Ctrl+Shift+L"), this);
+    QShortcut* shortcutSearch = new QShortcut(QKeySequence("Ctrl+F"), this);
     QShortcut* shortcutMute = new QShortcut(QKeySequence("M"), this);
     QShortcut* shortcutPlayButton = new QShortcut(QKeySequence("K"), this);
     QShortcut* shortcutStopButton = new QShortcut(QKeySequence("S"), this);
@@ -229,6 +230,7 @@ void MainWin::ConnectSignals()
     connect(shortcutAddSongs, SIGNAL(activated()), this, SLOT(on_actionAddNewSongs_triggered()));
     connect(shortcutEditPlaylist, SIGNAL(activated()), this, SLOT(on_actionEditPlaylist_triggered()));
     connect(shortcutEditLibrary, SIGNAL(activated()), this, SLOT(on_actionEditLibrary_triggered()));
+    connect(shortcutSearch, SIGNAL(activated()), this, SLOT(on_actionSearch_triggered()));
     connect(shortcutMute, SIGNAL(activated()), this, SLOT(on_VolumeSlider_mute()));
     connect(shortcutPlayButton, SIGNAL(activated()), this, SLOT(on_ButtonPlay_clicked()));
     connect(shortcutStopButton, SIGNAL(activated()), this, SLOT(on_ButtonStop_clicked()));
@@ -908,8 +910,26 @@ void MainWin::on_actionShowSongs_triggered(bool checked)
 
 void MainWin::on_actionSearch_triggered()
 {
-    // TODO:
+    DialogSearch dialog_search(_icon_widgets, this);
+    dialog_search.setModal(false);
+    connect(&dialog_search, SIGNAL(selected(iWidget*)), this, SLOT(on_Icon_search(iWidget*)));
+
+    dialog_search.exec();
 }
+
+void MainWin::on_Icon_search(iWidget *target)
+{
+    if (Type::T_ALBUM == target->getType() || "-" == target->getAlbumTitle()) {
+        on_ButtonHome_clicked();
+        on_Icon_click(target);
+    }
+    else {
+        iWidget* album_widget = target->getAlbumWidget();
+        on_Icon_doubleClick(album_widget);
+        on_Icon_click(target);
+    }
+}
+
 
 void MainWin::on_actionRandomSong_triggered()
 {

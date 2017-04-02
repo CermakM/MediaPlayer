@@ -96,7 +96,7 @@ void DragArea::mouseMoveEvent(QMouseEvent *event)
 void DragArea::paintEvent(QPaintEvent *)
 {
     _buffer = QImage(size(), QImage::Format_ARGB32_Premultiplied);
-    _buffer.fill(qRgba(0,0,0,0));
+    _buffer.fill(qRgba(0,0,0,10));
 
     QPainter painter(this);
     painter.setCompositionMode(QPainter::CompositionMode_SourceOver);

@@ -30,7 +30,7 @@ Song::Song(const QString path, Album* parent)
     if (title_string.isEmpty()) {
         // if no title extracted - use the filename
         _title = _path.right(_path.length() - 1 - _path.lastIndexOf("/"));
-        _title = _title.left(_title.lastIndexOf("\."));
+        _title = _title.left(_title.lastIndexOf("\\."));
     }
 }
 
