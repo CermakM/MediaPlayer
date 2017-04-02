@@ -69,7 +69,8 @@ int FlowLayout::verticalSpacing() const
 
 Qt::Orientations FlowLayout::expandingDirections() const
 {
-    return 0;
+//    return 0;
+    return Qt::Horizontal;
 }
 
 bool FlowLayout::hasHeightForWidth() const

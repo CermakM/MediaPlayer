@@ -9,16 +9,20 @@ MainWin::MainWin(QWidget *parent) :
     ui->setupUi(this);
     _media_player = new QMediaPlayer(this);
     _playlist = _library.getPlaylist();
+
     _default_action = new CustomActionRecent("No recently played songs", this);
     _default_action->setDisabled(true);
     ui->menuRecent->addAction(_default_action);
     ui->menuRecent->setDefaultAction(_default_action);
+    ui->default_placeholder->setParent(ui->dropArea);
 
     CreateDropArea();
 
     ConnectSignals();
 
     UpdatePlaylist();
+
+//    on_ButtonRefresh_clicked();
 }
 
 MainWin::~MainWin()
@@ -30,7 +34,7 @@ MainWin::~MainWin()
     delete ui;
 }
 
-void MainWin::CreateGraphicals()
+void MainWin::CreateGraphics()
 {
     // TODO: Create at least a background you dumbass...
 }
@@ -54,14 +58,17 @@ void MainWin::UpdatePlaylist() {
     }
 }
 
-
 void MainWin::CreateDropArea()
 {
+    delete ui->dropAreaContent;
     _icon_signal_mapper = new QSignalMapper(this);
+    ui->dropAreaContent = new DragArea();
+
     ui->default_placeholder->setVisible(false);
 
-    FlowLayout* flow_layout = new FlowLayout(ui->dropArea);
+    FlowLayout* flow_layout = new FlowLayout(ui->dropAreaContent);
     ui->dropAreaContent->setLayout(flow_layout);
+    ui->dropAreaContent->setParent(ui->dropArea);
 
     if (_library.empty()) {
         ui->default_placeholder->setVisible(true);
@@ -82,6 +89,7 @@ void MainWin::CreateDropArea()
 
     ui->dropArea->setWidget(ui->dropAreaContent);
     connect(ui->dropAreaContent, SIGNAL(selected(QRect&)), this, SLOT(on_Icon_rectangularSelection(QRect&)));
+    connect(ui->dropAreaContent, SIGNAL(clicked(QMouseEvent*)), this, SLOT(on_DragArea_pressEvent(QMouseEvent*)));
 }
 
 
@@ -90,7 +98,7 @@ iWidget* MainWin::CreateWidget(void* const media, Type type, int index) {
     iWidget* new_widget = nullptr;
     if ( type == T_ALBUM ) {
         Album* target_album = static_cast<Album*>(media);
-        new_widget = new iWidget(new Icon(target_album), &_library, ui->dropArea);
+        new_widget = new iWidget(new Icon(target_album), &_library, ui->dropAreaContent);
         for (Song& song : *(target_album->getSongs())) {
             iWidget* child_widget = new iWidget(new Icon(&song), &_library);
             child_widget->getIcon()->setParent(child_widget);
@@ -98,7 +106,7 @@ iWidget* MainWin::CreateWidget(void* const media, Type type, int index) {
         }
 }
     else if ( type == T_SONG)
-        new_widget = new iWidget(new Icon(static_cast<Song*>(media)), &_library, ui->dropArea);
+        new_widget = new iWidget(new Icon(static_cast<Song*>(media)), &_library, ui->dropAreaContent);
     else {
         qDebug() << "Icon type T_NOTYPE specified. Default folder will be created";
         new_widget = new iWidget(this);
@@ -121,6 +129,54 @@ iWidget* MainWin::CreateWidget(void* const media, Type type, int index) {
 
     return new_widget;
 }
+
+void MainWin::CreateWidgetMenu(iWidget * const target)
+{
+    iWidgetMenu icon_widget_menu(this);
+
+    icon_widget_menu.addAction("Play", this, SLOT(on_Icon_doubleClick()));
+    if (Type::T_ALBUM == target->getType()) {
+        icon_widget_menu.addAction("Peak", this, SLOT(on_Icon_doubleClick()));
+    }
+    icon_widget_menu.addAction("Add to Playlist", this, SLOT(on_Icon_AddToPlaylist()));
+    icon_widget_menu.addAction("Remove from Playlist", this, SLOT(on_Icon_RemoveFromPlaylist()));
+    icon_widget_menu.addAction("Remove", this, SLOT(on_Icon_removeSelected()));
+    icon_widget_menu.addAction("Properties", this, SLOT(on_Icon_Properties()));
+
+    icon_widget_menu.exec(QCursor::pos());
+}
+
+void MainWin::CreateAlbumContentArea(iWidget* const target_widget, DragArea *drop_area_container)
+{
+    ui->default_placeholder->setVisible(false);
+
+    _current_album_widget = target_widget;
+
+    FlowLayout* flow_layout = new FlowLayout(drop_area_container);
+    drop_area_container->setLayout(flow_layout);
+    drop_area_container->setParent(ui->dropArea);
+
+    if (_library.empty()) {
+        ui->default_placeholder->setVisible(true);
+        drop_area_container->layout()->addWidget(ui->default_placeholder);
+        return;
+    }
+
+    _temporary_signal_mapper = new QSignalMapper(this);
+
+    for (iWidget* const song_icon : *(target_widget->getChildWidgets()) ) {
+        song_icon->setParent(drop_area_container);
+        drop_area_container->layout()->addWidget(song_icon);
+        _temporary_signal_mapper->setMapping(song_icon, song_icon);
+        connect(song_icon, SIGNAL(clicked()), _temporary_signal_mapper, SLOT(map()));
+        connect(song_icon, SIGNAL(right_clicked(iWidget*)), this, SLOT(on_Icon_rightClick(iWidget*)));
+        connect(song_icon, SIGNAL(double_clicked(QWidget*)), this, SLOT(on_Icon_doubleClick(QWidget*)));
+    }
+
+    connect(drop_area_container, SIGNAL(selected(QRect&)), this, SLOT(on_Icon_rectangularSelection(QRect&)));
+    connect(drop_area_container, SIGNAL(clicked(QMouseEvent*)), this, SLOT(on_DragArea_pressEvent(QMouseEvent*)));
+}
+
 
 void MainWin::ConnectSignals()
 {
@@ -196,34 +252,9 @@ void MainWin::AddRecentSong(iWidget* const target)
    }
 }
 
-void MainWin::mousePressEvent(QMouseEvent *event)
+void MainWin::resizeEvent(QResizeEvent *event)
 {
-    if (Qt::RightButton == event->buttons() && !_selected_icons.empty()) {
-
-        iWidgetMenu icon_widget_menu(this);
-
-        icon_widget_menu.addAction("Play", this, SLOT(on_Icon_Play()));
-
-        // Check if there is a song among selected widgets
-        bool contains_song = false;
-        for (iWidget* icon : _selected_icons ) {
-            if (Type::T_SONG == icon->getType()) {
-                contains_song = true;
-                break;
-            }
-        }
-        if (!contains_song) icon_widget_menu.addAction("Peak", this, SLOT(on_Icon_doubleClick()));
-        icon_widget_menu.addAction("Add to Playlist", this, SLOT(on_Icon_AddToPlaylist()));
-        icon_widget_menu.addAction("Remove from Playlist", this, SLOT(on_Icon_RemoveFromPlaylist()));
-        icon_widget_menu.addAction("Remove", this, SLOT(on_Icon_removeSelected()));
-        // TODO:
-        // icon_widget_menu.addAction("Properties", this, SLOT(on_Icon_Properties()));
-
-        icon_widget_menu.exec(QCursor::pos());
-    }
-    else {
-        on_Icon_deselect();
-    }
+    ui->dropAreaContent->setGeometry(ui->dropArea->geometry());
 }
 
 void MainWin::on_Media_change(QMediaPlayer::MediaStatus status) {
@@ -290,11 +321,12 @@ void MainWin::on_Media_change(QMediaPlayer::MediaStatus status) {
 }
 
 
-void MainWin::on_EditPlaylistOver(Album* album, Library::ChangeState change) {
+void MainWin::on_EditPlaylistOver(Album*, Library::ChangeState change) {
 
-    (void*) album;
     if (change)
         UpdatePlaylist();
+
+    if (_library.empty()) ui->default_placeholder->setVisible(true);
 }
 
 void MainWin::on_EditPlaylistOver(bool change)
@@ -551,7 +583,7 @@ void MainWin::on_Icon_doubleClick(QWidget *target)
         else if (target_icon->getType() == Type::T_ALBUM) {
             // Open the Album folder
             _cache_dropAreaContent = ui->dropArea->takeWidget();
-            DragArea* temp_dropAreaContent = new DragArea(ui->dropArea);
+            DragArea* temp_dropAreaContent = new DragArea();
             temp_dropAreaContent->setAcceptDrops(false);
 
             CreateAlbumContentArea(target_icon, temp_dropAreaContent);
@@ -613,51 +645,6 @@ void MainWin::on_Icon_rectangularSelection(QRect& rect)
             on_Icon_click(widget);
         }
     }
-}
-
-void MainWin::CreateAlbumContentArea(iWidget* const target_widget, DragArea *drop_area_container)
-{
-    ui->default_placeholder->setVisible(false);
-
-    _current_album_widget = target_widget;
-
-    FlowLayout* flow_layout = new FlowLayout(drop_area_container);
-    drop_area_container->setLayout(flow_layout);
-
-    if (_library.empty()) {
-        ui->default_placeholder->setVisible(true);
-        drop_area_container->layout()->addWidget(ui->default_placeholder);
-        return;
-    }
-
-    _temporary_signal_mapper = new QSignalMapper(this);
-
-    for (iWidget* const song_icon : *(target_widget->getChildWidgets()) ) {
-        song_icon->setParent(ui->dropArea);
-        drop_area_container->layout()->addWidget(song_icon);
-        _temporary_signal_mapper->setMapping(song_icon, song_icon);
-        connect(song_icon, SIGNAL(clicked()), _temporary_signal_mapper, SLOT(map()));
-        connect(song_icon, SIGNAL(right_clicked(iWidget*)), this, SLOT(on_Icon_rightClick(iWidget*)));
-        connect(song_icon, SIGNAL(double_clicked(QWidget*)), this, SLOT(on_Icon_doubleClick(QWidget*)));
-    }
-
-    connect(drop_area_container, SIGNAL(selected(QRect&)), this, SLOT(on_Icon_rectangularSelection(QRect&)));
-}
-
-void MainWin::CreateWidgetMenu(iWidget * const target)
-{
-    iWidgetMenu icon_widget_menu(this);
-
-    icon_widget_menu.addAction("Play", this, SLOT(on_Icon_doubleClick()));
-    if (Type::T_ALBUM == target->getTitle()) {
-        icon_widget_menu.addAction("Peak", this, SLOT(on_Icon_doubleClick()));
-    }
-    icon_widget_menu.addAction("Add to Playlist", this, SLOT(on_Icon_AddToPlaylist()));
-    icon_widget_menu.addAction("Remove from Playlist", this, SLOT(on_Icon_RemoveFromPlaylist()));
-    icon_widget_menu.addAction("Remove", this, SLOT(on_Icon_removeSelected()));
-    icon_widget_menu.addAction("Properties", this, SLOT(on_Icon_Properties()));
-
-    icon_widget_menu.exec(QCursor::pos());
 }
 
 void MainWin::on_Icon_deselect()
@@ -787,15 +774,10 @@ void MainWin::on_ButtonRefresh_clicked()
     _selected_icons.clear();
     QVector<iWidget*>().swap(_selected_icons);
 
-    // Default placeholder will not be deleted
-    ui->dropAreaContent->layout()->removeWidget(ui->default_placeholder);
-    ui->default_placeholder->setParent(ui->dropArea);
-
     delete ui->dropAreaContent->layout();
     delete ui->dropArea->takeWidget();
     delete _icon_signal_mapper;
 
-    ui->dropAreaContent = new DragArea(ui->dropArea);
     CreateDropArea();
 
     connect(_icon_signal_mapper, SIGNAL(mapped(QWidget*)), this, SLOT(on_Icon_click(QWidget*)));
@@ -816,4 +798,34 @@ void MainWin::on_actionAbout_triggered()
 void MainWin::on_actionRecent_triggered(iWidget *target)
 {
     on_Icon_doubleClick(target);
+}
+
+void MainWin::on_DragArea_pressEvent(QMouseEvent *event)
+{
+    if (Qt::RightButton == event->buttons() && !_selected_icons.empty()) {
+
+        iWidgetMenu icon_widget_menu(this);
+
+        icon_widget_menu.addAction("Play", this, SLOT(on_Icon_Play()));
+
+        // Check if there is a song among selected widgets
+        bool contains_song = false;
+        for (iWidget* icon : _selected_icons ) {
+            if (Type::T_SONG == icon->getType()) {
+                contains_song = true;
+                break;
+            }
+        }
+        if (!contains_song) icon_widget_menu.addAction("Peak", this, SLOT(on_Icon_doubleClick()));
+        icon_widget_menu.addAction("Add to Playlist", this, SLOT(on_Icon_AddToPlaylist()));
+        icon_widget_menu.addAction("Remove from Playlist", this, SLOT(on_Icon_RemoveFromPlaylist()));
+        icon_widget_menu.addAction("Remove", this, SLOT(on_Icon_removeSelected()));
+        // TODO:
+        // icon_widget_menu.addAction("Properties", this, SLOT(on_Icon_Properties()));
+
+        icon_widget_menu.exec(QCursor::pos());
+    }
+    else {
+        on_Icon_deselect();
+    }
 }

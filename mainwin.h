@@ -48,22 +48,18 @@ public:
 
 protected:
 
-    void CreateGraphicals();
+    void CreateGraphics();
     void CreateDropArea();
     iWidget *CreateWidget(void* const media, Type type, int index = -1);
-    void CreateAlbumContentArea(iWidget * const target_widget, DragArea* drop_area_container);
     void CreateWidgetMenu(iWidget * const target);
+    void CreateAlbumContentArea(iWidget * const target_widget, DragArea* drop_area_container);
 
     void ConnectSignals();
     void UpdatePlaylist();
 
     void AddRecentSong(iWidget * const target);
 
-    /*
-     * This function only process right-button clicks
-     * Left-button clicks are processed by widgets itselves
-     */
-    void mousePressEvent(QMouseEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
 
 private slots:
 
@@ -113,6 +109,11 @@ private slots:
 
     void on_actionAbout_triggered();
     void on_actionRecent_triggered(iWidget*);
+    /*
+     * This function only process right-button clicks
+     * Left-button clicks are processed by widgets itselves
+     */
+    void on_DragArea_pressEvent(QMouseEvent *event);
 
 private:
     Ui::MainWin *ui;
@@ -136,6 +137,7 @@ private:
     QList<CustomActionRecent*>  _recent_actions;
 
     // Rectangular painter features
+
     QRect   _rect_selection;
 
     bool _temporary_window_entered  = false;

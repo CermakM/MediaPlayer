@@ -76,7 +76,6 @@ void iWidget::SetProperties()
 
     _icon_title_editor = new ScrollText(this);
     _icon_title_editor->setText(_icon->getTitle());
-    _icon_title_editor->setStyleSheet("border: 1px black;");
     _icon->setBuddy(_icon_title_editor);
 
     this->setLayout(new QGridLayout(this));
@@ -88,8 +87,6 @@ void iWidget::SetProperties()
     this->setFixedSize(this->baseSize());
     this->setContentsMargins(4,4,4,4);
     this->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-
-
 
     DefaultAdjustement();
 }

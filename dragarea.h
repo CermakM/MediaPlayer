@@ -28,6 +28,7 @@ public slots:
 signals:
     void dropped(const QMimeData* mime_data = 0);
     void selected(QRect&);
+    void clicked(QMouseEvent*);
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
