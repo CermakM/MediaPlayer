@@ -221,6 +221,11 @@ void Playlist::Update() {
     if (!this->empty()) setCurrentIndex(0);
 }
 
+Song *Playlist::at(int i)
+{
+    return (i >= 0 && i < _playlist.size()) ? _playlist[i] : nullptr;
+}
+
 Song* Playlist::operator[](int i)
 {
     return (i >= 0 && i < _playlist.size()) ? _playlist[i] : nullptr;

@@ -8,6 +8,7 @@
 #include <taglib/fileref.h>
 
 class Album;
+class iWidget;
 
 class Song
 {
@@ -23,6 +24,10 @@ public:
     void setParent(Album* const parent) { _parent = parent; }
 
     void setInterpret( const QString& interpret) { _interpret = interpret; }
+
+    void setWidget(iWidget* const widget) { _widget = widget; }
+
+    iWidget* getWidget() const { return _widget; }
 
     QString getPath() const { return _path; }
 
@@ -49,6 +54,8 @@ public:
 private:
 
     Album*  _parent;
+    iWidget* _widget = nullptr;
+
     QString _path;
     QString _title;
     QString _interpret;

@@ -49,7 +49,9 @@ public:
 
     void Update();
 
-    int Size() const { return _playlist.size(); }
+    int  Size() const { return _playlist.size(); }
+
+    Song* at(int i);
 
     Song* operator[] (int i);
 

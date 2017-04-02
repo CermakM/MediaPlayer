@@ -102,6 +102,7 @@ iWidget* MainWin::CreateWidget(void* const media, Type type, int index) {
         for (Song& song : *(target_album->getSongs())) {
             iWidget* child_widget = new iWidget(new Icon(&song), &_library);
             child_widget->getIcon()->setParent(child_widget);
+            song.setWidget(child_widget);
             new_widget->pushChild(child_widget);
         }
 }
@@ -212,6 +213,7 @@ void MainWin::ConnectSignals()
     QShortcut* shortcutAddSongs = new QShortcut(QKeySequence("Ctrl+Shift+S"), this);
     QShortcut* shortcutEditPlaylist = new QShortcut(QKeySequence("Ctrl+Shift+P"), this);
     QShortcut* shortcutEditLibrary = new QShortcut(QKeySequence("Ctrl+Shift+L"), this);
+    QShortcut* shortcutMute = new QShortcut(QKeySequence("M"), this);
     QShortcut* shortcutPlayButton = new QShortcut(QKeySequence("K"), this);
     QShortcut* shortcutStopButton = new QShortcut(QKeySequence("S"), this);
     QShortcut* shortcutForwardButton = new QShortcut(QKeySequence(Qt::Key_Right), this);
@@ -227,6 +229,7 @@ void MainWin::ConnectSignals()
     connect(shortcutAddSongs, SIGNAL(activated()), this, SLOT(on_actionAddNewSongs_triggered()));
     connect(shortcutEditPlaylist, SIGNAL(activated()), this, SLOT(on_actionEditPlaylist_triggered()));
     connect(shortcutEditLibrary, SIGNAL(activated()), this, SLOT(on_actionEditLibrary_triggered()));
+    connect(shortcutMute, SIGNAL(activated()), this, SLOT(on_VolumeSlider_mute()));
     connect(shortcutPlayButton, SIGNAL(activated()), this, SLOT(on_ButtonPlay_clicked()));
     connect(shortcutStopButton, SIGNAL(activated()), this, SLOT(on_ButtonStop_clicked()));
     connect(shortcutForwardButton, SIGNAL(activated()), this, SLOT(on_ButtonForward_clicked()));
@@ -360,12 +363,26 @@ void MainWin::on_EditPlaylistOver(bool change)
 void MainWin::on_VolumeSlider_valueChanged(int value)
 {
     if (!ui->VolumeSlider->value()) {
+        _media_player->setMuted(true);
         qInfo("The volume is now off");
-        _media_player->pause();
-        return;
     }
+    else
+        _media_player->setMuted(false);
 
     _media_player->setVolume(value);
+}
+
+void MainWin::on_VolumeSlider_mute()
+{
+    if (!_media_player->isMuted()) {
+        _cache_volume = ui->VolumeSlider->value();
+        ui->VolumeSlider->setValue(0);
+         _media_player->setMuted(true);
+    }
+    else {
+        ui->VolumeSlider->setValue(_cache_volume);
+        _media_player->setMuted(false);
+    }
 }
 
 
@@ -887,4 +904,21 @@ void MainWin::on_actionShowSongs_triggered(bool checked)
     ui->actionShowSongs->setChecked(checked);
     ShowSongs(checked);
     if (ui->actionShowAlbums->isChecked()) ui->actionShowAll->setChecked(checked);
+}
+
+void MainWin::on_actionSearch_triggered()
+{
+    // TODO:
+}
+
+void MainWin::on_actionRandomSong_triggered()
+{
+    if (_playlist->empty()) {
+        // TODO: inform user
+        return;
+    }
+    int widget_count = _playlist->Size();
+    int rand_song = rand() % widget_count;
+    Song* song = _playlist->at(rand_song);
+    on_Icon_doubleClick(song->getWidget());
 }

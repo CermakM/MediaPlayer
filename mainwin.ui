@@ -430,10 +430,7 @@
      <property name="title">
       <string>Play</string>
      </property>
-     <addaction name="actionNextAlbum"/>
-     <addaction name="actionPreviousAlbum"/>
      <addaction name="actionRandomSong"/>
-     <addaction name="actionMixUp"/>
     </widget>
     <widget class="QMenu" name="menuRecent">
      <property name="title">

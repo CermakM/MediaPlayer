@@ -69,6 +69,7 @@ protected:
 private slots:
 
     void on_VolumeSlider_valueChanged(int value);
+    void on_VolumeSlider_mute();
     void on_ProgressSlider_sliderMoved(int position);
     void on_ProgressSlider_FastForward();
     void on_ProgressSlider_FastBackward();
@@ -112,6 +113,12 @@ private slots:
     void on_Icon_Play();
     void on_Icon_rectangularSelection(QRect&);
 
+    /*
+     * This function only process right-button clicks
+     * Left-button clicks are processed by widgets itselves
+     */
+    void on_DragArea_pressEvent(QMouseEvent *event);
+
     void on_actionAbout_triggered();
     void on_actionShortcuts_triggered();
     void on_actionRecent_triggered(iWidget*);
@@ -123,12 +130,8 @@ private slots:
      *  This function controls the status tip - if all widgets are hidden
      */
     void on_actionShowAll_change();
-
-    /*
-     * This function only process right-button clicks
-     * Left-button clicks are processed by widgets itselves
-     */
-    void on_DragArea_pressEvent(QMouseEvent *event);
+    void on_actionSearch_triggered();
+    void on_actionRandomSong_triggered();
 
 private:
 
@@ -136,6 +139,8 @@ private:
     QMediaPlayer* _media_player;
     Playlist* _playlist;
     Library   _library;
+
+    uint _cache_volume;
 
     QVector<iWidget*> _icon_widgets;
     QVector<iWidget*> _selected_icons;
