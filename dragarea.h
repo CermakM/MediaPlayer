@@ -47,7 +47,7 @@ private:
     QTimer  _timer;
     QBrush  _brush;
     QPen    _pen;
-    QImage  _buffer;
+    QPixmap  _buffer;
     QRect   _rect_selection;
 
     bool _mouse_pressed = false;

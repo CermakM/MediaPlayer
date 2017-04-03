@@ -95,6 +95,7 @@ void iWidget::DefaultAdjustement() {
 
     _label_play->setVisible(*_is_playing);
 
+    _default_graphic_effect = new QGraphicsDropShadowEffect(_icon);
     _icon->setGraphicsEffect(nullptr);
 }
 
@@ -159,7 +160,7 @@ bool iWidget::isSelected(bool state)
 {
     if (state) {
         _graphic_effect = new QGraphicsColorizeEffect(_icon);
-        _graphic_effect->setColor(QColor(255, 80, 0, 255));
+        _graphic_effect->setColor(QColor(168, 0, 0, 255));
         _icon->setGraphicsEffect(_graphic_effect);
     }
     else DefaultAdjustement();

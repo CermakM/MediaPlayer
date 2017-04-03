@@ -66,6 +66,7 @@ protected:
     void AddRecentSong(iWidget * const target);
 
     void resizeEvent(QResizeEvent *event) override;
+    void paintEvent(QPaintEvent *event) override;
 
 private slots:
 
@@ -136,12 +137,14 @@ private slots:
     void on_actionRandomSong_triggered();
 
 private:
-
     Ui::MainWin *ui;
+
+    // Media
     QMediaPlayer* _media_player;
     Playlist* _playlist;
     Library   _library;
 
+    // Library Icons
     uint _cache_volume;
 
     QVector<iWidget*> _icon_widgets;
@@ -154,6 +157,9 @@ private:
     QWidget* _cache_dropAreaContent = nullptr;
     QSignalMapper* _temporary_signal_mapper = nullptr;
 
+    bool _temporary_window_entered  = false;
+
+    // Actions
     // There will be 3 songs stored in recents
     const ushort DEFAULT_RECENT_COUNT = 3;
     CustomActionRecent* _default_action;
@@ -162,7 +168,11 @@ private:
     // Rectangular painter features
     QRect   _rect_selection;
 
-    bool _temporary_window_entered  = false;
+    // Graphics
+    QPixmap _background;
+    QPixmap _buffer;
+    QBrush _brush;
+    QPen   _pen;
 };
 
 #endif // MAINWIN_H

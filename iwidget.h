@@ -100,6 +100,7 @@ private:
     QPixmap* _label_play_pixmap;
     ScrollText* _icon_title_editor;
 
+    QGraphicsDropShadowEffect* _default_graphic_effect;
     QGraphicsColorizeEffect* _graphic_effect;
 
     int _cursor_pos;

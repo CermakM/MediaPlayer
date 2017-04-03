@@ -23,7 +23,6 @@ DialogEditLibrary::DialogEditLibrary(Library * const library, QWidget *parent) :
 DialogEditLibrary::~DialogEditLibrary() {
 
     delete ui;
-    delete _pseudo_library;
 }
 
 
@@ -167,5 +166,7 @@ void DialogEditLibrary::on_buttonBox_rejected()
 
     qInfo() << "Library _pseudo_library database: "; _pseudo_library->infoDatabaseAddress();
     qInfo() << "Library _library database:"; _library->infoDatabaseAddress();
+    delete _pseudo_library;
+
     emit UpdatePlaylist(true);
 }

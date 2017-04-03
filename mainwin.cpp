@@ -7,6 +7,8 @@ MainWin::MainWin(QWidget *parent) :
     _library(parent)
 {
     ui->setupUi(this);
+    ui->dropArea->setAutoFillBackground(false);
+
     _media_player = new QMediaPlayer(this);
     _playlist = _library.getPlaylist();
 
@@ -22,7 +24,13 @@ MainWin::MainWin(QWidget *parent) :
 
     UpdatePlaylist();
 
-    _cache_dropAreaContent = ui->dropArea->widget();
+    _cache_dropAreaContent = ui->dropArea->widget();    
+
+    _background = QPixmap("Assets/background_main.jpg");
+    _brush = QBrush(QColor(0,0,0, 200));
+    _pen   = QPen(_brush, 4);
+
+    ui->dropArea->setFrameShape(QFrame::NoFrame);
 }
 
 MainWin::~MainWin()
@@ -275,11 +283,6 @@ void MainWin::AddRecentSong(iWidget* const target)
    for (CustomActionRecent* const current_action : _recent_actions) {
         ui->menuRecent->addAction(current_action);
    }
-}
-
-void MainWin::resizeEvent(QResizeEvent *event)
-{
-    ui->dropAreaContent->setGeometry(ui->dropArea->geometry());
 }
 
 void MainWin::on_Media_change(QMediaPlayer::MediaStatus status) {
@@ -773,7 +776,7 @@ void MainWin::on_ButtonRemove_clicked()
 
 void MainWin::on_ButtonHome_clicked()
 {
-    if (_cache_dropAreaContent == nullptr && !_temporary_window_entered)
+    if (_cache_dropAreaContent == nullptr || !_temporary_window_entered)
         return;
 
     on_Icon_deselect();
@@ -940,4 +943,21 @@ void MainWin::on_actionRandomSong_triggered()
     int rand_song = rand() % widget_count;
     Song* song = _playlist->at(rand_song);
     on_Icon_doubleClick(song->getWidget());
+}
+
+void MainWin::resizeEvent(QResizeEvent *)
+{
+    ui->dropAreaContent->setGeometry(ui->dropArea->geometry());
+}
+
+void MainWin::paintEvent(QPaintEvent *)
+{
+    QPainter painter(this);
+    _buffer = QPixmap(this->size());
+    _buffer.fill(QColor(0,0,0, 200));
+
+    QPainter pb(&_buffer);
+    pb.drawPixmap(QPoint(0,0), _background.scaled(this->size(), Qt::KeepAspectRatioByExpanding));
+
+    painter.drawPixmap(QPoint(0,0), _buffer);
 }

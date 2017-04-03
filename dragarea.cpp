@@ -3,13 +3,16 @@
 DragArea::DragArea(QWidget* parent) : QWidget(parent)
 {
     setAcceptDrops(true);
+    setAutoFillBackground(false);
 
-    _brush  = QBrush(QColor(65, 70, 115, 255), Qt::BrushStyle::SolidPattern);
+    _brush  = QBrush(QColor(168, 0, 0, 255), Qt::BrushStyle::SolidPattern);
     _pen =  QPen(_brush, 2.5, Qt::SolidLine, Qt::RoundCap);
 
     _timer.setParent(this);
     _timer.setInterval(50);
     _timer.setSingleShot(true);
+
+    this->setStyleSheet("background: transparent;");
 }
 
 DragArea::~DragArea()
@@ -74,7 +77,7 @@ void DragArea::clear()
     setBackgroundRole(QPalette::NoRole);
 }
 
-void DragArea::mouseReleaseEvent(QMouseEvent* event)
+void DragArea::mouseReleaseEvent(QMouseEvent* )
 {
     _mouse_pressed = false;
     if ( !_rect_selection.width()) return;
@@ -95,18 +98,20 @@ void DragArea::mouseMoveEvent(QMouseEvent *event)
 
 void DragArea::paintEvent(QPaintEvent *)
 {
-    _buffer = QImage(size(), QImage::Format_ARGB32_Premultiplied);
-    _buffer.fill(qRgba(0,0,0,10));
-
     QPainter painter(this);
     painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
 
-    QPainter painter_buffer(&_buffer);
-    painter_buffer.setCompositionMode(QPainter::CompositionMode_SourceOver);
-    painter_buffer.setClipRect(this->geometry());
-    painter_buffer.setPen(_pen);
-    painter_buffer.drawRect(_rect_selection);
-    painter_buffer.fillRect(_rect_selection, QColor(65, 70, 115, 50));
+    _buffer = QPixmap(this->size());
+    _buffer.fill(QColor(0,0,0,0));
 
-    painter.drawImage(0,0, _buffer);
+    QPainter pb(&_buffer);
+    if (!_rect_selection.isNull()) {
+        pb.setCompositionMode(QPainter::CompositionMode_SourceOver);
+        pb.setClipRect(this->geometry());
+        pb.setPen(_pen);
+        pb.drawRect(_rect_selection);
+        pb.fillRect(_rect_selection, QColor(168, 0, 0, 50));
+    }
+
+    painter.drawPixmap(0,0, _buffer);
 }
