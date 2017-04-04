@@ -11,5 +11,7 @@
         <file alias="icon_home">Assets/icon_home.png</file>
         <file alias="icon_refresh">Assets/icon_refresh.png</file>
         <file alias="icon_logo">Assets/icon_logo.png</file>
+        <file alias="background_main">Assets/background_main.jpg</file>
+        <file alias="icon_play_play">Assets/icon_play_play.png</file>
     </qresource>
 </RCC>

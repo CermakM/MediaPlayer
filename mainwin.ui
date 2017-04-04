@@ -24,11 +24,54 @@
     <normaloff>:/icons/icon_logo</normaloff>:/icons/icon_logo</iconset>
   </property>
   <property name="styleSheet">
-   <string notr="true"/>
+   <string notr="true">QPushButton#ButtonPlay, #ButtonStop, #ButtonForward, #ButtonBackward {
+	background-color: rgba(255, 255, 255, 20);
+	selection-background-color: rgba(100, 100, 100, 255);
+	background-repeat: none;
+	border: none;
+}
+
+QPushButton#ButtonHome, #ButtonRefresh{
+	background-color: rgba(255, 255, 255, 0);
+	background-repeat: none;
+	border: none;
+}
+
+QPushButton#ButtonHome:pressed, #ButtonRefresh:pressed, #ButtonPlay:pressed, #ButtonStop:pressed, #ButtonForward:pressed, #ButtonBackward:pressed {
+	background-color: rgba(255, 255, 255, 50);
+}
+
+QSlider::groove:horizontal {
+    border: 1px solid #999999;
+    height: 8px; /* the groove expands to the size of the slider by default. by giving it a height, it has a fixed size */
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #B1B1B1, stop:1 #a4a4a4);
+    margin: 2px 0;
+	border-radius: 3px;
+}
+
+QSlider::handle:horizontal {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #b4b4b4, stop:1 #8f8f8f);
+    border: 1px solid #5c5c5c;
+    width: 18px;
+    margin: -2px 0; /* handle is placed by default on the contents rect of the groove. Expand outside the groove */
+    border-radius: 3px;
+}
+
+QSlider::sub-page {
+	height: 8px;
+	background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 	rgba(255, 0, 0, 0), stop:1 rgba(255,0,0, 255));
+}
+
+QDial{
+	    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #b4b4b4, stop:1 #8f8f8f);
+}</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <property name="autoFillBackground">
     <bool>false</bool>
+   </property>
+   <property name="styleSheet">
+    <string notr="true"/>
    </property>
    <layout class="QGridLayout" name="gridLayout_2">
     <item row="0" column="1">
@@ -51,10 +94,15 @@
        <bool>false</bool>
       </property>
       <property name="styleSheet">
-       <string notr="true">background: transparent;</string>
+       <string notr="true">background-color : rgba(255,255,255, 20);
+background-repeat: none;
+border-radius: 20px;</string>
       </property>
       <property name="text">
        <string>MY LIBRARY</string>
+      </property>
+      <property name="frame">
+       <bool>true</bool>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
@@ -68,59 +116,6 @@
      <layout class="QHBoxLayout" name="MediaPlayerLayout">
       <item>
        <layout class="QGridLayout" name="gridLayout">
-        <item row="3" column="2">
-         <widget class="QLineEdit" name="CurrentSongLine">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="mouseTracking">
-           <bool>false</bool>
-          </property>
-          <property name="acceptDrops">
-           <bool>false</bool>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">background-color: rgba(255, 255, 255, 0);</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
-          <property name="placeholderText">
-           <string>No single is currently playing</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0" colspan="2">
-         <widget class="QLineEdit" name="CurrentAlbumLine">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="mouseTracking">
-           <bool>false</bool>
-          </property>
-          <property name="acceptDrops">
-           <bool>false</bool>
-          </property>
-          <property name="autoFillBackground">
-           <bool>false</bool>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">background-color: rgba(255, 255, 255, 0);</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
-          <property name="placeholderText">
-           <string>No playlist selected</string>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="1">
          <widget class="QPushButton" name="ButtonStop">
           <property name="toolTip">
@@ -150,35 +145,56 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="0">
-         <widget class="QPushButton" name="ButtonPlay">
-          <property name="toolTip">
-           <string/>
+        <item row="3" column="2">
+         <widget class="QLineEdit" name="CurrentSongLine">
+          <property name="enabled">
+           <bool>false</bool>
           </property>
-          <property name="statusTip">
-           <string/>
+          <property name="mouseTracking">
+           <bool>false</bool>
           </property>
-          <property name="text">
-           <string/>
+          <property name="acceptDrops">
+           <bool>false</bool>
           </property>
-          <property name="icon">
-           <iconset resource="resource.qrc">
-            <normaloff>:/icons/icon_play_pause</normaloff>:/icons/icon_play_pause</iconset>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgba(255, 255, 255, 20);</string>
           </property>
-          <property name="iconSize">
-           <size>
-            <width>32</width>
-            <height>32</height>
-           </size>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
           </property>
-          <property name="shortcut">
-           <string/>
-          </property>
-          <property name="autoDefault">
+          <property name="readOnly">
            <bool>true</bool>
           </property>
-          <property name="default">
+          <property name="placeholderText">
+           <string>No single is currently playing</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0" colspan="2">
+         <widget class="QLineEdit" name="CurrentAlbumLine">
+          <property name="enabled">
            <bool>false</bool>
+          </property>
+          <property name="mouseTracking">
+           <bool>false</bool>
+          </property>
+          <property name="acceptDrops">
+           <bool>false</bool>
+          </property>
+          <property name="autoFillBackground">
+           <bool>false</bool>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgba(255, 255, 255, 20);</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="placeholderText">
+           <string>No playlist selected</string>
           </property>
          </widget>
         </item>
@@ -202,13 +218,38 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="2" rowspan="2">
-         <widget class="QSlider" name="ProgressSlider">
-          <property name="mouseTracking">
+        <item row="0" column="0">
+         <widget class="QPushButton" name="ButtonPlay">
+          <property name="toolTip">
+           <string/>
+          </property>
+          <property name="statusTip">
+           <string/>
+          </property>
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="resource.qrc">
+            <normaloff>:/icons/icon_play_pause</normaloff>:/icons/icon_play_pause</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>32</width>
+            <height>32</height>
+           </size>
+          </property>
+          <property name="shortcut">
+           <string/>
+          </property>
+          <property name="autoDefault">
            <bool>true</bool>
           </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+          <property name="default">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -229,6 +270,19 @@
             <width>32</width>
             <height>32</height>
            </size>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2" rowspan="2">
+         <widget class="QSlider" name="ProgressSlider">
+          <property name="mouseTracking">
+           <bool>true</bool>
+          </property>
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
           </property>
          </widget>
         </item>
@@ -260,8 +314,8 @@
       </property>
       <property name="iconSize">
        <size>
-        <width>16</width>
-        <height>16</height>
+        <width>24</width>
+        <height>24</height>
        </size>
       </property>
       <property name="flat">
@@ -277,6 +331,12 @@
       <property name="icon">
        <iconset resource="resource.qrc">
         <normaloff>:/icons/icon_home</normaloff>:/icons/icon_home</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>24</width>
+        <height>24</height>
+       </size>
       </property>
      </widget>
     </item>
@@ -309,7 +369,7 @@ color: white;
 }
 QWidget#dropArea {
 	border: none;
-	background-color: rgba(0,0,0,10);
+	background-color: rgba(255,255,255,30);
 }</string>
       </property>
       <property name="frameShadow">
@@ -336,7 +396,7 @@ QWidget#dropArea {
          <x>0</x>
          <y>0</y>
          <width>1262</width>
-         <height>505</height>
+         <height>523</height>
         </rect>
        </property>
        <property name="mouseTracking">
@@ -449,12 +509,6 @@ QWidget#dropArea {
     <addaction name="menuPlay"/>
     <addaction name="menuRecent"/>
    </widget>
-   <widget class="QMenu" name="menuYouTube">
-    <property name="title">
-     <string>YouTube</string>
-    </property>
-    <addaction name="actionAddURL"/>
-   </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
      <string>Help</string>
@@ -474,7 +528,6 @@ QWidget#dropArea {
    <addaction name="menuEdit"/>
    <addaction name="menuFilter"/>
    <addaction name="menuMusic"/>
-   <addaction name="menuYouTube"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>

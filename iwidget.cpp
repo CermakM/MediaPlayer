@@ -95,7 +95,6 @@ void iWidget::DefaultAdjustement() {
 
     _label_play->setVisible(*_is_playing);
 
-    _default_graphic_effect = new QGraphicsDropShadowEffect(_icon);
     _icon->setGraphicsEffect(nullptr);
 }
 

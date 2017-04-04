@@ -78,10 +78,14 @@ private slots:
     void on_PositionChange( qint64 position );
     void on_DurationChange( qint64 position );
 
-    void on_ButtonPlay_clicked();
-    void on_ButtonStop_clicked();
-    void on_ButtonForward_clicked();
-    void on_ButtonBackward_clicked();
+    void on_ButtonPlay_pressed();
+    void on_ButtonPlay_released();
+    void on_ButtonStop_pressed();
+    void on_ButtonStop_released();
+    void on_ButtonForward_pressed();
+    void on_ButtonForward_released();
+    void on_ButtonBackward_pressed();
+    void on_ButtonBackward_released();
     void on_ButtonDeselect_clicked();
     void on_ButtonRemove_clicked();
     void on_ButtonHome_clicked();
@@ -96,6 +100,7 @@ private slots:
     void on_EditPlaylistOver(Album*, Library::ChangeState);
     void on_EditPlaylistOver(bool);
 
+    void on_MediaPlayer_change(QMediaPlayer::State);
     void on_Media_drop(const QMimeData*);
     void on_Media_change(QMediaPlayer::MediaStatus state);
     void on_Library_change(Album* album, Library::ChangeState state);
@@ -138,6 +143,7 @@ private slots:
 
 private:
     Ui::MainWin *ui;
+    QTimer _timer;
 
     // Media
     QMediaPlayer* _media_player;

@@ -12,6 +12,10 @@ MainWin::MainWin(QWidget *parent) :
     _media_player = new QMediaPlayer(this);
     _playlist = _library.getPlaylist();
 
+    _timer.setParent(this);
+    _timer.setSingleShot(true);
+    _timer.setInterval(50);
+
     _default_action = new CustomActionRecent("No recently played songs", this);
     _default_action->setDisabled(true);
     ui->menuRecent->addAction(_default_action);
@@ -23,8 +27,6 @@ MainWin::MainWin(QWidget *parent) :
     ConnectSignals();
 
     UpdatePlaylist();
-
-    _cache_dropAreaContent = ui->dropArea->widget();    
 
     _background = QPixmap("Assets/background_main.jpg");
     _brush = QBrush(QColor(0,0,0, 200));
@@ -95,6 +97,7 @@ void MainWin::CreateDropArea()
         CreateWidget(&song, T_SONG);
     }
 
+    _cache_dropAreaContent = ui->dropAreaContent;
     ui->dropArea->setWidget(ui->dropAreaContent);
     connect(ui->dropAreaContent, SIGNAL(selected(QRect&)), this, SLOT(on_Icon_rectangularSelection(QRect&)));
     connect(ui->dropAreaContent, SIGNAL(clicked(QMouseEvent*)), this, SLOT(on_DragArea_pressEvent(QMouseEvent*)));
@@ -212,6 +215,7 @@ void MainWin::ConnectSignals()
     connect(_media_player, &QMediaPlayer::positionChanged, this, &MainWin::on_PositionChange);
     connect(_media_player, &QMediaPlayer::durationChanged, this, &MainWin::on_DurationChange);
     connect(_media_player, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)), this, SLOT(on_Media_change(QMediaPlayer::MediaStatus)));
+    connect(_media_player, SIGNAL(stateChanged(QMediaPlayer::State)), this, SLOT(on_MediaPlayer_change(QMediaPlayer::State)));
 
     connect(ui->actionShowAll, SIGNAL(changed()), this, SLOT(on_actionShowAll_change()));
 
@@ -240,10 +244,10 @@ void MainWin::ConnectSignals()
     connect(shortcutEditLibrary, SIGNAL(activated()), this, SLOT(on_actionEditLibrary_triggered()));
     connect(shortcutSearch, SIGNAL(activated()), this, SLOT(on_actionSearch_triggered()));
     connect(shortcutMute, SIGNAL(activated()), this, SLOT(on_VolumeSlider_mute()));
-    connect(shortcutPlayButton, SIGNAL(activated()), this, SLOT(on_ButtonPlay_clicked()));
-    connect(shortcutStopButton, SIGNAL(activated()), this, SLOT(on_ButtonStop_clicked()));
-    connect(shortcutForwardButton, SIGNAL(activated()), this, SLOT(on_ButtonForward_clicked()));
-    connect(shortcutBackwardButton, SIGNAL(activated()), this, SLOT(on_ButtonBackward_clicked()));
+    connect(shortcutPlayButton, SIGNAL(activated()), this, SLOT(on_ButtonPlay_pressed()));
+    connect(shortcutStopButton, SIGNAL(activated()), this, SLOT(on_ButtonStop_pressed()));
+    connect(shortcutForwardButton, SIGNAL(activated()), this, SLOT(on_ButtonForward_pressed()));
+    connect(shortcutBackwardButton, SIGNAL(activated()), this, SLOT(on_ButtonBackward_pressed()));
     connect(shortcutPositionForward, SIGNAL(activated()), this, SLOT(on_ProgressSlider_FastForward()));
     connect(shortcutPositionBackward, SIGNAL(activated()), this, SLOT(on_ProgressSlider_FastBackward()));
     connect(shortcutDeselect, SIGNAL(activated()), this, SLOT(on_Icon_deselect()));
@@ -365,6 +369,11 @@ void MainWin::on_EditPlaylistOver(bool change)
     if (_library.empty()) ui->default_placeholder->setVisible(true);
 }
 
+void MainWin::on_MediaPlayer_change(QMediaPlayer::State state)
+{
+    QMediaPlayer::PlayingState == state ? ui->ButtonPlay->setIcon(QIcon(":/icons/icon_play_play")) : ui->ButtonPlay->setIcon(QIcon(":/icons/icon_play_pause"));
+}
+
 void MainWin::on_VolumeSlider_valueChanged(int value)
 {
     if (!ui->VolumeSlider->value()) {
@@ -419,17 +428,65 @@ void MainWin::on_DurationChange(qint64 position)
 }
 
 
-void MainWin::on_ButtonPlay_clicked()
+void MainWin::on_ButtonPlay_pressed()
 {
+    connect(&_timer, SIGNAL(timeout()), this, SLOT(on_ButtonPlay_released()));
+
+    ui->ButtonPlay->setDown(true);
+    _timer.start();
     _media_player->state() == QMediaPlayer::PlayingState ?
     _media_player->pause() : _media_player->play();
 }
 
-void MainWin::on_ButtonStop_clicked()
+void MainWin::on_ButtonPlay_released()
 {
+    ui->ButtonPlay->setDown(false);
+    disconnect(&_timer);
+}
+
+void MainWin::on_ButtonStop_pressed()
+{
+    connect(&_timer, SIGNAL(timeout()), this, SLOT(on_ButtonStop_released()));
+    ui->ButtonStop->setDown(true);
+    _timer.start();
     _media_player->stop();
 }
 
+void MainWin::on_ButtonStop_released()
+{
+    ui->ButtonStop->setDown(false);
+    disconnect(&_timer);
+}
+
+void MainWin::on_ButtonForward_pressed()
+{
+    connect(&_timer, SIGNAL(timeout()), this, SLOT(on_ButtonForward_released()));
+    ui->ButtonForward->setDown(true);
+    _timer.start();
+    if(_current_song_widget) _current_song_widget->isPlaying(false);
+    if (_media_player->playlist()) _media_player->playlist()->next();
+}
+
+void MainWin::on_ButtonForward_released()
+{
+    ui->ButtonForward->setDown(false);
+    disconnect(&_timer);
+}
+
+void MainWin::on_ButtonBackward_pressed()
+{
+    connect(&_timer, SIGNAL(timeout()), this, SLOT(on_ButtonBackward_released()));
+    ui->ButtonBackward->setDown(true);
+    _timer.start();
+    if(_current_song_widget) _current_song_widget->isPlaying(false);
+    if (_media_player->playlist()) _media_player->playlist()->previous();
+}
+
+void MainWin::on_ButtonBackward_released()
+{
+    ui->ButtonBackward->setDown(false);
+    disconnect(&_timer);
+}
 
 void MainWin::on_actionAddNewAlbum_triggered()
 {
@@ -533,18 +590,6 @@ void MainWin::on_Library_change(Album* album, Library::ChangeState state)
         }
         qDebug() << "in MainWin::on_Library_change: Could not find icon of " + album->getTitle() + " to be removed";
     }
-}
-
-void MainWin::on_ButtonForward_clicked()
-{
-    if(_current_song_widget) _current_song_widget->isPlaying(false);
-    if (_media_player->playlist()) _media_player->playlist()->next();
-}
-
-void MainWin::on_ButtonBackward_clicked()
-{
-    if(_current_song_widget) _current_song_widget->isPlaying(false);
-    if (_media_player->playlist()) _media_player->playlist()->previous();
 }
 
 void MainWin::on_Media_drop(const QMimeData* mime_data)
