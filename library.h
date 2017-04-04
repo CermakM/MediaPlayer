@@ -55,6 +55,13 @@ public:
 
     QString getDatabasePath() const { return _database_path; }
 
+    /**
+     * @brief takeAlbums removes the content of this library and gives up ownership to the caller
+     * @return QVector<Album>*
+     * \warning The caller is responsible for deleting the content of the vector
+     */
+    QVector<Album*> takeAlbums();
+
     QVector<Album*> * getAlbums() {return &_albums; }
 
     Song* getSongByTitle(const QString & title);

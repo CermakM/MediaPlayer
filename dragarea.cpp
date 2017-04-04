@@ -28,7 +28,8 @@ void DragArea::dragEnterEvent(QDragEnterEvent *event)
     else
         event->ignore();
 
-    setBackgroundRole(QPalette::Dark);
+    _on_drag = true;
+    update();
 }
 
 void DragArea::dragMoveEvent(QDragMoveEvent *event)
@@ -98,6 +99,33 @@ void DragArea::mouseMoveEvent(QMouseEvent *event)
 
 void DragArea::paintEvent(QPaintEvent *)
 {
+    if (_on_drag) {
+        QPainter painter(this);
+        _buffer = QPixmap(this->size());
+        _buffer.fill(QColor(0,0,0,180));
+        QPainter pb(&_buffer);
+        pb.setPen(_pen);
+        QPainterPath path;
+        int xcenter = width() / 2;
+        int ycenter = height() / 2;
+        QSize rect_size (25 % this->size().width(), 100 % this->size().height());
+        if ( rect_size.isNull()) return;
+        QRect h_rect(QPoint(xcenter - rect_size.width() / 2, ycenter - rect_size.height() / 2), rect_size);
+        QRect v_rect(QPoint(xcenter - rect_size.height() / 2, ycenter - rect_size.width() / 2), rect_size.transposed());
+
+        pb.fillRect(h_rect, _brush);
+        pb.fillRect(v_rect, _brush);
+        path.setFillRule(Qt::WindingFill);
+        path.addRect(h_rect);
+        path.addRect(v_rect);
+
+        pb.drawPath(path);
+
+        painter.drawPixmap(0,0, _buffer);
+        _on_drag = false;
+        return;
+    }
+
     QPainter painter(this);
     painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
 

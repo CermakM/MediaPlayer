@@ -251,6 +251,14 @@ void Library::putInDatabase(QSqlQuery& query, Album* const album, Song& song)
     query.bindValue(":path", song.getPath());
 }
 
+QVector<Album *> Library::takeAlbums()
+{
+    QVector<Album*> vec = _albums;
+    _albums.clear();
+
+    return vec;
+}
+
 
 Library::ChangeState Library::AddMedia(Song *song)
 {

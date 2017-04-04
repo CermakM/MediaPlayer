@@ -51,6 +51,7 @@ private:
     QRect   _rect_selection;
 
     bool _mouse_pressed = false;
+    bool _on_drag = false;
 };
 
 #endif // DRAGAREA_H
