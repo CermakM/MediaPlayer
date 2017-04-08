@@ -139,7 +139,6 @@ void Library::CopyDatabaseFile(const QString &original_fname, const QString &new
     // Probe to deduce the platform and hide the temporary database file
     #ifdef WINDOWS
        qDebug() << "Windows platform specified but no code provided yet";
-       return;
 //     hide_temp_database_win();
     #endif
     QDir::setCurrent(working_dir);
