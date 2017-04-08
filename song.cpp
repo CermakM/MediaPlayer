@@ -13,7 +13,7 @@ Song::Song(const QString path, Album* parent)
     }
 
     // read the tags from the mp3 file
-    TagLib::FileRef file(_path.toUtf8());
+    TagLib::FileRef file(QFile::encodeName(_path).constData());
     TagLib::String title_string = file.tag()->title();
     TagLib::String artist_string = file.tag()->artist();
     TagLib::String album_string = file.tag()->album();

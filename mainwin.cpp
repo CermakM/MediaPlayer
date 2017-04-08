@@ -1015,6 +1015,7 @@ void MainWin::on_actionRandomSong_triggered()
 void MainWin::resizeEvent(QResizeEvent *)
 {
     ui->dropAreaContent->setGeometry(ui->dropArea->geometry());
+    if (ui->default_placeholder->isVisible()) ui->default_placeholder->move(QPoint((ui->dropAreaContent->width() - ui->default_placeholder->width()) / 2, (ui->dropAreaContent->height() - ui->default_placeholder->height()) / 2));
 }
 
 void MainWin::paintEvent(QPaintEvent *)

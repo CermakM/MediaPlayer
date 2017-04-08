@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <QDebug>
+#include <QFile>
 
 #include <taglib/tag.h>
 #include <taglib/fileref.h>
