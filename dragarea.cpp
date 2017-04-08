@@ -82,6 +82,7 @@ void DragArea::mouseReleaseEvent(QMouseEvent* )
 {
     _mouse_pressed = false;
     if ( !_rect_selection.width()) return;
+
     emit selected(_rect_selection);
     _rect_selection = QRect();
     update();

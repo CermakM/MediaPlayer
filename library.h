@@ -31,7 +31,7 @@ public:
     Library(const Library& other);
     ~Library();
 
-    enum ChangeState { ERROR = -1, NOCHANGE = 0, CHANGE, ADD, REMOVE };
+    enum ChangeState { UNDEFINED_OP = -1, NOCHANGE = 0, CHANGE, ADD, REMOVE };
 
     void setDatabaseFileName(const QString& fname);
 

@@ -162,7 +162,7 @@ Library::ChangeState Library::AddMedia(Album *album) {
 
     if(!_database.open()) {
         qDebug() << "Database has not been opened: " << _database.lastError();
-        return ERROR;
+        return UNDEFINED_OP;
     }
 
     QSqlQuery query(_database);
@@ -180,12 +180,12 @@ Library::ChangeState Library::AddMedia(Album *album) {
 
     if(!query.prepare(create_statement)) {
         qDebug() << "Query not prepared successfully" << query.lastError();
-        return ERROR;
+        return UNDEFINED_OP;
     }
 
     if(!query.exec()) {
         qDebug() << "Query not executed successfully" << query.lastError();
-        return ERROR;
+        return UNDEFINED_OP;
     }
 
     QVector<Song> songs_to_add;

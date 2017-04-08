@@ -1,8 +1,6 @@
 # Files to ignore
 *.txt
 Musician.pro.user*
-
+Media/*
 
 # Folders to ignore
-Assets/
-Media/

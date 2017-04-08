@@ -61,7 +61,7 @@ void iWidget::SetProperties()
 
     _event_click_timer = new QTimer(this);
     _event_click_timer->setSingleShot(true);
-    _event_click_timer->setInterval(200);
+    _event_click_timer->setInterval(300);
 
     if (_icon->getType() == Type::T_SONG) {
         Song* song = _library->getSongByTitle(_icon->getTitle());

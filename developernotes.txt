@@ -1,11 +1,10 @@
 # Developer notes
 
 ## Rate songs and albums (stars / hearts... ) *
-## Favourite playlists *
 
 ## Adjust SQL to delete files with " ' " properly **
-## Work on a better layout.... *
 
 ## What to do when album or song can not be found? **
 ## TODO:
 	### UPDATE ICON LABELS ON REMOVE FROM PLAYLIST
+

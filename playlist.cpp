@@ -95,22 +95,42 @@ void Playlist::AddSample(Song* song)
         return;
     }
 
-    _cache_index = _media_playlist->currentIndex();
-    _sample_song_indexes.push_back(_playlist.size());
+    _samples.push_back(song);
     _playlist.push_back(song);
     _media_playlist->addMedia(QMediaContent(QUrl::fromLocalFile(song->getPath())));
-    _media_playlist->setCurrentIndex(_sample_song_indexes.last());
+    _media_playlist->setCurrentIndex(_cache_index + 1);
+}
+
+void Playlist::AddSamples(const QVector<Song *> &songs)
+{
+    if (songs.empty()) {
+        qDebug() << "in Playlist::AddSamples: Empty vector provided";
+        return;
+    }
+
+    _cache_index = _media_playlist->currentIndex();
+    for (auto const& song : songs) {
+        if (_playlist.contains(song)) {
+            _media_playlist->setCurrentIndex(_playlist.indexOf(song));
+            continue;
+        }
+        _samples.push_back(song);
+        _playlist.push_back(song);
+        _media_playlist->addMedia(QMediaContent(QUrl::fromLocalFile(song->getPath())));
+    }
+
+    _media_playlist->setCurrentIndex(_cache_index + 1);
 }
 
 void Playlist::RemoveSample(Song * const song)
 {
-    if (_sample_song_indexes.empty()) {
+    if (_samples.empty()) {
         qDebug() << "in Playlist::RemoveSample: Sample media has not been set up";
         return;
     }
 
     const uint index = _playlist.indexOf(song);
-    _sample_song_indexes.removeOne(index);
+    _samples.removeOne(song);
     _media_playlist->removeMedia(index);
     _playlist.removeAt(index);
 
@@ -119,12 +139,13 @@ void Playlist::RemoveSample(Song * const song)
 
 void Playlist::RemoveAllSamples()
 {
-    if (_sample_song_indexes.empty()) {
+    if (_samples.empty()) {
         qDebug() << "in Playlist::RemoveSample: Sample media has not been set up";
         return;
     }
-    for (auto const& index: _sample_song_indexes) {
-        _playlist.removeAt(index);
+    for (auto const& song: _samples) {
+        uint index = _playlist.indexOf(song);
+        _playlist.removeOne(song);
         _media_playlist->removeMedia(index);
     }
     _media_playlist->setCurrentIndex(_cache_index);

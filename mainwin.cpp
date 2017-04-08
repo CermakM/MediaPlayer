@@ -146,9 +146,12 @@ void MainWin::CreateWidgetMenu(iWidget * const target)
 {
     iWidgetMenu icon_widget_menu(this);
 
-    icon_widget_menu.addAction("Play", this, SLOT(on_Icon_doubleClick()));
     if (Type::T_ALBUM == target->getType()) {
+        icon_widget_menu.addAction("Play", this, SLOT(on_Icon_Play()));
         icon_widget_menu.addAction("Peak", this, SLOT(on_Icon_doubleClick()));
+    }
+    else {
+        icon_widget_menu.addAction("Play", this, SLOT(on_Icon_doubleClick()));
     }
     icon_widget_menu.addAction("Add to Playlist", this, SLOT(on_Icon_AddToPlaylist()));
     icon_widget_menu.addAction("Remove from Playlist", this, SLOT(on_Icon_RemoveFromPlaylist()));
@@ -187,6 +190,8 @@ void MainWin::CreateAlbumContentArea(iWidget* const target_widget, DragArea *dro
 
     connect(drop_area_container, SIGNAL(selected(QRect&)), this, SLOT(on_Icon_rectangularSelection(QRect&)));
     connect(drop_area_container, SIGNAL(clicked(QMouseEvent*)), this, SLOT(on_DragArea_pressEvent(QMouseEvent*)));
+
+    _temporary_window_entered = true;
 }
 
 void MainWin::ShowAlbums(bool on)
@@ -236,6 +241,7 @@ void MainWin::ConnectSignals()
     QShortcut* shortcutDeselect = new QShortcut(QKeySequence(Qt::Key_Escape), this);
     QShortcut* shortcutDelete = new QShortcut(QKeySequence(Qt::Key_Delete), this);
     QShortcut* shortcutHome = new QShortcut(QKeySequence(Qt::Key_Backspace), this);
+    QShortcut* shortcutRefresh = new QShortcut(QKeySequence(Qt::Key_F5), this);
 
     connect(shortcutAbout, SIGNAL(activated()), this, SLOT(on_actionAbout_triggered()));
     connect(shortcutAddAlbum, SIGNAL(activated()), this, SLOT(on_actionAddNewAlbum_triggered()));
@@ -253,7 +259,7 @@ void MainWin::ConnectSignals()
     connect(shortcutDeselect, SIGNAL(activated()), this, SLOT(on_Icon_deselect()));
     connect(shortcutDelete, SIGNAL(activated()), this, SLOT(on_Icon_removeSelected()));
     connect(shortcutHome, SIGNAL(activated()), this, SLOT(on_ButtonHome_clicked()));
-
+    connect(shortcutRefresh, SIGNAL(activated()), this, SLOT(on_ButtonRefresh_clicked()));
 
     connect(_icon_signal_mapper, SIGNAL(mapped(QWidget*)), this, SLOT(on_Icon_click(QWidget*)));
     connect(ui->dropAreaContent, SIGNAL(dropped(const QMimeData*)), this, SLOT(on_Media_drop(const QMimeData*)));
@@ -306,6 +312,7 @@ void MainWin::on_Media_change(QMediaPlayer::MediaStatus status) {
     qDebug() << "Media change:";
 
     if (status == QMediaPlayer::LoadingMedia) {
+        if (_current_song_widget) _current_song_widget->isPlaying(false);
         iWidget* current_widget = nullptr;
         for (iWidget* const widget : _icon_widgets) {
             if (widget->getTitle() == song->getTitle() && widget->getType() == T_SONG) {
@@ -339,6 +346,8 @@ void MainWin::on_Media_change(QMediaPlayer::MediaStatus status) {
     else if (status == QMediaPlayer::BufferedMedia || status == QMediaPlayer::LoadedMedia) {
         _current_song_widget->isPlaying(true);
         _current_song = song;
+        // Add the song widget to recents
+        AddRecentSong(_current_song_widget);
         qDebug() << "\t... Loaded media " + _current_song_widget->getTitle();
     }
 
@@ -662,10 +671,6 @@ void MainWin::on_Icon_doubleClick(QWidget *target)
             _current_song_widget = target_icon;
             _current_song = song_to_play;
             _media_player->play();
-
-            // Add the song widget to recents
-            AddRecentSong(target_icon);
-
         }
         else if (target_icon->getType() == Type::T_ALBUM) {
             // Open the Album folder
@@ -681,7 +686,6 @@ void MainWin::on_Icon_doubleClick(QWidget *target)
             ui->TitleLibrary->setText(target_icon->getInterpret() + "  -  " + target_icon->getAlbumTitle());
 
             _current_album_widget = target_icon;
-            _temporary_window_entered = true;
         }
 }
 
@@ -702,19 +706,35 @@ void MainWin::on_Icon_Play()
     if ( _selected_icons.empty() )
         return;
 
+    _media_player->stop();
+//    if (_current_song_widget) _current_song_widget->isPlaying(false);
+//    _current_song_widget = nullptr;
+//    _current_song = nullptr;
+
+    // Cashes the last index, so that the playlist can start from the first selected item
+    _playlist->CacheLastIndex();
+
     for ( iWidget* icon : _selected_icons) {
         if ( Type::T_ALBUM == icon->getType()) {
             for (iWidget* child : *icon->getChildWidgets()) {
                 Song* song = _library.getSongByTitle(child->getTitle());
-                if (!song) _playlist->AddSample(song);
+                _playlist->AddSample(song);
+//                if (!_current_song_widget)  {
+//                    _current_song_widget = child;
+//                    _current_song = song;
+//                }
             }
-            _media_player->play();
         }
         else if (Type::T_SONG == icon->getType()) {
+//            Song* song = _library.getSongByTitle(icon->getTitle());
+//            if (!_current_song_widget) {
+//                _current_song_widget = icon;
+//                _current_song = song;
+//            }
             _playlist->AddSample(_library.getSongByTitle(icon->getTitle()));
-            _media_player->play();
         }
     }
+    _media_player->play();
 }
 
 void MainWin::on_Icon_rectangularSelection(QRect& rect)
@@ -724,6 +744,7 @@ void MainWin::on_Icon_rectangularSelection(QRect& rect)
         widgets = *_current_album_widget->getChildWidgets();
     else
         widgets = _icon_widgets;
+
     for (iWidget* const widget : widgets) {
 //        QRect widget_rect = widget->rect();
 //        widget_rect.moveTopLeft(widget->pos());
@@ -835,8 +856,8 @@ void MainWin::on_ButtonHome_clicked()
     delete _temporary_signal_mapper;
     _temporary_signal_mapper = nullptr;
 
-    _temporary_window_entered = false;
     _current_album_widget = nullptr;
+    _temporary_window_entered = false;
 
     ui->TitleLibrary->setText("MY LIBRARY");
 }
@@ -853,6 +874,7 @@ void MainWin::on_ButtonRefresh_clicked()
         _current_song_widget = nullptr;
     }
     _current_album_widget = nullptr;
+    _temporary_window_entered = false;
 
     while (!_icon_widgets.empty())
         delete _icon_widgets.takeFirst();

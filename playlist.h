@@ -23,6 +23,8 @@ public:
 
     void AddSample(Song* song);
 
+    void AddSamples(QVector<Song*> const & songs);
+
     void RemoveSample(Song* const song);
 
     void RemoveAllSamples();
@@ -30,6 +32,10 @@ public:
     bool RemoveMedia(Album* album);
 
     bool RemoveMedia(Song* song);
+
+    void CacheCurrentIndex() { _cache_index = _media_playlist->currentIndex(); }
+
+    void CacheLastIndex() { _cache_index = _playlist.size() - 1; }
 
     void setDatabase(QSqlDatabase* const db);
 
@@ -58,12 +64,13 @@ public:
 private:
 
     QVector<Song*>  _playlist;
+//    QVector<int> _sample_song_indexes;
+    QVector<Song*> _samples;
 
     QMediaPlaylist* _media_playlist;
     QSqlDatabase*   _database;
 
     int _cache_index = 0;
-    QVector<int> _sample_song_indexes;
 };
 
 #endif // PLAYLIST_H
