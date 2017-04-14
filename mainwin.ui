@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1280</width>
-    <height>720</height>
+    <width>610</width>
+    <height>364</height>
    </rect>
   </property>
   <property name="baseSize">
@@ -395,8 +395,8 @@ QWidget#dropArea {
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>1262</width>
-         <height>523</height>
+         <width>592</width>
+         <height>161</height>
         </rect>
        </property>
        <property name="mouseTracking">
@@ -472,8 +472,8 @@ QWidget#dropArea {
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1280</width>
-     <height>19</height>
+     <width>610</width>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFilter">

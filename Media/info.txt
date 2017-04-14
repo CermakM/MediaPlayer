@@ -1,0 +1,3 @@
+# This folder is an application dependant folder and must not be removed
+
+## In order to delete your database ( library, playlists ), feel free to remove "media.sqlite" file without any consequences
