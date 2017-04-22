@@ -98,7 +98,7 @@ void Playlist::AddSample(Song* song)
     _samples.push_back(song);
     _playlist.push_back(song);
     _media_playlist->addMedia(QMediaContent(QUrl::fromLocalFile(song->getPath())));
-    _media_playlist->setCurrentIndex(_cache_index + 1);
+    _media_playlist->setCurrentIndex(_playlist.size() - 1);
 }
 
 void Playlist::AddSamples(const QVector<Song *> &songs)
@@ -194,6 +194,11 @@ bool Playlist::RemoveMedia(Song* song) {
         return false;
     }
 
+    if (_samples.contains(song)) {
+        RemoveSample(song);
+        return;
+    }
+
     QSqlQuery query(*_database);
     QString album_title = song->getAlbumTitle();
     QString query_string = QString("UPDATE \"%1\" SET inPlaylist = 0 WHERE title = \"%2\"")
@@ -228,6 +233,11 @@ Song* Playlist::CurrentMedia() {
 void Playlist::Clear() {
 
     _playlist.clear();
+}
+
+bool Playlist::isSample(Song * const song)
+{
+    return _samples.contains(song);
 }
 
 

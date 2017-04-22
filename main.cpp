@@ -1,9 +1,9 @@
 /**
-  * User friendly media player program
+  * A Simple media player program
   * main.cpp
   *
   * @author Marek Cermak
-  * @version 1.1b 4.4.2017
+  * @version 1.2b 20.4.2017
 */
 
 #include "mainwin.h"

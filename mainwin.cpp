@@ -360,6 +360,10 @@ void MainWin::on_Media_change(QMediaPlayer::MediaStatus status) {
     }
     else if (status == QMediaPlayer::EndOfMedia) {
         _current_song_widget->isPlaying(false);
+        if (_playlist->isSample(_current_song)) {
+            _playlist->RemoveSample(_current_song);
+            on_EditPlaylistOver(true);
+        }
         qDebug() << "\t... End of media or stopped media " + _current_song_widget->getTitle();
     }
     else if (status == QMediaPlayer::BufferedMedia || status == QMediaPlayer::LoadedMedia) {
@@ -590,7 +594,7 @@ void MainWin::on_Library_change(Album* album, Library::ChangeState state)
         }
         if (widget_to_change) {
             qDebug() << "in MainWin::on_Library_change: Widget: " + album->getTitle() + " has been deleted";
-            _icon_widgets.removeOne(widget_to_change);
+            delete _icon_widgets.takeAt(_icon_widgets.indexOf(widget_to_change));
         }
         iWidget* new_widget = new iWidget(new Icon(album), &_library, ui->dropAreaContent);
         new_widget->getIcon()->setParent(new_widget);
@@ -601,23 +605,22 @@ void MainWin::on_Library_change(Album* album, Library::ChangeState state)
         _icon_signal_mapper->setMapping(new_widget, new_widget);
         connect(new_widget, SIGNAL(clicked()), _icon_signal_mapper, SLOT(map()));
         connect(new_widget, SIGNAL(double_clicked(QWidget*)), this, SLOT(on_Icon_doubleClick(QWidget*)));
-        return;
     }
-    if (state == Library::ADD) {
+    else if (state == Library::ADD) {
         CreateWidget(album, Type::T_ALBUM);
-        on_ButtonRefresh_clicked();
     }
-    if (state == Library::REMOVE) {
+    else if (state == Library::REMOVE) {
         for (iWidget* const widget : _icon_widgets) {
             if ( widget->getTitle() == album->getTitle()) {
                 ui->dropAreaContent->layout()->removeWidget(widget);
                 _icon_widgets.removeOne(widget);
                 delete widget;
-                return;
             }
         }
         qDebug() << "in MainWin::on_Library_change: Could not find icon of " + album->getTitle() + " to be removed";
     }
+
+    on_ButtonRefresh_clicked();
 }
 
 void MainWin::on_Media_drop(const QMimeData* mime_data)
@@ -914,6 +917,7 @@ void MainWin::on_ButtonRefresh_clicked()
 
     _playlist->RemoveAllSamples();
 
+    ui->TitleLibrary->setText("MY LIBRARY");
     UpdatePlaylist();
 }
 

@@ -51,6 +51,8 @@ public:
 
     void Clear();
 
+    bool isSample(Song* const song);
+
     bool empty() const { return _playlist.isEmpty(); }
 
     void Update();

@@ -1,5 +1,5 @@
 #  A Simple Music Player GUI
-#  Musician v1.1b
+#  Musician v1.2b
 ###  The music player is suitable for grouping your songs and adding them to the library. 
 
 ###  Version Notes: 
@@ -7,8 +7,8 @@
 ##### additional optimalizations would be needed for the app to run on Win.
 
 ###   Developer Notes:
-##### In order to build the application properly, you need to have Taglib library installed
+##### In order to build the application properly, you need to have Qt 5.6 and Taglib library installed
 
 #### Feel free to customize the player to your needs
-#### Licensed under open-source, Developed in Qt
+#### GNU General Public License Usage, Developed in Qt
 #### @author Marek Cermak, 2017
