@@ -70,6 +70,8 @@ public:
 
     Album* at(const int& i) { return _albums[i]; }
 
+    Album* at(Album* const album) { return _albums[_albums.indexOf(album)]; }
+
     Playlist* getPlaylist() { return &_playlist; }
 
     int CountAlbums() const { return _albums.size(); }

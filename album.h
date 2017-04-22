@@ -17,7 +17,7 @@ public:
     Album();
     ~Album();
 
-    Album(QVector<Song>& songs);
+    Album(QVector<Song> &songs);
 
     Album(const QString& path);
 

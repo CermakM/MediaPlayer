@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>610</width>
-    <height>364</height>
+    <width>720</width>
+    <height>480</height>
    </rect>
   </property>
   <property name="baseSize">
@@ -395,8 +395,8 @@ QWidget#dropArea {
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>592</width>
-         <height>161</height>
+         <width>702</width>
+         <height>268</height>
         </rect>
        </property>
        <property name="mouseTracking">
@@ -472,17 +472,17 @@ QWidget#dropArea {
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>610</width>
-     <height>22</height>
+     <width>720</width>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFilter">
     <property name="title">
-     <string>Filter</string>
+     <string>&amp;Filter</string>
     </property>
     <widget class="QMenu" name="menuFilters">
      <property name="title">
-      <string>Filters</string>
+      <string>&amp;Filters</string>
      </property>
      <addaction name="actionShowAlbums"/>
      <addaction name="actionShowSongs"/>
@@ -493,17 +493,17 @@ QWidget#dropArea {
    </widget>
    <widget class="QMenu" name="menuMusic">
     <property name="title">
-     <string>Music</string>
+     <string>&amp;Music</string>
     </property>
     <widget class="QMenu" name="menuPlay">
      <property name="title">
-      <string>Play</string>
+      <string>&amp;Play</string>
      </property>
      <addaction name="actionRandomSong"/>
     </widget>
     <widget class="QMenu" name="menuRecent">
      <property name="title">
-      <string>Recent</string>
+      <string>&amp;Recent</string>
      </property>
     </widget>
     <addaction name="menuPlay"/>
@@ -511,14 +511,14 @@ QWidget#dropArea {
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
-     <string>Help</string>
+     <string>&amp;Help</string>
     </property>
     <addaction name="actionShortcuts"/>
     <addaction name="actionAbout"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
-     <string>Edit</string>
+     <string>&amp;Edit</string>
     </property>
     <addaction name="actionAddNewAlbum"/>
     <addaction name="actionAddNewSongs"/>
@@ -533,7 +533,7 @@ QWidget#dropArea {
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionAddNewAlbum">
    <property name="text">
-    <string>Add Album</string>
+    <string>Add &amp;Album</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+A</string>
@@ -541,7 +541,7 @@ QWidget#dropArea {
   </action>
   <action name="actionEditPlaylist">
    <property name="text">
-    <string>Edit Playlist</string>
+    <string>Edit &amp;Playlist</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+P</string>
@@ -549,7 +549,7 @@ QWidget#dropArea {
   </action>
   <action name="actionSearch">
    <property name="text">
-    <string>Search</string>
+    <string>&amp;Search</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+F</string>
@@ -557,7 +557,7 @@ QWidget#dropArea {
   </action>
   <action name="actionAddNewSongs">
    <property name="text">
-    <string>Add Songs</string>
+    <string>Add &amp;Songs</string>
    </property>
    <property name="toolTip">
     <string>Add Songs</string>
@@ -573,12 +573,12 @@ QWidget#dropArea {
   </action>
   <action name="actionShortcuts">
    <property name="text">
-    <string>Shortcuts</string>
+    <string>&amp;Shortcuts</string>
    </property>
   </action>
   <action name="actionEditLibrary">
    <property name="text">
-    <string>Edit Library</string>
+    <string>Edit &amp;Library</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+L</string>
@@ -586,7 +586,7 @@ QWidget#dropArea {
   </action>
   <action name="actionAbout">
    <property name="text">
-    <string>About</string>
+    <string>&amp;About</string>
    </property>
    <property name="shortcut">
     <string>F1</string>

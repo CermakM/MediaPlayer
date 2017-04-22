@@ -22,7 +22,7 @@ void CustomActionRecent::setWidget(iWidget * const target)
     setText((_title = target->getAlbumTitle() + "  -  " + target->getTitle()));
 }
 
-void CustomActionRecent::on_triggered(bool checked)
+void CustomActionRecent::on_triggered(bool)
 {
     emit triggered(_target);
 }

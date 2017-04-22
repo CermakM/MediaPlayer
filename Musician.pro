@@ -15,7 +15,8 @@ TEMPLATE = app
 
 CONFIG += c++17
 
-LIBS += -ltag
+LIBS += -ltag \
+        -lz
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked as deprecated (the exact warnings
@@ -91,3 +92,22 @@ DISTFILES += \
     developernotes.txt \
     README.md \
     Media/media.sqlite
+
+win32:CONFIG(release, debug|release): LIBS += \
+    -L$$PWD/../../../../Qt/5.8/gcc_64/lib/release/ -lQt5Multimedia \
+    -L$$PWD/../../../../Qt/5.8/gcc_64/lib/release/ -lQt5Gui.so \
+    -L$$PWD/../../../../Qt/5.8/gcc_64/lib/release/ -lQt5Core.so \
+    -L$$PWD/../../../../Qt/5.8/gcc_64/lib/release/ -lQt5Sql.so
+else:win32:CONFIG(debug, debug|release): LIBS += \
+    -L$$PWD/../../../../Qt/5.8/gcc_64/lib/debug/ -lQt5Multimedia \
+    -L$$PWD/../../../../Qt/5.8/gcc_64/lib/debug/ -lQt5Gui.so \
+    -L$$PWD/../../../../Qt/5.8/gcc_64/lib/debug/ -lQt5Core.so \
+    -L$$PWD/../../../../Qt/5.8/gcc_64/lib/debug/ -lQt5Sql.so
+else:unix: LIBS += \
+    -L$$PWD/../../../../Qt/5.8/gcc_64/lib/ -lQt5Multimedia
+
+INCLUDEPATH += \
+    $$PWD/../../../../Qt/5.8/gcc_64/lib \
+
+DEPENDPATH += \
+    $$PWD/../../../../Qt/5.8/gcc_64/lib

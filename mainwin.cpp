@@ -18,6 +18,8 @@ MainWin::MainWin(QWidget *parent) :
 
     _default_action = new CustomActionRecent("No recently played songs", this);
     _default_action->setDisabled(true);
+
+    ui->menuBar->hide();
     ui->menuRecent->addAction(_default_action);
     ui->menuRecent->setDefaultAction(_default_action);
     ui->default_placeholder->setParent(ui->dropArea);
@@ -33,6 +35,7 @@ MainWin::MainWin(QWidget *parent) :
     _pen   = QPen(_brush, 4);
 
     ui->dropArea->setFrameShape(QFrame::NoFrame);
+    ui->dropAreaContent->update();
 }
 
 MainWin::~MainWin()
@@ -212,6 +215,20 @@ void MainWin::ShowSongs(bool on)
     }
 }
 
+void MainWin::keyPressEvent(QKeyEvent *e)
+{
+    if (Qt::Key_Alt == e->key()) {
+        ui->menuBar->show();
+    }
+    else
+        ui->menuBar->hide();
+}
+
+void MainWin::keyReleaseEvent(QKeyEvent *e)
+{
+    if (Qt::Key_Alt == e->key())
+        ui->menuBar->hide();
+}
 
 void MainWin::ConnectSignals()
 {
@@ -238,7 +255,7 @@ void MainWin::ConnectSignals()
     QShortcut* shortcutBackwardButton = new QShortcut(QKeySequence(Qt::Key_Left), this);
     QShortcut* shortcutPositionForward = new QShortcut(QKeySequence(Qt::Key_L), this);
     QShortcut* shortcutPositionBackward = new QShortcut(QKeySequence(Qt::Key_J), this);
-    QShortcut* shortcutDeselect = new QShortcut(QKeySequence(Qt::Key_Escape), this);
+//    QShortcut* shortcutDeselect = new QShortcut(QKeySequence(Qt::Key_Escape), this);
     QShortcut* shortcutDelete = new QShortcut(QKeySequence(Qt::Key_Delete), this);
     QShortcut* shortcutHome = new QShortcut(QKeySequence(Qt::Key_Backspace), this);
     QShortcut* shortcutRefresh = new QShortcut(QKeySequence(Qt::Key_F5), this);
@@ -256,7 +273,7 @@ void MainWin::ConnectSignals()
     connect(shortcutBackwardButton, SIGNAL(activated()), this, SLOT(on_ButtonBackward_pressed()));
     connect(shortcutPositionForward, SIGNAL(activated()), this, SLOT(on_ProgressSlider_FastForward()));
     connect(shortcutPositionBackward, SIGNAL(activated()), this, SLOT(on_ProgressSlider_FastBackward()));
-    connect(shortcutDeselect, SIGNAL(activated()), this, SLOT(on_Icon_deselect()));
+//    connect(shortcutDeselect, SIGNAL(activated()), this, SLOT(on_Icon_deselect()));
     connect(shortcutDelete, SIGNAL(activated()), this, SLOT(on_Icon_removeSelected()));
     connect(shortcutHome, SIGNAL(activated()), this, SLOT(on_ButtonHome_clicked()));
     connect(shortcutRefresh, SIGNAL(activated()), this, SLOT(on_ButtonRefresh_clicked()));
@@ -304,8 +321,10 @@ void MainWin::on_Media_change(QMediaPlayer::MediaStatus status) {
         ui->CurrentSongLine->setText("End of Playlist .. Press PLAY to repeat");
         return;
     }
-    if (song == nullptr)
+    if (song == nullptr) {
+        _current_song_widget = nullptr;
         return;
+    }
 
     song->isPlaying(false);
 
@@ -625,9 +644,13 @@ void MainWin::on_Media_drop(const QMimeData* mime_data)
             }
         }
         else if (Library::isSong(url.toLocalFile())) {
-            library_status = _library.AddMedia(new Song(url.toLocalFile()));
+            Song* temp_song = new Song(url.toLocalFile());
+            library_status = _library.AddMedia(temp_song);
             if (Library::CHANGE == library_status) {
-                on_Library_change(_library.at(0), Library::CHANGE);
+                on_Library_change(_library.at(temp_song->getAlbum()), Library::CHANGE);
+            }
+            if (Library::ADD == library_status) {
+                on_Library_change(_library.at(temp_song->getAlbum()), Library::ADD);
             }
             else if ( Library::NOCHANGE == library_status) {
                 qDebug() << "Song is already in library";
@@ -782,7 +805,6 @@ void MainWin::on_Icon_removeSelected()
         }
         else {
             _library.RemoveMedia(_library.getSongByTitle(icon->getTitle()));
-
         }
 
         _selected_icons.removeFirst();
@@ -1012,12 +1034,6 @@ void MainWin::on_actionRandomSong_triggered()
     on_Icon_doubleClick(song->getWidget());
 }
 
-void MainWin::resizeEvent(QResizeEvent *)
-{
-    ui->dropAreaContent->setGeometry(ui->dropArea->geometry());
-    if (ui->default_placeholder->isVisible()) ui->default_placeholder->move(QPoint((ui->dropAreaContent->width() - ui->default_placeholder->width()) / 2, (ui->dropAreaContent->height() - ui->default_placeholder->height()) / 2));
-}
-
 void MainWin::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
@@ -1028,4 +1044,15 @@ void MainWin::paintEvent(QPaintEvent *)
     pb.drawPixmap(QPoint(0,0), _background.scaled(this->size(), Qt::KeepAspectRatioByExpanding));
 
     painter.drawPixmap(QPoint(0,0), _buffer);
+
+    UpdatePlaceholderPosition();
+}
+
+void MainWin::UpdatePlaceholderPosition() {
+    if (ui->default_placeholder->isVisible()) {
+        ui->default_placeholder->move(
+                    QPoint((ui->dropAreaContent->width() - ui->default_placeholder->width()) / 2,
+                           (ui->dropAreaContent->height() - ui->default_placeholder->height()) / 2
+                           ));
+    }
 }

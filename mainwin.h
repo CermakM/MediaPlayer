@@ -65,8 +65,11 @@ protected:
 
     void AddRecentSong(iWidget * const target);
 
-    void resizeEvent(QResizeEvent *event) override;
     void paintEvent(QPaintEvent *event) override;
+
+    void keyPressEvent(QKeyEvent *e);
+    void keyReleaseEvent(QKeyEvent *e);
+    void UpdatePlaceholderPosition();
 
 private slots:
 
@@ -112,8 +115,8 @@ private slots:
     void on_Icon_click(QWidget* target);
     void on_Icon_rightClick(iWidget *target);
     void on_Icon_doubleClick(QWidget* target);
-    /*
-     * Reimplemented for signal receiving
+    /**
+     * @brief Reimplemented for signal receiving
      */
     void on_Icon_doubleClick();    
     void on_Icon_Properties();
@@ -121,9 +124,9 @@ private slots:
     void on_Icon_rectangularSelection(QRect&);
     void on_Icon_search(iWidget*);
 
-    /*
-     * This function only process right-button clicks
-     * Left-button clicks are processed by widgets itselves
+    /**
+     * @brief This function only process right-button clicks
+     * \warning Left-button clicks are processed by widgets itselves
      */
     void on_DragArea_pressEvent(QMouseEvent *event);
 
@@ -134,8 +137,8 @@ private slots:
     void on_actionShowSongs_triggered(bool checked);
     void on_actionShowAll_triggered(bool checked);
 
-    /*
-     *  This function controls the status tip - if all widgets are hidden
+    /**
+     * @brief This function controls the status tip - if all widgets are hidden
      */
     void on_actionShowAll_change();
     void on_actionSearch_triggered();

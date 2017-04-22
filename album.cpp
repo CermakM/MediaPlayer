@@ -13,7 +13,7 @@ Album::~Album() {
     qDebug() << "Calling destructor for album " + this->_title;
 }
 
-Album::Album(QVector<Song>& songs)
+Album::Album(QVector<Song> & songs)
 {
     if (songs.isEmpty()) {
         qDebug() << "Empty song vector provided...";
@@ -28,8 +28,9 @@ Album::Album(QVector<Song>& songs)
 
     _songs = songs;
 
-    for (Song& song : _songs) {
+    for (Song song : _songs) {
         song.setParent(this);
+        song.setAlbumTitle(_title);
     }
 
     SearchForIcons(_path);
@@ -82,13 +83,11 @@ Album::Album(Album const& other)
 
 void Album::setIcon(QIcon &icon)
 {
-
     _current_icon = icon;
 }
 
 void Album::setIcon(const QString &path)
 {
-
     _current_icon = QIcon(QPixmap(path));
 }
 
@@ -98,7 +97,6 @@ void Album::setIcon(const int& i) {
 
     QString path_to_icon = _icons[i].absoluteFilePath();
     QPixmap pixmap(path_to_icon);
-
 
     _current_icon = QIcon(pixmap);
 }
@@ -119,7 +117,6 @@ void Album::SearchForIcons(const QString &path)
 
     // Set the 1st icon by default as current icon
     _current_icon = QIcon(_icons[0].absoluteFilePath());
-
 }
 
 void Album::setTitle(const QString &title)

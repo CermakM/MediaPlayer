@@ -272,38 +272,36 @@ QMap<Album*, Library::ChangeState> Library::AddMedia(QVector<Song*> const& song_
     for(Song* const song : song_vector) {
         Album* album = getAlbumByTitle(song->getAlbumTitle());
         if (album == nullptr) {
-            Album* album = new Album();
-            album->PushSong(*song);
-            album->setInterpret(song->getInterpret());
-            album->setTitle(song->getAlbumTitle());
+            QVector<Song> temp_vector{*song};
+            album = new Album(temp_vector);
+            song->setParent(album);
             if (!map_changes.contains(album))
                 map_changes[album] = AddMedia(album);
         }
-        else if (!album->contains(*song)){
+        else if (!album->contains(*song)) {
             album->PushSong(*song);
             album->setInterpret(song->getInterpret());
             album->setTitle(song->getAlbumTitle());
-
-            if ( !_database.open()) {
-                qDebug() << "in Library::AddMedia(QVector<Song*> const&): Database "
-                            "has not been opened " << _database.lastError();
-            }
-
-            QSqlQuery query(_database);
-
-            putInDatabase(query, album, *song);
-
-            if(!query.exec()) {
-                qDebug() << "Query not executed successfully" << query.lastError();
-            }
-
-            _database.close();
-            if (!map_changes.contains(album))
-                map_changes[album] = Library::CHANGE;
+            map_changes[album] = Library::CHANGE;
         }
-        else map_changes[nullptr] = Library::NOCHANGE;
-    }
 
+        if ( !_database.open()) {
+            qDebug() << "in Library::AddMedia(QVector<Song*> const&): Database "
+                        "has not been opened " << _database.lastError();
+        }
+
+        QSqlQuery query(_database);
+
+        putInDatabase(query, album, *song);
+
+        if(!query.exec()) {
+            qDebug() << "Query not executed successfully" << query.lastError();
+        }
+
+        _database.close();
+    }
+    if (map_changes.empty())
+        map_changes[nullptr] = Library::NOCHANGE;
     return map_changes;
 }
 
@@ -314,7 +312,7 @@ void Library::RemoveMedia(Album *album)
         return;
     }
 
-    _playlist.RemoveMedia(album);
+    playlist_updated = _playlist.RemoveMedia(album);
 
     if(!_database.open()) {
         qDebug() << "in Library::RemoveMedia : " << _database.lastError();
@@ -344,7 +342,7 @@ void Library::RemoveMedia(Song *song)
         return;
     }
 
-    _playlist.RemoveMedia(song);
+    playlist_updated = _playlist.RemoveMedia(song);
 
     Album* album_ptr= song->getAlbum();
 
