@@ -196,7 +196,7 @@ bool Playlist::RemoveMedia(Song* song) {
 
     if (_samples.contains(song)) {
         RemoveSample(song);
-        return;
+        return true;
     }
 
     QSqlQuery query(*_database);

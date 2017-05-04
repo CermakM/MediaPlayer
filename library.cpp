@@ -39,6 +39,10 @@ void Library::LoadDatabase()
     std::fstream dbFile(_database_path.toStdString(), std::ios::in);
     if (!dbFile.good()) {
         qDebug() << "Database file does not exist... creating new one " ;
+        if (!QDir("Media").exists()) {
+            QDir().mkdir("Media");
+        }
+
         dbFile.open("Media/" + DB_FILENAME.toStdString(), std::ios::out);
         dbFile.close();
     }
